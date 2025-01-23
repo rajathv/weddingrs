@@ -156,6 +156,23 @@ export const guest = (() => {
     };
 
     /**
+     * @returns {void}
+     */
+    const booting = () => {
+        animateSvg();
+        countDownDate();
+        normalizeArabicFont();
+
+        if (information.has('presence')) {
+            document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';
+        }
+
+        if (information.get('info')) {
+            document.getElementById('information')?.remove();
+        }
+    };
+
+    /**
      * @returns {object}
      */
     const init = () => {
@@ -163,16 +180,7 @@ export const guest = (() => {
         session.init();
         offline.init();
         progress.init();
-
         information = storage('information');
-        document.addEventListener('progressDone', () => {
-            document.body.scrollIntoView({ behavior: 'instant' });
-            normalizeArabicFont();
-            window.AOS.init();
-            countDownDate();
-            showGuestName();
-            animateSvg();
-        });
 
         if (session.isAdmin()) {
             storage('user').clear();
@@ -183,14 +191,14 @@ export const guest = (() => {
             storage('tracker').clear();
         }
 
-        if (information.has('presence')) {
-            document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';
-        }
+        document.addEventListener('progressDone', () => {
+            document.body.scrollIntoView({ behavior: 'instant' });
+            window.AOS.init();
+            booting();
 
-        const info = document.getElementById('information');
-        if (info && information.get('info')) {
-            info.remove();
-        }
+            // then show guest name.
+            showGuestName();
+        });
 
         const token = document.body.getAttribute('data-key');
         if (!token || token.length === 0) {
