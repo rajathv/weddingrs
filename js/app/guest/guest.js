@@ -105,6 +105,7 @@ export const guest = (() => {
      */
     const open = (button) => {
         button.disabled = true;
+        document.body.style.overflowY = 'scroll';
 
         if (!theme.isAutoMode()) {
             document.getElementById('button-theme').style.display = 'none';
