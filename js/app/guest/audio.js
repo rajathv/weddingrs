@@ -49,6 +49,7 @@ export const audio = (() => {
      */
     const init = () => {
         music = document.getElementById('button-music');
+        music.style.display = 'block';
 
         audio = new Audio(music.getAttribute('data-url'));
         audio.volume = 1;

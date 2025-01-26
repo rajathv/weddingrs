@@ -107,8 +107,8 @@ export const guest = (() => {
         button.disabled = true;
         document.body.style.overflowY = 'scroll';
 
-        if (!theme.isAutoMode()) {
-            document.getElementById('button-theme').style.display = 'none';
+        if (theme.isAutoMode()) {
+            document.getElementById('button-theme').style.display = 'block';
         }
 
         basicAnimation();
@@ -159,6 +159,8 @@ export const guest = (() => {
         animateSvg();
         countDownDate();
         normalizeArabicFont();
+        document.querySelector('main').style.opacity = '1';
+        document.querySelector('.navbar').style.opacity = '1';
 
         if (information.has('presence')) {
             document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';
