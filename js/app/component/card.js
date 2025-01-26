@@ -1,5 +1,4 @@
 import { util } from '../../common/util.js';
-import { theme } from '../../common/theme.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
 
@@ -125,7 +124,6 @@ export const card = (() => {
     };
 
     const renderBody = (comment, is_parent) => {
-        const text = theme.isDarkMode('light', 'dark');
         const original = convertMarkdownToHTML(util.escapeHtml(comment.comment));
         const moreThanMaxLength = original.length > maxCommentLength;
 
