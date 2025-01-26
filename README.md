@@ -14,12 +14,12 @@ Untuk kamu yang ingin melihat demo terlebih dahulu:
 
 ## Documentation
 
-- jalankan: npm install && npm run dev
+- Jalankan: `npm install` serta `npm run dev`.
 - Ubah isi dari index.html sesuai kebutuhan.
 - Jika tidak ingin menggunakan `komentar` bisa hapus `data-url` dan `data-key` pada body index.
 - Sesuaikan `data-url` pada body index dan dashboard sesuai domain backend (jika deploy sendiri).
 - Sesuaikan juga `data-key` dengan access key pada dashboard.
-- Jika ingin deploy frontend: npm run build
+- Jika ingin deploy: `npm run build` dan folder dist akan terbuat.
 - Self deployment backend bisa lihat dibawah ini atau ingin coba gratis selama 1 hari pada trial api.
 
 > Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga dapat mengetahuinya.
