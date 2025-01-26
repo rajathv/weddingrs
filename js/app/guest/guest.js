@@ -2,13 +2,13 @@ import { image } from './image.js';
 import { audio } from './audio.js';
 import { progress } from './progress.js';
 import { util } from '../../common/util.js';
+import { bs } from '../../libs/bootstrap.js';
 import { theme } from '../../common/theme.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
 import { offline } from '../../common/offline.js';
 import { comment } from '../component/comment.js';
-import { bootstrap } from '../../libs/bootstrap.js';
-import { confetti, openAnimation } from '../../libs/confetti.js';
+import { basicAnimation, openAnimation } from '../../libs/confetti.js';
 
 export const guest = (() => {
 
@@ -110,11 +110,7 @@ export const guest = (() => {
             document.getElementById('button-theme').style.display = 'none';
         }
 
-        confetti({
-            origin: { y: 1 },
-            zIndex: 1057
-        });
-
+        basicAnimation();
         opacity('welcome', 0.025);
 
         audio.init();
@@ -129,7 +125,7 @@ export const guest = (() => {
      */
     const modal = (img) => {
         document.getElementById('show-modal-image').src = img.src;
-        bootstrap.Modal.getOrCreateInstance('#modal-image').show();
+        bs.modal('modal-image').show();
     };
 
     /**
@@ -173,11 +169,9 @@ export const guest = (() => {
     };
 
     /**
-     * @returns {object}
+     * @returns {void}
      */
-    const init = () => {
-        theme.init();
-        session.init();
+    const domLoaded = () => {
         offline.init();
         progress.init();
         information = storage('information');
@@ -241,6 +235,15 @@ export const guest = (() => {
                 }).catch(() => progress.invalid('config'));
             });
         }
+    };
+
+    /**
+     * @returns {object}
+     */
+    const init = () => {
+        theme.init();
+        session.init();
+        window.addEventListener('DOMContentLoaded', domLoaded);
 
         return {
             util,

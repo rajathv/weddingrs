@@ -1,8 +1,8 @@
 import { util } from '../../common/util.js';
+import { bs } from '../../libs/bootstrap.js';
 import { dto } from '../../connection/dto.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
-import { bootstrap } from '../../libs/bootstrap.js';
 import { request, HTTP_GET } from '../../connection/request.js';
 
 export const auth = (() => {
@@ -29,7 +29,7 @@ export const auth = (() => {
         if (res) {
             formEmail.value = null;
             formPassword.value = null;
-            bootstrap.Modal.getOrCreateInstance('#mainModal').hide();
+            bs.modal('mainModal').hide();
         }
 
         btn.restore();
@@ -68,7 +68,7 @@ export const auth = (() => {
     const clearSession = () => {
         user.clear();
         session.logout();
-        bootstrap.Modal.getOrCreateInstance('#mainModal').show();
+        bs.modal('mainModal').show();
     };
 
     /**

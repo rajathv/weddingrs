@@ -200,7 +200,7 @@ export const pagination = (() => {
                 </button>
             </li>
             <li class="page-item disabled">
-                <span class="page-link text-light" id="page">1</span>
+                <span class="page-link text-theme-auto" id="page">1</span>
             </li>
             <li class="page-item" id="next">
                 <button class="page-link rounded-end-4" onclick="undangan.comment.pagination.next(this)" data-offline-disabled="false">

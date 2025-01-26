@@ -249,12 +249,9 @@ export const admin = (() => {
     };
 
     /**
-     * @returns {object}
+     * @returns {void}
      */
-    const init = () => {
-        auth.init();
-        theme.init();
-        session.init();
+    const domLoaded = () => {
         offline.init();
 
         if (!session.isAdmin()) {
@@ -281,6 +278,16 @@ export const admin = (() => {
         } catch {
             auth.clearSession();
         }
+    };
+
+    /**
+     * @returns {object}
+     */
+    const init = () => {
+        auth.init();
+        theme.init();
+        session.init();
+        window.addEventListener('DOMContentLoaded', domLoaded);
 
         return {
             util,

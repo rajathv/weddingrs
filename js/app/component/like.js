@@ -1,7 +1,7 @@
 import { dto } from '../../connection/dto.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
-import { confetti, tapTapAnimation } from '../../libs/confetti.js';
+import { tapTapAnimation } from '../../libs/confetti.js';
 import { request, HTTP_PATCH, HTTP_POST } from '../../connection/request.js';
 
 export const like = (() => {
@@ -80,10 +80,7 @@ export const like = (() => {
                 navigator.vibrate(100);
             }
 
-            if (confetti) {
-                tapTapAnimation(div);
-            }
-
+            tapTapAnimation(div);
             const likeButton = document.querySelector(`[onclick="undangan.comment.like.like(this)"][data-uuid="${uuid}"]`);
 
             div.setAttribute('data-liked', 'true');

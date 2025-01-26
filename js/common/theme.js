@@ -24,60 +24,6 @@ export const theme = (() => {
     let metaTheme = null;
 
     /**
-     * @type {IntersectionObserver|null}
-     */
-    let observerLight = null;
-
-    /**
-     * @type {IntersectionObserver|null}
-     */
-    let observerDark = null;
-
-    /**
-     * @param {HTMLElement} element 
-     */
-    const toLight = (element) => {
-        const classMap = {
-            'text-light': 'text-dark',
-            'btn-theme-light': 'btn-theme-dark',
-            'bg-dark': 'bg-light',
-            'bg-black': 'bg-white',
-            'bg-theme-dark': 'bg-theme-light',
-            'color-theme-black': 'color-theme-white',
-            'btn-outline-light': 'btn-outline-dark',
-            'bg-cover-black': 'bg-cover-white'
-        };
-
-        Object.entries(classMap).forEach(([oldClass, newClass]) => {
-            if (element.classList.contains(oldClass)) {
-                element.classList.replace(oldClass, newClass);
-            }
-        });
-    };
-
-    /**
-     * @param {HTMLElement} element 
-     */
-    const toDark = (element) => {
-        const classMap = {
-            'text-dark': 'text-light',
-            'btn-theme-dark': 'btn-theme-light',
-            'bg-light': 'bg-dark',
-            'bg-white': 'bg-black',
-            'bg-theme-light': 'bg-theme-dark',
-            'color-theme-white': 'color-theme-black',
-            'btn-outline-dark': 'btn-outline-light',
-            'bg-cover-white': 'bg-cover-black'
-        };
-
-        Object.entries(classMap).forEach(([oldClass, newClass]) => {
-            if (element.classList.contains(oldClass)) {
-                element.classList.replace(oldClass, newClass);
-            }
-        });
-    };
-
-    /**
      * @returns {void}
      */
     const setLight = () => theme.set('active', 'light');
@@ -94,18 +40,8 @@ export const theme = (() => {
         setLight();
         document.documentElement.setAttribute('data-bs-theme', 'light');
 
-        const classes = [
-            '.text-light',
-            '.btn-theme-light',
-            '.bg-dark',
-            '.bg-black',
-            '.bg-theme-dark',
-            '.color-theme-black',
-            '.btn-outline-light',
-            '.bg-cover-black'
-        ].join(', ');
-
-        document.querySelectorAll(classes).forEach((e) => observerLight.observe(e));
+        const now = metaTheme.getAttribute('content');
+        metaTheme.setAttribute('content', themeDark.some((i) => i === now) ? themeColors[now] : now);
     };
 
     /**
@@ -115,18 +51,8 @@ export const theme = (() => {
         setDark();
         document.documentElement.setAttribute('data-bs-theme', 'dark');
 
-        const classes = [
-            '.text-dark',
-            '.btn-theme-dark',
-            '.bg-light',
-            '.bg-white',
-            '.bg-theme-light',
-            '.color-theme-white',
-            '.btn-outline-dark',
-            '.bg-cover-white'
-        ].join(', ');
-
-        document.querySelectorAll(classes).forEach((e) => observerDark.observe(e));
+        const now = metaTheme.getAttribute('content');
+        metaTheme.setAttribute('content', themeLight.some((i) => i === now) ? themeColors[now] : now);
     };
 
     /**
@@ -157,29 +83,10 @@ export const theme = (() => {
     /**
      * @returns {void}
      */
-    const initObserver = () => {
-        const createObserver = (action, themes) => new IntersectionObserver((es, o) => {
-
-            es.filter((e) => e.isIntersecting).forEach((e) => action(e.target));
-            es.filter((e) => !e.isIntersecting).forEach((e) => action(e.target));
-
-            o.disconnect();
-
-            const now = metaTheme.getAttribute('content');
-            metaTheme.setAttribute('content', themes.some((i) => i === now) ? themeColors[now] : now);
-        });
-
-        observerLight = createObserver(toLight, themeDark);
-        observerDark = createObserver(toDark, themeLight);
-    };
-
-    /**
-     * @returns {void}
-     */
     const spyTop = () => {
         const callback = (es) => {
             es.filter((e) => e.isIntersecting).forEach((e) => {
-                const themeColor = ['bg-black', 'bg-white'].some((i) => e.target.classList.contains(i))
+                const themeColor = e.target.classList.contains('bg-white-black')
                     ? isDarkMode(themeDark[0], themeLight[0])
                     : isDarkMode(themeDark[1], themeLight[1]);
 
@@ -198,13 +105,11 @@ export const theme = (() => {
         theme = storage('theme');
         metaTheme = document.querySelector('meta[name="theme-color"]');
 
-        initObserver();
-
         if (!theme.has('active')) {
             window.matchMedia('(prefers-color-scheme: dark)').matches ? setDark() : setLight();
         }
 
-        switch (document.body.getAttribute('data-theme')) {
+        switch (document.documentElement.getAttribute('data-bs-theme')) {
             case 'dark':
                 setDark();
                 break;

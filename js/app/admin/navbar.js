@@ -1,15 +1,29 @@
-import { bootstrap } from '../../libs/bootstrap.js';
+import { bs } from '../../libs/bootstrap.js';
 
 export const navbar = (() => {
+
+    /**
+     * @param {HTMLElement} btn
+     * @param {string} id
+     * @returns {void}
+     */
+    const showActiveTab = (btn, id) => {
+        bs.tab(id).show();
+        btn.classList.add('active');
+
+        document.querySelectorAll('.navbar button').forEach((b) => {
+            if (b.classList.contains('active')) {
+                b.classList.remove('active');
+            }
+        });
+    };
 
     /**
      * @param {HTMLElement} btn
      * @returns {void}
      */
     const buttonNavHome = (btn) => {
-        bootstrap.Tab.getOrCreateInstance(document.getElementById('button-home')).show();
-        btn.classList.add('active');
-        document.getElementById('button-mobile-setting').classList.remove('active');
+        showActiveTab(btn, 'button-home');
     };
 
     /**
@@ -17,9 +31,7 @@ export const navbar = (() => {
      * @returns {void}
      */
     const buttonNavSetting = (btn) => {
-        bootstrap.Tab.getOrCreateInstance(document.getElementById('button-setting')).show();
-        btn.classList.add('active');
-        document.getElementById('button-mobile-home').classList.remove('active');
+        showActiveTab(btn, 'button-setting');
     };
 
     return {

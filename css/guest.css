@@ -31,12 +31,12 @@
     z-index: 1030;
 }
 
-.btn-float.bg-dark {
+html[data-bs-theme="dark"] .btn-float {
     background-color: rgba(var(--bs-dark-rgb), 0.9) !important;
     backdrop-filter: blur(0.625rem);
 }
 
-.btn-float.bg-light {
+html[data-bs-theme="light"] .btn-float {
     background-color: rgba(var(--bs-light-rgb), 0.9) !important;
     backdrop-filter: blur(0.625rem);
 }
@@ -49,14 +49,30 @@
     z-index: 1056;
 }
 
-.color-theme-white {
+html[data-bs-theme="light"] .color-theme-svg {
     color: rgb(255, 255, 255);
     background-color: var(--bs-light);
 }
 
-.color-theme-black {
+html[data-bs-theme="dark"] .color-theme-svg {
     color: rgb(0, 0, 0);
     background-color: var(--bs-dark);
+}
+
+html[data-bs-theme="light"] .bg-light-dark {
+    background-color: rgba(var(--bs-light-rgb), 1);
+}
+
+html[data-bs-theme="dark"] .bg-light-dark {
+    background-color: rgba(var(--bs-dark-rgb), 1);
+}
+
+html[data-bs-theme="light"] .bg-white-black {
+    background-color: rgba(var(--bs-white-rgb), 1);
+}
+
+html[data-bs-theme="dark"] .bg-white-black {
+    background-color: rgba(var(--bs-black-rgb), 1);
 }
 
 .bg-cover-home {

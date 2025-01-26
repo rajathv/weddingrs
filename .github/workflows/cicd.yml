@@ -53,6 +53,9 @@ jobs:
     - name: Install Netlify CLI
       run: npm install netlify-cli -g --omit=dev
 
+    - name: Run Build
+      run: npm run build
+
     - name: Add netlify.toml File for Headers
       run: |
         echo "[[headers]]" > netlify.toml
