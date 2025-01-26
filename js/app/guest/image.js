@@ -20,9 +20,9 @@ export const image = (() => {
     const cacheName = 'images';
 
     /**
-     * @param {HTMLImageElement} el 
-     * @returns {Promise<void>}
-     */
+ * @param {HTMLImageElement} el 
+ * @returns {Promise<void>}
+ */
     const getByFetch = async (el) => {
         const url = el.getAttribute('data-src');
         const exp = 'x-expiration-time';
@@ -35,15 +35,23 @@ export const image = (() => {
 
         /**
          * @param {Cache} c 
-         * @returns {Promise<blob>}
+         * @param {number} retries
+         * @param {number} delay
+         * @returns {Promise<Blob>}
          */
-        const fetchPut = (c) => {
+        const fetchPut = (c, retries = 3, delay = 1000) => {
             return fetch(url).then((res) => res.blob().then((b) => {
                 const headers = new Headers(res.headers);
                 headers.append(exp, String(Date.now() + ttl));
 
                 return c.put(url, new Response(b, { headers })).then(() => b);
-            }));
+            })).catch((err) => {
+                if (retries > 0) {
+                    return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay)), delay));
+                }
+
+                throw err;
+            });
         };
 
         await caches.open(cacheName).then((c) => {

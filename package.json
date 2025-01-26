@@ -10,7 +10,7 @@
         "lint:js": "eslint js",
         "lint:css": "stylelint css",
         "lint:html": "htmlhint **/*.html",
-        "dev:start": "http-server -p 8080",
+        "dev": "npx esbuild js/*.js --bundle --outdir=dist --servedir=.",
         "build": "npx esbuild js/*.js --bundle --minify --outdir=dist"
     },
     "dependencies": {
