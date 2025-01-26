@@ -3,3 +3,4 @@ SECURITY.md
 LICENSE
 node_modules
 package-lock.json
+dist
