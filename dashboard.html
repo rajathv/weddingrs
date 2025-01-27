@@ -83,37 +83,35 @@
         </div>
 
         <!-- Body -->
-        <div class="row">
+        <div class="row m-0 p-0">
 
             <!-- Menu -->
-            <div class="col-md-3 d-none d-md-block">
-                <div class="pe-3">
-                    <ul class="nav flex-column w-100 nav-pills" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="btn-theme-auto nav-link w-100 text-start fw-semibold mb-1 rounded-4 shadow-sm active" data-bs-toggle="pill" data-bs-target="#pills-home" id="button-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">
-                                <i class="fa-solid fa-house ms-3 me-2"></i>Home
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="btn-theme-auto nav-link w-100 text-start fw-semibold my-1 rounded-4 shadow-sm" data-bs-toggle="pill" data-bs-target="#pills-setting" id="button-setting" type="button" role="tab" aria-controls="pills-setting" aria-selected="false">
-                                <i class="fa-solid fa-gear ms-3 me-2"></i>Setting
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <hr class="my-2" aria-hidden="true">
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="btn-theme-auto logout nav-link w-100 text-start fw-semibold mt-1 rounded-4 shadow-sm" onclick="undangan.admin.logout()" type="button" role="tab" aria-selected="false">
-                                <i class="fa-solid fa-right-from-bracket ms-3 me-2"></i>Logout
-                            </button>
-                        </li>
-                    </ul>
-                </div>
+            <div class="col-md-3 d-none d-md-block m-0 p-0">
+                <ul class="nav flex-column w-100 nav-pills pe-4" role="tablist">
+                    <li class="nav-item pe-2" role="presentation">
+                        <button class="btn-theme-auto nav-link w-100 text-start fw-semibold mb-1 rounded-4 shadow-sm active" data-bs-toggle="pill" data-bs-target="#pills-home" id="button-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">
+                            <i class="fa-solid fa-house ms-3 me-2"></i>Home
+                        </button>
+                    </li>
+                    <li class="nav-item pe-2" role="presentation">
+                        <button class="btn-theme-auto nav-link w-100 text-start fw-semibold my-1 rounded-4 shadow-sm" data-bs-toggle="pill" data-bs-target="#pills-setting" id="button-setting" type="button" role="tab" aria-controls="pills-setting" aria-selected="false">
+                            <i class="fa-solid fa-gear ms-3 me-2"></i>Setting
+                        </button>
+                    </li>
+                    <li class="nav-item pe-2" role="presentation">
+                        <hr class="my-2" aria-hidden="true">
+                    </li>
+                    <li class="nav-item pe-2" role="presentation">
+                        <button class="btn-theme-auto logout nav-link w-100 text-start fw-semibold mt-1 rounded-4 shadow-sm" onclick="undangan.admin.logout()" type="button" role="tab" aria-selected="false">
+                            <i class="fa-solid fa-right-from-bracket ms-3 me-2"></i>Logout
+                        </button>
+                    </li>
+                </ul>
             </div>
 
             <!-- Content -->
-            <div class="col-md-9">
-                <div class="tab-content">
+            <div class="col-md-9 m-0 p-0">
+                <div class="tab-content ps-2">
 
                     <!-- Home -->
                     <section class="tab-pane fade show active" id="pills-home" role="tabpanel" tabindex="0">
@@ -140,17 +138,17 @@
                                     <div class="row align-items-center" style="color: var(--bs-gray-100);">
                                         <div class="col-9">
                                             <p class="fw-bold m-0 p-0">Comments</p>
-                                            <div class="fw-bold m-0 p-0" id="count-comment">
+                                            <div class="fw-bold m-0 p-0" style="font-size: 1.2rem;" id="count-comment">
                                                 <div class="placeholder-wave">
                                                     <span class="placeholder col-8 rounded-3"></span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-3 p-0">
-                                            <div class="d-md-none d-lg-none d-xl-none">
+                                            <div class="d-block d-sm-none">
                                                 <i class="fa-solid fa-comments me-2" style="font-size: 1.5rem;"></i>
                                             </div>
-                                            <div class="d-none d-md-block d-lg-block d-xl-block">
+                                            <div class="d-none d-sm-block d-md-block d-lg-block d-xl-block">
                                                 <i class="fa-solid fa-comments fa-2x me-2"></i>
                                             </div>
                                         </div>
@@ -162,17 +160,17 @@
                                     <div class="row align-items-center" style="color: var(--bs-gray-100);">
                                         <div class="col-9">
                                             <p class="fw-bold m-0 p-0">Present</p>
-                                            <div class="fw-bold m-0 p-0" id="count-present">
+                                            <div class="fw-bold m-0 p-0" style="font-size: 1.2rem;" id="count-present">
                                                 <div class="placeholder-wave">
                                                     <span class="placeholder col-8 rounded-3"></span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-3 p-0">
-                                            <div class="d-md-none d-lg-none d-xl-none">
+                                            <div class="d-block d-sm-none">
                                                 <i class="fa-solid fa-circle-check me-2" style="font-size: 1.5rem;"></i>
                                             </div>
-                                            <div class="d-none d-md-block d-lg-block d-xl-block">
+                                            <div class="d-none d-sm-block d-md-block d-lg-block d-xl-block">
                                                 <i class="fa-solid fa-circle-check fa-2x me-2"></i>
                                             </div>
                                         </div>
@@ -184,17 +182,17 @@
                                     <div class="row align-items-center" style="color: var(--bs-gray-100);">
                                         <div class="col-9">
                                             <p class="fw-bold m-0 p-0">Absent</p>
-                                            <div class="fw-bold m-0 p-0" id="count-absent">
+                                            <div class="fw-bold m-0 p-0" style="font-size: 1.2rem;" id="count-absent">
                                                 <div class="placeholder-wave">
                                                     <span class="placeholder col-8 rounded-3"></span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-3 p-0">
-                                            <div class="d-md-none d-lg-none d-xl-none">
+                                            <div class="d-block d-sm-none">
                                                 <i class="fa-solid fa-circle-xmark me-2" style="font-size: 1.5rem;"></i>
                                             </div>
-                                            <div class="d-none d-md-block d-lg-block d-xl-block">
+                                            <div class="d-none d-sm-block d-md-block d-lg-block d-xl-block">
                                                 <i class="fa-solid fa-circle-xmark fa-2x me-2"></i>
                                             </div>
                                         </div>
@@ -206,17 +204,17 @@
                                     <div class="row align-items-center" style="color: var(--bs-gray-100);">
                                         <div class="col-9">
                                             <p class="fw-bold m-0 p-0">Likes</p>
-                                            <div class="fw-bold m-0 p-0" id="count-like">
+                                            <div class="fw-bold m-0 p-0" style="font-size: 1.2rem;" id="count-like">
                                                 <div class="placeholder-wave">
                                                     <span class="placeholder col-8 rounded-3"></span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-3 p-0">
-                                            <div class="d-md-none d-lg-none d-xl-none">
+                                            <div class="d-block d-sm-none">
                                                 <i class="fa-solid fa-heart me-2" style="font-size: 1.5rem;"></i>
                                             </div>
-                                            <div class="d-none d-md-block d-lg-block d-xl-block">
+                                            <div class="d-none d-sm-block d-md-block d-lg-block d-xl-block">
                                                 <i class="fa-solid fa-heart fa-2x me-2"></i>
                                             </div>
                                         </div>
