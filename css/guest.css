@@ -10,18 +10,6 @@
     display: none !important;
 }
 
-body {
-    overflow-y: hidden;
-}
-
-main {
-    opacity: 0;
-}
-
-.navbar {
-    opacity: 0;
-}
-
 .font-esthetic {
     font-family: 'Sacramento', cursive !important;
 }

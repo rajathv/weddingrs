@@ -266,7 +266,7 @@ export const admin = (() => {
         theme.spyTop();
         comment.init();
 
-        document.getElementById('mainModal').addEventListener('hidden.bs.modal', getAllRequest);
+        document.addEventListener('hidden.bs.modal', getAllRequest);
 
         try {
             const exp = session.decode()?.exp;

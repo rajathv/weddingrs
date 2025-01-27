@@ -159,8 +159,7 @@ export const guest = (() => {
         animateSvg();
         countDownDate();
         normalizeArabicFont();
-        document.querySelector('main').style.opacity = '1';
-        document.querySelector('.navbar').style.opacity = '1';
+        document.getElementById('root').style.opacity = '1';
 
         if (information.has('presence')) {
             document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';
@@ -188,13 +187,19 @@ export const guest = (() => {
             storage('tracker').clear();
         }
 
-        document.addEventListener('progressDone', () => {
+        document.addEventListener('progress.done', () => {
             document.body.scrollIntoView({ behavior: 'instant' });
             window.AOS.init();
             booting();
 
             // then show guest name.
             showGuestName();
+        });
+
+        document.addEventListener('hide.bs.modal', () => {
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
         });
 
         const token = document.body.getAttribute('data-key');

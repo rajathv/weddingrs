@@ -10,6 +10,7 @@ html {
 body {
     font-family: 'Josefin Sans', sans-serif !important;
     padding: 0 !important;
+    width: 100% !important;
     overflow-x: hidden !important;
 }
 
@@ -19,6 +20,12 @@ svg {
 
 svg>path {
     transition: color 350ms ease;
+}
+
+.fixed-bottom {
+    right: unset;
+    left: unset;
+    width: inherit;
 }
 
 html[data-bs-theme="dark"] .navbar {
