@@ -155,10 +155,31 @@ export const guest = (() => {
     /**
      * @returns {void}
      */
+    const buildGoogleCalendar = () => {
+        const queryParams = new URLSearchParams();
+        const data = {
+            action: 'TEMPLATE',
+            text: 'The Wedding of Wahyu and Riski',
+            dates: '20230315T100000/20230315T110000',
+            details: 'RT 10 RW 02, Desa Pajerukan, Kec. Kalibagor, Kab. Banyumas, Jawa Tengah 53191.',
+            location: 'https://goo.gl/maps/ALZR6FJZU3kxVwN86',
+            ctz: 'Asia/Jakarta',
+        };
+
+        Object.entries(data).forEach(([k, v]) => queryParams.set(k, v));
+        document.querySelector('#home button').addEventListener('click', () => {
+            window.open(`https://calendar.google.com/calendar/render?${queryParams.toString()}`, '_blank');
+        });
+    };
+
+    /**
+     * @returns {void}
+     */
     const booting = () => {
         animateSvg();
         countDownDate();
         normalizeArabicFont();
+        buildGoogleCalendar();
         document.getElementById('root').style.opacity = '1';
 
         if (information.has('presence')) {

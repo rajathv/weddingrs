@@ -1,3 +1,5 @@
 import { guest } from './app/guest/guest.js';
 
-window.undangan = guest.init();
+((w) => {
+    w.undangan = guest.init();
+})(window);
