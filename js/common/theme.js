@@ -34,14 +34,21 @@ export const theme = (() => {
     const setDark = () => theme.set('active', 'dark');
 
     /**
+     * @param {string[]} listTheme
+     * @returns {void}
+     */
+    const setMetaTheme = (listTheme) => {
+        const now = metaTheme.getAttribute('content');
+        metaTheme.setAttribute('content', listTheme.some((i) => i === now) ? themeColors[now] : now);
+    };
+
+    /**
      * @returns {void}
      */
     const onLight = () => {
         setLight();
         document.documentElement.setAttribute('data-bs-theme', 'light');
-
-        const now = metaTheme.getAttribute('content');
-        metaTheme.setAttribute('content', themeDark.some((i) => i === now) ? themeColors[now] : now);
+        setMetaTheme(themeDark);
     };
 
     /**
@@ -50,9 +57,7 @@ export const theme = (() => {
     const onDark = () => {
         setDark();
         document.documentElement.setAttribute('data-bs-theme', 'dark');
-
-        const now = metaTheme.getAttribute('content');
-        metaTheme.setAttribute('content', themeLight.some((i) => i === now) ? themeColors[now] : now);
+        setMetaTheme(themeLight);
     };
 
     /**
