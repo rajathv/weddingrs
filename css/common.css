@@ -39,11 +39,11 @@ html[data-bs-theme="light"] .navbar {
 }
 
 html[data-bs-theme="dark"] .text-theme-auto {
-    color: rgba(var(--bs-light-rgb));
+    color: rgb(var(--bs-light-rgb));
 }
 
 html[data-bs-theme="light"] .text-theme-auto {
-    color: rgba(var(--bs-dark-rgb));
+    color: rgb(var(--bs-dark-rgb));
 }
 
 html[data-bs-theme="dark"] .bg-theme-auto {
