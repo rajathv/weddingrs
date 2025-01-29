@@ -167,7 +167,7 @@ export const guest = (() => {
         };
 
         document.querySelector('#home button').addEventListener('click', () => {
-            Object.entries(data).forEach(([k, v]) => queryParams.set(k, encodeURIComponent(v)));
+            Object.entries(data).forEach(([k, v]) => queryParams.set(k, v));
             window.open(`https://calendar.google.com/calendar/render?${queryParams.toString()}`, '_blank');
         });
     };
