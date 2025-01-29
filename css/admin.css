@@ -36,12 +36,12 @@ html[data-bs-theme="dark"] .btn-theme-auto {
     background-color: var(--bs-gray-800);
 }
 
-html[data-bs-theme="dark"] .btn-theme-auto:hover:not([style]):not(.nav-link.active) {
+html[data-bs-theme="dark"] .btn-theme-auto:hover:not(.nav-link.active) {
     color: var(--bs-light);
     background-color: var(--bs-gray-600);
 }
 
-html[data-bs-theme="light"] .btn-theme-auto:hover:not([style]):not(.nav-link.active) {
+html[data-bs-theme="light"] .btn-theme-auto:hover:not(.nav-link.active) {
     color: var(--bs-dark);
     background-color: var(--bs-gray-300);
 }
