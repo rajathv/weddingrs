@@ -166,8 +166,8 @@ export const guest = (() => {
             ctz: 'Asia/Jakarta',
         };
 
-        Object.entries(data).forEach(([k, v]) => queryParams.set(k, v));
         document.querySelector('#home button').addEventListener('click', () => {
+            Object.entries(data).forEach(([k, v]) => queryParams.set(k, encodeURIComponent(v)));
             window.open(`https://calendar.google.com/calendar/render?${queryParams.toString()}`, '_blank');
         });
     };

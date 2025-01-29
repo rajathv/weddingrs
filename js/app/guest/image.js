@@ -47,7 +47,7 @@ export const image = (() => {
                 return c.put(url, new Response(b, { headers })).then(() => b);
             })).catch((err) => {
                 if (retries > 0) {
-                    return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay)), delay));
+                    return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 500)), delay));
                 }
 
                 throw err;
