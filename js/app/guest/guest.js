@@ -156,18 +156,29 @@ export const guest = (() => {
      * @returns {void}
      */
     const buildGoogleCalendar = () => {
+        /**
+         * @param {string} d 
+         * @returns {string}
+         */
+        const formatDate = (d) => {
+            return (new Date(d)).toISOString().replace(/[-:]/g, '').split('.')[0];
+        };
+
         const queryParams = new URLSearchParams();
         const data = {
             action: 'TEMPLATE',
             text: 'The Wedding of Wahyu and Riski',
-            dates: '20230315T100000/20230315T110000',
+            dates: '2023-03-15 10:00:00/2023-03-15 11:00:00',
             details: 'RT 10 RW 02, Desa Pajerukan, Kec. Kalibagor, Kab. Banyumas, Jawa Tengah 53191.',
             location: 'https://goo.gl/maps/ALZR6FJZU3kxVwN86',
             ctz: 'Asia/Jakarta',
         };
 
+        // format date.
+        data.dates = `${formatDate(data.dates.split('/')[0])}/${formatDate(data.dates.split('/')[1])}`;
+
+        Object.entries(data).forEach(([k, v]) => queryParams.set(k, v));
         document.querySelector('#home button')?.addEventListener('click', () => {
-            Object.entries(data).forEach(([k, v]) => queryParams.set(k, v));
             window.open(`https://calendar.google.com/calendar/render?${queryParams.toString()}`, '_blank');
         });
     };
