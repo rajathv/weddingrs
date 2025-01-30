@@ -8,14 +8,21 @@ export const HTTP_DELETE = 'DELETE';
 
 export const request = (method, path) => {
 
+    const ac = new AbortController();
+
     let url = document.body.getAttribute('data-url');
     let req = {
+        signal: ac.signal,
         method: String(method).toUpperCase(),
         headers: new Headers({
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }),
     };
+
+    window.addEventListener('offline', () => ac.abort());
+    window.addEventListener('popstate', () => ac.abort());
+    window.addEventListener('beforeunload', () => ac.abort());
 
     if (url.slice(-1) === '/') {
         url = url.slice(0, -1);
@@ -47,6 +54,11 @@ export const request = (method, path) => {
                     });
                 })
                 .catch((err) => {
+                    if (err.name !== 'AbortError') {
+                        console.warn('Fetch abort:', err);
+                        return err;
+                    }
+
                     alert(err);
                     throw new Error(err);
                 });
@@ -85,6 +97,11 @@ export const request = (method, path) => {
                     });
                 })
                 .catch((err) => {
+                    if (err.name !== 'AbortError') {
+                        console.warn('Fetch abort:', err);
+                        return err;
+                    }
+
                     alert(err);
                     throw new Error(err);
                 });

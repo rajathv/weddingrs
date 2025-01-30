@@ -7,24 +7,24 @@
 [![GitHub repo size](https://img.shields.io/github/repo-size/dewanakl/undangan?color=brightgreen)](https://shields.io)
 [![GitHub License](https://img.shields.io/github/license/dewanakl/undangan?color=brightgreen)](https://shields.io)
 
-## Demo
+## 🚀 Demo
 Untuk kamu yang ingin melihat demo terlebih dahulu:
 
 [https://ulems.my.id](https://ulems.my.id/?to=Teman%20teman%20semua)
 
-## Documentation
+## 📦 Documentation
 
 - Jalankan: `npm install` serta `npm run dev`.
-- Ubah isi dari index.html sesuai kebutuhan.
+- Ubah isi dari index.html sesuai yang kamu mau.
 - Jika tidak ingin menggunakan `komentar` bisa hapus `data-url` dan `data-key` pada body index.
-- Sesuaikan `data-url` pada body index dan dashboard sesuai domain backend (jika deploy sendiri).
+- Sesuaikan `data-url` pada body index dan dashboard sesuai url backend (jika deploy sendiri).
 - Sesuaikan juga `data-key` dengan access key pada dashboard.
-- Jika ingin deploy: `npm run build` dan folder dist akan terbuat.
+- Waktu deploy: `npm run build` dan folder dist akan terbuat.
 - Self deployment backend bisa lihat dibawah ini atau ingin coba gratis selama 1 hari pada trial api.
 
-> Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga dapat mengetahuinya.
+> Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga dapat mengetahuinya 🙌.
 
-## Deployment API
+## 🔥 Deployment API
 
 - Video\
     otw
@@ -32,13 +32,13 @@ Untuk kamu yang ingin melihat demo terlebih dahulu:
 - Presentation
     [https://docs.google.com/presentation](https://docs.google.com/presentation/d/1EY2YmWdZUI7ASoo0f2wvU7ec_Yt0uZanYa8YLbfNysk/edit)
 
-## Trial API
+## ⏰ Trial API
 Untuk kamu yang ingin mencoba secara gratis:
 
 [https://trial.ulems.my.id](https://trial.ulems.my.id)
 
 
-## Tech stack
+## ⚙ Tech stack
 
 - Bootstrap 5.3.3
 - AOS 2.3.4
@@ -48,14 +48,14 @@ Untuk kamu yang ingin mencoba secara gratis:
 - Google Fonts
 - Vanilla JS
 
-## Contributing
+## 🤝 Contributing
 
 I'm very open to those of you who want to contribute to the undangan!
 
-## Security Vulnerabilities
+## 🪲 Security Vulnerabilities
 
 If you find any security vulnerabilities in this undangan, please email DKL via [dewanakretarta29@gmail.com](mailto:dewanakretarta29@gmail.com).
 
-## License
+## 📜 License
 
 Undangan is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
