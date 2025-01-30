@@ -22,7 +22,7 @@ Untuk kamu yang ingin melihat demo terlebih dahulu:
 - Waktu deploy: `npm run build` dan folder dist akan terbuat.
 - Self deployment backend bisa lihat dibawah ini atau ingin coba gratis selama 1 hari pada trial api.
 
-> Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga dapat mengetahuinya 🙌.
+> Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga mengetahuinya.
 
 ## 🔥 Deployment API
 
@@ -38,7 +38,7 @@ Untuk kamu yang ingin mencoba secara gratis:
 [https://trial.ulems.my.id](https://trial.ulems.my.id)
 
 
-## ⚙ Tech stack
+## ⚙️ Tech stack
 
 - Bootstrap 5.3.3
 - AOS 2.3.4
@@ -52,7 +52,7 @@ Untuk kamu yang ingin mencoba secara gratis:
 
 I'm very open to those of you who want to contribute to the undangan!
 
-## 🪲 Security Vulnerabilities
+## 🐞 Security Vulnerabilities
 
 If you find any security vulnerabilities in this undangan, please email DKL via [dewanakretarta29@gmail.com](mailto:dewanakretarta29@gmail.com).
 
