@@ -161,7 +161,7 @@ export const guest = (() => {
          * @returns {string}
          */
         const formatDate = (d) => {
-            return (new Date(d)).toISOString().replace(/[-:]/g, '').split('.')[0];
+            return (new Date(d + 'Z')).toISOString().replace(/[-:]/g, '').split('.')[0];
         };
 
         const queryParams = new URLSearchParams();
