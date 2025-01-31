@@ -169,15 +169,14 @@ export const guest = (() => {
             action: 'TEMPLATE',
             text: 'The Wedding of Wahyu and Riski',
             dates: '2023-03-15 10:00:00/2023-03-15 11:00:00',
-            details: 'RT 10 RW 02, Desa Pajerukan, Kec. Kalibagor, Kab. Banyumas, Jawa Tengah 53191.',
+            details: 'Tanpa mengurangi rasa hormat, kami mengundang Anda untuk berkenan menghadiri acara pernikahan kami. Terima kasih atas perhatian dan doa restu Anda, yang menjadi kebahagiaan serta kehormatan besar bagi kami.',
             location: 'https://goo.gl/maps/ALZR6FJZU3kxVwN86',
             ctz: 'Asia/Jakarta',
         };
 
-        // format date.
         data.dates = `${formatDate(data.dates.split('/')[0])}/${formatDate(data.dates.split('/')[1])}`;
-
         Object.entries(data).forEach(([k, v]) => queryParams.set(k, v));
+
         document.querySelector('#home button')?.addEventListener('click', () => {
             window.open(`https://calendar.google.com/calendar/render?${queryParams.toString()}`, '_blank');
         });

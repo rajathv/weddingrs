@@ -20,9 +20,9 @@ export const image = (() => {
     const cacheName = 'images';
 
     /**
- * @param {HTMLImageElement} el 
- * @returns {Promise<void>}
- */
+     * @param {HTMLImageElement} el 
+     * @returns {Promise<void>}
+     */
     const getByFetch = async (el) => {
         const url = el.getAttribute('data-src');
         const exp = 'x-expiration-time';

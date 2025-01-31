@@ -54,7 +54,7 @@ export const request = (method, path) => {
                     });
                 })
                 .catch((err) => {
-                    if (err.name !== 'AbortError') {
+                    if (err.name === 'AbortError') {
                         console.warn('Fetch abort:', err);
                         return err;
                     }
@@ -97,7 +97,7 @@ export const request = (method, path) => {
                     });
                 })
                 .catch((err) => {
-                    if (err.name !== 'AbortError') {
+                    if (err.name === 'AbortError') {
                         console.warn('Fetch abort:', err);
                         return err;
                     }
