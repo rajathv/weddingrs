@@ -126,8 +126,8 @@ export const util = (() => {
      */
     const parseUserAgent = (userAgent) => {
         const deviceTypes = [
-            { type: 'Mobile', regex: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i },
-            { type: 'Tablet', regex: /iPad|Android(?!.*Mobile)/i },
+            { type: 'Mobile', regex: /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i },
+            { type: 'Tablet', regex: /iPad|Android(?!.*Mobile)|Tablet/i },
             { type: 'Desktop', regex: /Windows NT|Macintosh|Linux/i },
         ];
 
