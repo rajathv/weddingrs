@@ -198,7 +198,8 @@ export const comment = (() => {
 
         if (nameValue.length == 0) {
             if (id) {
-                name.scrollIntoView({ behavior: 'smooth' });
+                // scroll to form.
+                document.getElementById('comment').scrollIntoView({ behavior: 'smooth' });
             }
 
             alert('Silakan masukkan nama Anda.');
