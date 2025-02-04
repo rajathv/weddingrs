@@ -89,15 +89,13 @@ export const theme = (() => {
      * @returns {void}
      */
     const spyTop = () => {
-        const callback = (es) => {
-            es.filter((e) => e.isIntersecting).forEach((e) => {
-                const themeColor = e.target.classList.contains('bg-white-black')
-                    ? isDarkMode(themeDark[0], themeLight[0])
-                    : isDarkMode(themeDark[1], themeLight[1]);
+        const callback = (es) => es.filter((e) => e.isIntersecting).forEach((e) => {
+            const themeColor = e.target.classList.contains('bg-white-black')
+                ? isDarkMode(themeDark[0], themeLight[0])
+                : isDarkMode(themeDark[1], themeLight[1]);
 
-                metaTheme.setAttribute('content', themeColor);
-            });
-        };
+            metaTheme.setAttribute('content', themeColor);
+        });
 
         const observerTop = new IntersectionObserver(callback, { rootMargin: '0% 0% -95% 0%' });
         document.querySelectorAll('section').forEach((e) => observerTop.observe(e));
