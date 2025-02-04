@@ -1,6 +1,6 @@
 import { storage } from './storage.js';
 import { dto } from '../connection/dto.js';
-import { request, HTTP_POST, HTTP_GET } from '../connection/request.js';
+import { request, HTTP_POST, HTTP_GET, HTTP_STATUS_OK } from '../connection/request.js';
 
 export const session = (() => {
 
@@ -24,11 +24,11 @@ export const session = (() => {
             .send(dto.tokenResponse)
             .then(
                 (res) => {
-                    if (res.code === 200) {
+                    if (res.code === HTTP_STATUS_OK) {
                         setToken(res.data.token);
                     }
 
-                    return res.code === 200;
+                    return res.code === HTTP_STATUS_OK;
                 },
                 () => false
             );
@@ -58,8 +58,8 @@ export const session = (() => {
             .token(getToken())
             .send()
             .then((res) => {
-                if (res.code !== 200) {
-                    return res;
+                if (res.code !== HTTP_STATUS_OK) {
+                    throw new Error('failed to get config.');
                 }
 
                 const config = storage('config');

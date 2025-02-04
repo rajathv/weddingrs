@@ -3,7 +3,7 @@ import { bs } from '../../libs/bootstrap.js';
 import { dto } from '../../connection/dto.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
-import { request, HTTP_GET } from '../../connection/request.js';
+import { request, HTTP_GET, HTTP_STATUS_OK } from '../../connection/request.js';
 
 export const auth = (() => {
 
@@ -42,13 +42,11 @@ export const auth = (() => {
      */
     const getDetailUser = () => {
         return request(HTTP_GET, '/api/user').token(session.getToken()).send().then((res) => {
-            if (res.code !== 200) {
-                return res;
+            if (res.code !== HTTP_STATUS_OK) {
+                throw new Error('failed to get user.');
             }
 
-            for (let [k, v] of Object.entries(res.data)) {
-                user.set(k, v);
-            }
+            Object.entries(res.data).forEach(([k, v]) => user.set(k, v));
 
             return res;
         }, (res) => {

@@ -256,11 +256,7 @@ export const guest = (() => {
                 const params = new URLSearchParams(window.location.search);
 
                 session.setToken(params.get('k') ?? token);
-                session.guest().then((res) => {
-                    if (res.code !== 200) {
-                        progress.invalid('config');
-                        return;
-                    }
+                session.guest().then(() => {
 
                     progress.complete('config');
                     if (img.hasDataSrc()) {

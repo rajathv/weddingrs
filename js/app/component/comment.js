@@ -5,7 +5,7 @@ import { pagination } from './pagination.js';
 import { dto } from '../../connection/dto.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
-import { request, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_PUT } from '../../connection/request.js';
+import { request, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_PUT, HTTP_STATUS_OK, HTTP_STATUS_CREATED } from '../../connection/request.js';
 
 export const comment = (() => {
 
@@ -261,7 +261,7 @@ export const comment = (() => {
 
         btn.restore();
 
-        if (!response || response.code !== 201) {
+        if (!response || response.code !== HTTP_STATUS_CREATED) {
             return;
         }
 
@@ -361,7 +361,7 @@ export const comment = (() => {
             .token(session.getToken())
             .send(dto.commentResponse)
             .then((res) => {
-                if (res.code !== 200) {
+                if (res.code !== HTTP_STATUS_OK) {
                     return;
                 }
 

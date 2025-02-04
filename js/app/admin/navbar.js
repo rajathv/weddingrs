@@ -8,14 +8,14 @@ export const navbar = (() => {
      * @returns {void}
      */
     const showActiveTab = (btn, id) => {
-        bs.tab(id).show();
-        btn.classList.add('active');
-
         document.querySelectorAll('.navbar button').forEach((b) => {
             if (b.classList.contains('active')) {
                 b.classList.remove('active');
             }
         });
+
+        bs.tab(id).show();
+        btn.classList.add('active');
     };
 
     /**

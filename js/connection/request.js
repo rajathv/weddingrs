@@ -6,6 +6,10 @@ export const HTTP_POST = 'POST';
 export const HTTP_PATCH = 'PATCH';
 export const HTTP_DELETE = 'DELETE';
 
+export const HTTP_STATUS_OK = 200;
+export const HTTP_STATUS_CREATED = 201;
+export const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
+
 export const request = (method, path) => {
 
     const ac = new AbortController();
@@ -38,7 +42,7 @@ export const request = (method, path) => {
             return fetch(url + path, req)
                 .then((res) => {
                     return res.json().then((json) => {
-                        if (res.status >= 500 && (json.message ?? json[0])) {
+                        if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
                             throw new Error(json.message ?? json[0]);
                         }
 
@@ -69,7 +73,7 @@ export const request = (method, path) => {
         download() {
             return fetch(url + path, req)
                 .then((res) => {
-                    if (res.status !== 200) {
+                    if (res.status !== HTTP_STATUS_OK) {
                         return false;
                     }
 

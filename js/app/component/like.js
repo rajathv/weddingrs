@@ -2,7 +2,7 @@ import { dto } from '../../connection/dto.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
 import { tapTapAnimation } from '../../libs/confetti.js';
-import { request, HTTP_PATCH, HTTP_POST } from '../../connection/request.js';
+import { request, HTTP_PATCH, HTTP_POST, HTTP_STATUS_CREATED } from '../../connection/request.js';
 
 export const like = (() => {
 
@@ -44,7 +44,7 @@ export const like = (() => {
                 .token(session.getToken())
                 .send(dto.uuidResponse)
                 .then((res) => {
-                    if (res.code == 201) {
+                    if (res.code == HTTP_STATUS_CREATED) {
                         likes.set(id, res.data.uuid);
 
                         heart.classList.remove('fa-regular');
