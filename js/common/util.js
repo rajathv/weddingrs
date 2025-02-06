@@ -76,7 +76,7 @@ export const util = (() => {
     const copy = async (button, message = null, timeout = 1500) => {
         const data = button.getAttribute('data-copy');
 
-        if (!data || data.length == 0) {
+        if (!data || data.length === 0) {
             alert('Nothing to copy');
             return;
         }
@@ -148,9 +148,9 @@ export const util = (() => {
             { name: 'Linux', regex: /Linux/i },
         ];
 
-        const deviceType = deviceTypes.find((device) => device.regex.test(userAgent))?.type || 'Unknown';
-        const browser = browsers.find((browser) => browser.regex.test(userAgent))?.name || 'Unknown';
-        const osMatch = operatingSystems.find((os) => os.regex.test(userAgent));
+        const deviceType = deviceTypes.find((i) => i.regex.test(userAgent))?.type || 'Unknown';
+        const browser = browsers.find((i) => i.regex.test(userAgent))?.name || 'Unknown';
+        const osMatch = operatingSystems.find((i) => i.regex.test(userAgent));
 
         let osVersion = osMatch ? (userAgent.match(osMatch.regex)?.[1]?.replace(/_/g, '.') || '') : '';
 

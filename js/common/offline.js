@@ -7,6 +7,11 @@ export const offline = (() => {
     let online = true;
 
     /**
+     * @returns {boolean}
+     */
+    const isOnline = () => online;
+
+    /**
      * @param {boolean} isUp 
      * @returns {Promise<void>}
      */
@@ -34,21 +39,6 @@ export const offline = (() => {
     /**
      * @returns {void}
      */
-    const hide = () => {
-        let t = null;
-        t = setTimeout(() => {
-            clearTimeout(t);
-            t = null;
-
-            if (online) {
-                setDefaultState();
-            }
-        }, 3000);
-    };
-
-    /**
-     * @returns {void}
-     */
     const setOffline = () => {
         const el = alert.firstElementChild.firstElementChild;
         el.classList.remove('bg-success');
@@ -72,6 +62,21 @@ export const offline = (() => {
     const setDefaultState = async () => {
         await show(false);
         setOffline();
+    };
+
+    /**
+     * @returns {void}
+     */
+    const hide = () => {
+        let t = null;
+        t = setTimeout(() => {
+            clearTimeout(t);
+            t = null;
+
+            if (online) {
+                setDefaultState();
+            }
+        }, 3000);
     };
 
     /**
@@ -119,11 +124,6 @@ export const offline = (() => {
         hide();
         changeState();
     };
-
-    /**
-     * @returns {boolean}
-     */
-    const isOnline = () => online;
 
     /**
      * @returns {void}

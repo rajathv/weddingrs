@@ -88,7 +88,7 @@ export const pagination = (() => {
         button.innerHTML = `<span class="spinner-border spinner-border-sm my-0 mx-1 p-0" style="height: 0.8rem; width: 0.8rem;"></span>`;
 
         const process = async () => {
-            await comment.comment();
+            await comment.show();
 
             button.disabled = false;
             button.innerHTML = tmp;
@@ -132,7 +132,7 @@ export const pagination = (() => {
 
         disabledNext();
         disabledPrevious();
-        await comment.comment();
+        await comment.show();
 
         return true;
     };

@@ -16,7 +16,7 @@ export const theme = (() => {
     /**
      * @type {ReturnType<typeof storage>|null}
      */
-    let theme = null;
+    let themes = null;
 
     /**
      * @type {HTMLElement|null}
@@ -26,12 +26,12 @@ export const theme = (() => {
     /**
      * @returns {void}
      */
-    const setLight = () => theme.set('active', 'light');
+    const setLight = () => themes.set('active', 'light');
 
     /**
      * @returns {void}
      */
-    const setDark = () => theme.set('active', 'dark');
+    const setDark = () => themes.set('active', 'dark');
 
     /**
      * @param {string[]} listTheme
@@ -61,15 +61,15 @@ export const theme = (() => {
     };
 
     /**
-     * @param {string|null} [onDark=null] 
-     * @param {string|null} [onLight=null] 
+     * @param {string|null} [dark=null] 
+     * @param {string|null} [light=null] 
      * @returns {boolean|string}
      */
-    const isDarkMode = (onDark = null, onLight = null) => {
-        const status = theme.get('active') === 'dark';
+    const isDarkMode = (dark = null, light = null) => {
+        const status = themes.get('active') === 'dark';
 
-        if (onDark && onLight) {
-            return status ? onDark : onLight;
+        if (dark && light) {
+            return status ? dark : light;
         }
 
         return status;
@@ -105,10 +105,10 @@ export const theme = (() => {
      * @returns {void}
      */
     const init = () => {
-        theme = storage('theme');
+        themes = storage('theme');
         metaTheme = document.querySelector('meta[name="theme-color"]');
 
-        if (!theme.has('active')) {
+        if (!themes.has('active')) {
             window.matchMedia('(prefers-color-scheme: dark)').matches ? setDark() : setLight();
         }
 

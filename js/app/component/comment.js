@@ -47,6 +47,24 @@ export const comment = (() => {
         });
     };
 
+    /**
+     * @returns {void}
+     */
+    const scroll = () => document.getElementById('comments').scrollIntoView({ behavior: 'smooth' });
+
+    /**
+     * @param {ReturnType<typeof dto.getCommentResponse>} c
+     * @returns {void}
+     */
+    const addListenerLike = (c) => {
+        if (c.comments) {
+            c.comments.forEach(addListenerLike);
+        }
+
+        const bodyLike = document.getElementById(`body-content-${c.uuid}`);
+        bodyLike.addEventListener('touchend', () => like.tapTap(bodyLike));
+    };
+
     const remove = async (button) => {
         if (!confirm('Are you sure?')) {
             return;
@@ -60,8 +78,8 @@ export const comment = (() => {
 
         changeButton(id, true);
         const btn = util.disableButton(button);
-        const like = document.querySelector(`[onclick="undangan.comment.like.like(this)"][data-uuid="${id}"]`);
-        like.disabled = true;
+        const likes = document.querySelector(`[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`);
+        likes.disabled = true;
 
         const status = await request(HTTP_DELETE, '/api/comment/' + owns.get(id))
             .token(session.getToken())
@@ -70,7 +88,7 @@ export const comment = (() => {
 
         if (!status) {
             btn.restore();
-            like.disabled = false;
+            likes.disabled = false;
             return;
         }
 
@@ -87,7 +105,7 @@ export const comment = (() => {
         document.getElementById(id).remove();
 
         const comments = document.getElementById('comments');
-        if (comments.children.length == 0) {
+        if (comments.children.length === 0) {
             comments.innerHTML = onNullComment();
         }
     };
@@ -196,7 +214,7 @@ export const comment = (() => {
             nameValue = user.get('name');
         }
 
-        if (nameValue.length == 0) {
+        if (nameValue.length === 0) {
             if (id) {
                 // scroll to form.
                 document.getElementById('comment').scrollIntoView({ behavior: 'smooth' });
@@ -207,7 +225,7 @@ export const comment = (() => {
         }
 
         const presence = document.getElementById('form-presence');
-        if (!id && presence && presence.value == '0') {
+        if (!id && presence && presence.value === '0') {
             alert('Silakan pilih status kehadiran Anda.');
             return;
         }
@@ -216,7 +234,7 @@ export const comment = (() => {
             name.disabled = true;
         }
 
-        if (presence && presence.value != '0') {
+        if (presence && presence.value !== '0') {
             presence.disabled = true;
         }
 
@@ -275,15 +293,15 @@ export const comment = (() => {
                 return;
             }
 
-            response.data.is_admin = session.isAdmin();
-            const comments = document.getElementById('comments');
-            pagination.setResultData(comments.children.length);
+            const c = document.getElementById('comments');
+            pagination.setResultData(c.children.length);
 
-            if (pagination.getResultData() == pagination.getPer()) {
-                comments.lastElementChild.remove();
+            if (pagination.getResultData() === pagination.getPer()) {
+                c.lastElementChild.remove();
             }
 
-            comments.innerHTML = card.renderContent(response.data) + comments.innerHTML;
+            response.data.is_admin = session.isAdmin();
+            c.innerHTML = card.renderContent(response.data) + c.innerHTML;
             scroll();
         }
 
@@ -309,7 +327,7 @@ export const comment = (() => {
                 anchorTag.remove();
             }
 
-            containerDiv.querySelector(`button[onclick="undangan.comment.like.like(this)"][data-uuid="${id}"]`).insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
+            containerDiv.querySelector(`button[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`).insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
         }
 
         addListenerLike(response.data);
@@ -375,12 +393,12 @@ export const comment = (() => {
         button.disabled = true;
     };
 
-    const comment = () => {
-        const comments = document.getElementById('comments');
+    const show = () => {
+        const c = document.getElementById('comments');
 
-        if (comments.getAttribute('data-loading') === 'false') {
-            comments.setAttribute('data-loading', 'true');
-            comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
+        if (c.getAttribute('data-loading') === 'false') {
+            c.setAttribute('data-loading', 'true');
+            c.innerHTML = card.renderLoading().repeat(pagination.getPer());
         }
 
         return request(HTTP_GET, `/api/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
@@ -388,10 +406,10 @@ export const comment = (() => {
             .send(dto.getCommentsResponse)
             .then((res) => {
                 pagination.setResultData(res.data.length);
-                comments.setAttribute('data-loading', 'false');
+                c.setAttribute('data-loading', 'false');
 
                 if (res.data.length === 0) {
-                    comments.innerHTML = onNullComment();
+                    c.innerHTML = onNullComment();
                     return res;
                 }
 
@@ -410,7 +428,7 @@ export const comment = (() => {
                 };
 
                 showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
-                comments.innerHTML = res.data.map((c) => card.renderContent(c)).join('');
+                c.innerHTML = res.data.map((i) => card.renderContent(i)).join('');
 
                 res.data.forEach(fetchTracker);
                 res.data.forEach(addListenerLike);
@@ -421,10 +439,10 @@ export const comment = (() => {
 
     const showOrHide = (button) => {
         const ids = button.getAttribute('data-uuids').split(',');
-        const show = button.getAttribute('data-show') === 'true';
+        const isShow = button.getAttribute('data-show') === 'true';
         const uuid = button.getAttribute('data-uuid');
 
-        if (show) {
+        if (isShow) {
             button.setAttribute('data-show', 'false');
             button.innerText = 'Show replies';
             button.innerText += ' (' + ids.length + ')';
@@ -440,14 +458,14 @@ export const comment = (() => {
         for (const id of ids) {
             showHide.set('hidden', showHide.get('hidden').map((i) => {
                 if (i.uuid === id) {
-                    i.show = !show;
+                    i.show = !isShow;
                 }
 
                 return i;
             }));
 
             const cls = document.getElementById(id).classList;
-            show ? cls.add('d-none') : cls.remove('d-none');
+            isShow ? cls.add('d-none') : cls.remove('d-none');
         }
     };
 
@@ -457,66 +475,48 @@ export const comment = (() => {
      * @returns {void}
      */
     const showMore = (anchor, uuid) => {
-        const comment = document.getElementById(`content-${uuid}`);
-        const original = util.base64Decode(comment.getAttribute('data-comment'));
+        const c = document.getElementById(`content-${uuid}`);
+        const original = util.base64Decode(c.getAttribute('data-comment'));
         const isCollapsed = anchor.getAttribute('data-show') === 'false';
 
-        comment.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
+        c.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
         anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
         anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
 
     /**
-     * @param {ReturnType<typeof dto.getCommentResponse>} comment
+     * @param {ReturnType<typeof dto.getCommentResponse>} c
      * @returns {void}
      */
-    const addListenerLike = (comment) => {
-        if (comment.comments) {
-            comment.comments.forEach(addListenerLike);
-        }
-
-        const bodyLike = document.getElementById(`body-content-${comment.uuid}`);
-        bodyLike.addEventListener('touchend', () => like.tapTap(bodyLike));
-    };
-
-    /**
-     * @param {ReturnType<typeof dto.getCommentResponse>} comment
-     * @returns {void}
-     */
-    const fetchTracker = (comment) => {
+    const fetchTracker = (c) => {
         if (!session.isAdmin()) {
             return;
         }
 
-        if (comment.comments) {
-            comment.comments.forEach(fetchTracker);
+        if (c.comments) {
+            c.comments.forEach(fetchTracker);
         }
 
-        if (comment.ip === undefined || comment.user_agent === undefined || comment.is_admin || tracker.has(comment.ip)) {
+        if (c.ip === undefined || c.user_agent === undefined || c.is_admin || tracker.has(c.ip)) {
             return;
         }
 
-        fetch(`https://freeipapi.com/api/json/${comment.ip}`)
+        fetch(`https://freeipapi.com/api/json/${c.ip}`)
             .then((res) => res.json())
             .then((res) => {
                 let result = res.cityName + ' - ' + res.regionName;
 
-                if (res.cityName == '-' && res.regionName == '-') {
+                if (res.cityName === '-' && res.regionName === '-') {
                     result = 'localhost';
                 }
 
-                tracker.set(comment.ip, result);
-                document.getElementById(`ip-${comment.uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(comment.ip)} <strong>${result}</strong>`;
+                tracker.set(c.ip, result);
+                document.getElementById(`ip-${c.uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <strong>${result}</strong>`;
             })
             .catch((err) => {
-                document.getElementById(`ip-${comment.uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(comment.ip)} <strong>${util.escapeHtml(err.message)}</strong>`;
+                document.getElementById(`ip-${c.uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <strong>${util.escapeHtml(err.message)}</strong>`;
             });
     };
-
-    /**
-     * @returns {void}
-     */
-    const scroll = () => document.getElementById('comments').scrollIntoView({ behavior: 'smooth' });
 
     /**
      * @returns {void}
@@ -551,7 +551,7 @@ export const comment = (() => {
         reply,
         remove,
         update,
-        comment,
+        show,
         showMore,
         showOrHide,
     };

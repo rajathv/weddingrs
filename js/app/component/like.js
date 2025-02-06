@@ -15,7 +15,7 @@ export const like = (() => {
      * @param {HTMLButtonElement} button
      * @returns {Promise<void>}
      */
-    const like = async (button) => {
+    const love = async (button) => {
 
         const info = button.firstElementChild;
         const heart = button.lastElementChild;
@@ -44,7 +44,7 @@ export const like = (() => {
                 .token(session.getToken())
                 .send(dto.uuidResponse)
                 .then((res) => {
-                    if (res.code == HTTP_STATUS_CREATED) {
+                    if (res.code === HTTP_STATUS_CREATED) {
                         likes.set(id, res.data.uuid);
 
                         heart.classList.remove('fa-regular');
@@ -81,7 +81,7 @@ export const like = (() => {
             }
 
             tapTapAnimation(div);
-            const likeButton = document.querySelector(`[onclick="undangan.comment.like.like(this)"][data-uuid="${uuid}"]`);
+            const likeButton = document.querySelector(`[onclick="undangan.comment.like.love(this)"][data-uuid="${uuid}"]`);
 
             div.setAttribute('data-liked', 'true');
             await like(likeButton);
@@ -100,7 +100,7 @@ export const like = (() => {
 
     return {
         init,
-        like,
+        love,
         tapTap,
     };
 })();

@@ -36,7 +36,7 @@ export const admin = (() => {
             document.getElementById('count-absent').innerHTML = String(res.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         });
 
-        comment.comment();
+        comment.show();
     };
 
     /**
@@ -138,7 +138,7 @@ export const admin = (() => {
         const old = document.getElementById('old_password');
         const newest = document.getElementById('new_password');
 
-        if (old.value.length == 0 || newest.value.length == 0) {
+        if (old.value.length === 0 || newest.value.length === 0) {
             alert('Password cannot be empty');
             return;
         }
@@ -177,7 +177,7 @@ export const admin = (() => {
     const changeName = async (button) => {
         const name = document.getElementById('form-name');
 
-        if (name.value.length == 0) {
+        if (name.value.length === 0) {
             alert('Name cannot be empty');
             return;
         }
@@ -253,18 +253,8 @@ export const admin = (() => {
      */
     const domLoaded = () => {
         offline.init();
-
-        if (!session.isAdmin()) {
-            storage('owns').clear();
-            storage('likes').clear();
-            storage('config').clear();
-            storage('comment').clear();
-            storage('session').clear();
-            storage('information').clear();
-        }
-
-        theme.spyTop();
         comment.init();
+        theme.spyTop();
 
         document.addEventListener('hidden.bs.modal', getAllRequest);
 
@@ -287,6 +277,16 @@ export const admin = (() => {
         auth.init();
         theme.init();
         session.init();
+
+        if (!session.isAdmin()) {
+            storage('owns').clear();
+            storage('likes').clear();
+            storage('config').clear();
+            storage('comment').clear();
+            storage('session').clear();
+            storage('information').clear();
+        }
+
         window.addEventListener('DOMContentLoaded', domLoaded);
 
         return {

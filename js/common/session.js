@@ -15,6 +15,12 @@ export const session = (() => {
     const getToken = () => ses.get('token');
 
     /**
+     * @param {string} token
+     * @returns {void}
+     */
+    const setToken = (token) => ses.set('token', token);
+
+    /**
      * @param {object} body
      * @returns {Promise<boolean>}
      */
@@ -40,12 +46,6 @@ export const session = (() => {
     const logout = () => ses.unset('token');
 
     /**
-     * @param {string} token
-     * @returns {void}
-     */
-    const setToken = (token) => ses.set('token', token);
-
-    /**
      * @returns {boolean}
      */
     const isAdmin = () => String(getToken() ?? '.').split('.').length === 3;
@@ -63,7 +63,7 @@ export const session = (() => {
                 }
 
                 const config = storage('config');
-                for (let [k, v] of Object.entries(res.data)) {
+                for (const [k, v] of Object.entries(res.data)) {
                     config.set(k, v);
                 }
 

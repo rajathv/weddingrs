@@ -23,6 +23,7 @@ export const guest = (() => {
     const countDownDate = () => {
         const until = document.getElementById('count-down')?.getAttribute('data-time')?.replace(' ', 'T');
         if (!until) {
+            alert('invalid count down date.');
             return;
         }
 
@@ -69,34 +70,31 @@ export const guest = (() => {
     const showGuestName = () => {
         /**
          * Make sure "to=" is the last query string.
-         * Ex. domain.my.id/?id=some-uuid-here&to=name
+         * Ex. ulems.my.id/?id=some-uuid-here&to=name
          */
         const raw = window.location.search.split('to=');
         let name = null;
 
-        if (raw.length > 1 && raw[1].length > 0) {
+        if (raw.length > 1 && raw[1].length >= 1) {
             name = window.decodeURIComponent(raw[1]);
         }
 
         if (name) {
-            const guest = document.getElementById('guest-name');
+            const guestName = document.getElementById('guest-name');
             const div = document.createElement('div');
             div.classList.add('m-2');
             div.innerHTML = `
-                <p class="mt-0 mb-1 mx-0 p-0" style="font-size: 0.95rem;">${guest?.getAttribute('data-message')}</p>
+                <p class="mt-0 mb-1 mx-0 p-0" style="font-size: 0.95rem;">${guestName?.getAttribute('data-message')}</p>
                 <h2 class="m-0 p-0">${util.escapeHtml(name)}</h2>
             `;
 
-            guest?.appendChild(div);
+            guestName?.appendChild(div);
         }
 
         const form = document.getElementById('form-name');
         if (form) {
             form.value = information.get('name') ?? name;
         }
-
-        // remove loading screen
-        opacity('loading', 0.025);
     };
 
     /**
@@ -111,12 +109,11 @@ export const guest = (() => {
             document.getElementById('button-theme').style.display = 'block';
         }
 
-        basicAnimation();
-        opacity('welcome', 0.025);
-
         audio.init();
         theme.spyTop();
 
+        basicAnimation();
+        opacity('welcome', 0.025);
         util.timeOut(openAnimation, 1500);
     };
 
@@ -164,7 +161,7 @@ export const guest = (() => {
             return (new Date(d + 'Z')).toISOString().replace(/[-:]/g, '').split('.')[0];
         };
 
-        const queryParams = new URLSearchParams();
+        const url = new URL('https://calendar.google.com/calendar/render');
         const data = {
             action: 'TEMPLATE',
             text: 'The Wedding of Wahyu and Riski',
@@ -175,11 +172,9 @@ export const guest = (() => {
         };
 
         data.dates = `${formatDate(data.dates.split('/')[0])}/${formatDate(data.dates.split('/')[1])}`;
-        Object.entries(data).forEach(([k, v]) => queryParams.set(k, v));
+        Object.entries(data).forEach(([k, v]) => url.searchParams.set(k, v));
 
-        document.querySelector('#home button')?.addEventListener('click', () => {
-            window.open(`https://calendar.google.com/calendar/render?${queryParams.toString()}`, '_blank');
-        });
+        document.querySelector('#home button')?.addEventListener('click', () => window.open(url, '_blank'));
     };
 
     /**
@@ -188,6 +183,7 @@ export const guest = (() => {
     const booting = () => {
         animateSvg();
         countDownDate();
+        showGuestName();
         normalizeArabicFont();
         buildGoogleCalendar();
         document.getElementById('root').style.opacity = '1';
@@ -199,6 +195,12 @@ export const guest = (() => {
         if (information.get('info')) {
             document.getElementById('information')?.remove();
         }
+
+        window.AOS.init();
+        document.body.scrollIntoView({ behavior: 'instant' });
+
+        // remove loading screen and show welcome screen.
+        opacity('loading', 0.025);
     };
 
     /**
@@ -208,6 +210,53 @@ export const guest = (() => {
         offline.init();
         progress.init();
         information = storage('information');
+        const token = document.body.getAttribute('data-key');
+
+        document.addEventListener('progress.done', () => booting());
+        document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
+
+        if (!token || token.length <= 0) {
+            image.init().load();
+            document.getElementById('comment')?.remove();
+            document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
+        }
+
+        if (token.length > 0) {
+            // add 2 progress for config and comment.
+            // before img.load();
+            progress.add();
+            progress.add();
+
+            const img = image.init();
+            if (!img.hasDataSrc()) {
+                img.load();
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            session.setToken(params.get('k') ?? token);
+
+            // fetch after document is loaded.
+            window.addEventListener('load', () => session.guest().then(() => {
+                progress.complete('config');
+
+                if (img.hasDataSrc()) {
+                    img.load();
+                }
+
+                comment.init();
+                comment.show()
+                    .then(() => progress.complete('comment'))
+                    .catch(() => progress.invalid('comment'));
+            }).catch(() => progress.invalid('config')));
+        }
+    };
+
+    /**
+     * @returns {object}
+     */
+    const init = () => {
+        theme.init();
+        session.init();
 
         if (session.isAdmin()) {
             storage('user').clear();
@@ -218,66 +267,6 @@ export const guest = (() => {
             storage('tracker').clear();
         }
 
-        document.addEventListener('progress.done', () => {
-            document.body.scrollIntoView({ behavior: 'instant' });
-            window.AOS.init();
-            booting();
-
-            // then show guest name.
-            showGuestName();
-        });
-
-        document.addEventListener('hide.bs.modal', () => {
-            if (document.activeElement) {
-                document.activeElement.blur();
-            }
-        });
-
-        const token = document.body.getAttribute('data-key');
-        if (!token || token.length === 0) {
-            image.init().load();
-            document.getElementById('comment')?.remove();
-            document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
-        }
-
-        if (token.length > 0) {
-            // add 2 progress for config and comment.
-            // before load image.
-            progress.add();
-            progress.add();
-
-            const img = image.init();
-            if (!img.hasDataSrc()) {
-                img.load();
-            }
-
-            // fetch after document is loaded.
-            window.addEventListener('load', () => {
-                const params = new URLSearchParams(window.location.search);
-
-                session.setToken(params.get('k') ?? token);
-                session.guest().then(() => {
-
-                    progress.complete('config');
-                    if (img.hasDataSrc()) {
-                        img.load();
-                    }
-
-                    comment.init();
-                    comment.comment()
-                        .then(() => progress.complete('comment'))
-                        .catch(() => progress.invalid('comment'));
-                }).catch(() => progress.invalid('config'));
-            });
-        }
-    };
-
-    /**
-     * @returns {object}
-     */
-    const init = () => {
-        theme.init();
-        session.init();
         window.addEventListener('DOMContentLoaded', domLoaded);
 
         return {

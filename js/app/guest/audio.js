@@ -8,7 +8,7 @@ export const audio = (() => {
     /**
      * @type {HTMLAudioElement|null}
      */
-    let audio = null;
+    let audioEl = null;
 
     let isPlay = false;
 
@@ -25,7 +25,7 @@ export const audio = (() => {
 
         music.disabled = true;
         try {
-            await audio.play();
+            await audioEl.play();
             isPlay = true;
             music.disabled = false;
             music.innerHTML = statePlay;
@@ -40,7 +40,7 @@ export const audio = (() => {
      */
     const pause = () => {
         isPlay = false;
-        audio.pause();
+        audioEl.pause();
         music.innerHTML = statePause;
     };
 
@@ -51,15 +51,15 @@ export const audio = (() => {
         music = document.getElementById('button-music');
         music.style.display = 'block';
 
-        audio = new Audio(music.getAttribute('data-url'));
-        audio.volume = 1;
-        audio.loop = true;
-        audio.muted = false;
-        audio.currentTime = 0;
-        audio.autoplay = false;
-        audio.controls = false;
+        audioEl = new Audio(music.getAttribute('data-url'));
+        audioEl.volume = 1;
+        audioEl.loop = true;
+        audioEl.muted = false;
+        audioEl.currentTime = 0;
+        audioEl.autoplay = false;
+        audioEl.controls = false;
 
-        audio.addEventListener('canplay', play);
+        audioEl.addEventListener('canplay', play);
         music.addEventListener('offline', pause);
         music.addEventListener('click', () => isPlay ? pause() : play());
     };

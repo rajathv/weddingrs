@@ -49,7 +49,7 @@ export const card = (() => {
 
     const renderLike = (comment) => {
         return `
-        <button style="font-size: 0.8rem;" onclick="undangan.comment.like.like(this)" data-uuid="${comment.uuid}" class="btn btn-sm btn-outline-auto ms-auto rounded-3 p-0 shadow-sm d-flex justify-content-start align-items-center" data-offline-disabled="false">
+        <button style="font-size: 0.8rem;" onclick="undangan.comment.like.love(this)" data-uuid="${comment.uuid}" class="btn btn-sm btn-outline-auto ms-auto rounded-3 p-0 shadow-sm d-flex justify-content-start align-items-center" data-offline-disabled="false">
             <span class="my-0 mx-1" data-count-like="${comment.like.love}">${comment.like.love}</span>
             <i class="me-1 ${likes.has(comment.uuid) ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart'}"></i>
         </button>`;
@@ -58,17 +58,17 @@ export const card = (() => {
     const renderAction = (comment) => {
         let action = `<div class="d-flex flex-wrap justify-content-start align-items-center" data-button-action="${comment.uuid}">`;
 
-        if (config.get('can_reply') == true || config.get('can_reply') === undefined) {
+        if (config.get('can_reply') === true || config.get('can_reply') === undefined) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.reply(this)" data-uuid="${comment.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Reply</button>`;
         }
 
-        if (owns.has(comment.uuid) && (config.get('can_edit') == true || config.get('can_edit') === undefined)) {
+        if (owns.has(comment.uuid) && (config.get('can_edit') === true || config.get('can_edit') === undefined)) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${comment.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Edit</button>`;
         }
 
         if (session.isAdmin()) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.remove(this)" data-uuid="${comment.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-own="${comment.own}" data-offline-disabled="false">Delete</button>`;
-        } else if (owns.has(comment.uuid) && (config.get('can_delete') == true || config.get('can_delete') === undefined)) {
+        } else if (owns.has(comment.uuid) && (config.get('can_delete') === true || config.get('can_delete') === undefined)) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.remove(this)" data-uuid="${comment.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Delete</button>`;
         }
 

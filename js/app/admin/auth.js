@@ -38,6 +38,15 @@ export const auth = (() => {
     };
 
     /**
+     * @returns {void}
+     */
+    const clearSession = () => {
+        user.clear();
+        session.logout();
+        bs.modal('mainModal').show();
+    };
+
+    /**
      * @returns {Promise<ReturnType<typeof dto.baseResponse>>}
      */
     const getDetailUser = () => {
@@ -59,15 +68,6 @@ export const auth = (() => {
      * @returns {ReturnType<typeof storage>|null}
      */
     const getUserStorage = () => user;
-
-    /**
-     * @returns {void}
-     */
-    const clearSession = () => {
-        user.clear();
-        session.logout();
-        bs.modal('mainModal').show();
-    };
 
     /**
      * @returns {void}

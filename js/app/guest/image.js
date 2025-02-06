@@ -3,12 +3,12 @@ import { progress } from './progress.js';
 export const image = (() => {
 
     /**
-     * @type {Map<string, string>}
+     * @type {Map<string, string>|null}
      */
     let uniqUrl = null;
 
     /**
-     * @type {NodeListOf<HTMLImageElement>}
+     * @type {NodeListOf<HTMLImageElement>|null}
      */
     let images = null;
 
@@ -46,17 +46,17 @@ export const image = (() => {
 
                 return c.put(url, new Response(b, { headers })).then(() => b);
             })).catch((err) => {
-                if (retries > 0) {
-                    console.warn('Retrying fetch:' + url);
-                    return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 500)), delay));
+                if (retries <= 0) {
+                    throw err;
                 }
 
-                throw err;
+                console.warn('Retrying fetch:' + url);
+                return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 500)), delay));
             });
         };
 
-        await caches.open(cacheName).then((c) => {
-            return c.match(url).then((res) => {
+        await caches.open(cacheName)
+            .then((c) => c.match(url).then((res) => {
                 if (!res) {
                     return fetchPut(c);
                 }
@@ -66,12 +66,13 @@ export const image = (() => {
                 }
 
                 return c.delete(url).then((s) => s ? fetchPut(c) : res.blob());
-            }).then((b) => {
+            }))
+            .then((b) => {
                 el.src = URL.createObjectURL(b);
                 uniqUrl.set(url, el.src);
                 progress.complete('image');
             })
-        }).catch(() => progress.invalid('image'));
+            .catch(() => progress.invalid('image'));
     };
 
     /**
@@ -99,7 +100,7 @@ export const image = (() => {
      * @returns {void} 
      */
     const setTtl = (v) => {
-        ttl = Number(v)
+        ttl = Number(v);
     };
 
     /**
