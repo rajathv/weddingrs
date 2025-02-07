@@ -75,6 +75,7 @@ export const image = (() => {
                     .then((i) => toWebp(i))
                     .then((b) => {
                         const headers = new Headers(res.headers);
+                        headers.set('Content-Type', 'image/webp');
                         headers.append(exp, String(Date.now() + ttl));
 
                         return c.put(url, new Response(b, { headers })).then(() => b);
