@@ -32,6 +32,7 @@ export const image = (() => {
             el.src = img.src;
             el.width = img.width;
             el.height = img.height;
+            uniqUrl.set(url, img.src);
             progress.complete('image');
         };
 
@@ -111,7 +112,6 @@ export const image = (() => {
             .then((c) => imageCache(c))
             .then((b) => {
                 img.src = URL.createObjectURL(b);
-                uniqUrl.set(url, img.src);
             })
             .catch(() => progress.invalid('image'));
     };
