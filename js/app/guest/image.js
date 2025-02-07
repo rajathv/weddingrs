@@ -41,38 +41,25 @@ export const image = (() => {
         }
 
         /**
-         * @param {Blob} b 
+         * @param {ImageBitmap} i
          * @returns {Promise<Blob>}
          */
-        const toWebp = (b) => new Promise((res, rej) => {
-            const i = new Image();
+        const toWebp = (i) => new Promise((res, rej) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = i.width;
+            canvas.height = i.height;
+            canvas.getContext('2d').drawImage(i, 0, 0);
 
-            i.onerror = (err) => {
-                URL.revokeObjectURL(i.src);
-                rej(err);
+            const callback = (blob) => {
+                if (blob) {
+                    res(blob);
+                } else {
+                    rej(new Error('Failed to convert image to WebP'));
+                }
             };
 
-            i.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = i.width;
-                canvas.height = i.height;
-
-                const callback = (blob) => {
-                    URL.revokeObjectURL(i.src);
-
-                    if (blob) {
-                        res(blob);
-                    } else {
-                        rej(new Error('Failed to convert image to WebP'));
-                    }
-                };
-
-                ctx.drawImage(i, 0, 0);
-                canvas.toBlob(callback, 'image/webp');
-            };
-
-            i.src = URL.createObjectURL(b);
+            canvas.onerror = rej;
+            canvas.toBlob(callback, 'image/webp');
         });
 
         /**
@@ -109,7 +96,8 @@ export const image = (() => {
 
                 return c.delete(url).then((s) => s ? fetchPut(c) : res.blob());
             }))
-            .then((b) => toWebp(b))
+            .then((b) => window.createImageBitmap(b))
+            .then((i) => toWebp(i))
             .then((b) => {
                 img.src = URL.createObjectURL(b);
                 uniqUrl.set(url, img.src);
