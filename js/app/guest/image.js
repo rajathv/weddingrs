@@ -59,7 +59,7 @@ export const image = (() => {
             };
 
             c.onerror = rej;
-            c.toBlob(callback, 'image/webp');
+            c.toBlob(callback, 'image/webp', 0.8);
         });
 
         /**
@@ -70,16 +70,17 @@ export const image = (() => {
          */
         const fetchPut = (c, retries = 3, delay = 1000) => {
             return fetch(url)
-                .then((res) => res.blob()
-                    .then((b) => window.createImageBitmap(b))
-                    .then((i) => toWebp(i))
-                    .then((b) => {
-                        const headers = new Headers(res.headers);
-                        headers.set('Content-Type', 'image/webp');
-                        headers.append(exp, String(Date.now() + ttl));
+                .then((r) => r.blob())
+                .then((b) => window.createImageBitmap(b))
+                .then((i) => toWebp(i))
+                .then((b) => {
+                    const headers = new Headers();
+                    headers.set('Content-Type', 'image/webp');
+                    headers.set('Content-Length', String(b.size));
+                    headers.set(exp, String(Date.now() + ttl));
 
-                        return c.put(url, new Response(b, { headers })).then(() => b);
-                    }))
+                    return c.put(url, new Response(b, { headers })).then(() => b);
+                })
                 .catch((err) => {
                     if (retries <= 0) {
                         throw err;
