@@ -26,10 +26,17 @@ export const image = (() => {
     const getByFetch = async (el) => {
         const url = el.getAttribute('data-src');
         const exp = 'x-expiration-time';
+        const img = new Image();
+
+        img.onload = () => {
+            el.src = img.src;
+            el.width = img.width;
+            el.height = img.height;
+            progress.complete('image');
+        };
 
         if (uniqUrl.has(url)) {
-            el.src = uniqUrl.get(url);
-            progress.complete('image');
+            img.src = uniqUrl.get(url);
             return;
         }
 
@@ -68,9 +75,8 @@ export const image = (() => {
                 return c.delete(url).then((s) => s ? fetchPut(c) : res.blob());
             }))
             .then((b) => {
-                el.src = URL.createObjectURL(b);
-                uniqUrl.set(url, el.src);
-                progress.complete('image');
+                img.src = URL.createObjectURL(b);
+                uniqUrl.set(url, img.src);
             })
             .catch(() => progress.invalid('image'));
     };
