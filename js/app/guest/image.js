@@ -45,21 +45,21 @@ export const image = (() => {
          * @returns {Promise<Blob>}
          */
         const toWebp = (i) => new Promise((res, rej) => {
-            const canvas = document.createElement('canvas');
-            canvas.width = i.width;
-            canvas.height = i.height;
-            canvas.getContext('2d').drawImage(i, 0, 0);
+            const c = document.createElement('canvas');
+            c.width = i.width;
+            c.height = i.height;
+            c.getContext('2d').drawImage(i, 0, 0);
 
-            const callback = (blob) => {
-                if (blob) {
-                    res(blob);
+            const callback = (b) => {
+                if (b) {
+                    res(b);
                 } else {
                     rej(new Error('Failed to convert image to WebP'));
                 }
             };
 
-            canvas.onerror = rej;
-            canvas.toBlob(callback, 'image/webp');
+            c.onerror = rej;
+            c.toBlob(callback, 'image/webp');
         });
 
         /**
@@ -69,35 +69,44 @@ export const image = (() => {
          * @returns {Promise<Blob>}
          */
         const fetchPut = (c, retries = 3, delay = 1000) => {
-            return fetch(url).then((res) => res.blob().then((b) => {
-                const headers = new Headers(res.headers);
-                headers.append(exp, String(Date.now() + ttl));
+            return fetch(url)
+                .then((res) => res.blob()
+                    .then((b) => window.createImageBitmap(b))
+                    .then((i) => toWebp(i))
+                    .then((b) => {
+                        const headers = new Headers(res.headers);
+                        headers.append(exp, String(Date.now() + ttl));
 
-                return c.put(url, new Response(b, { headers })).then(() => b);
-            })).catch((err) => {
-                if (retries <= 0) {
-                    throw err;
-                }
+                        return c.put(url, new Response(b, { headers })).then(() => b);
+                    }))
+                .catch((err) => {
+                    if (retries <= 0) {
+                        throw err;
+                    }
 
-                console.warn('Retrying fetch:' + url);
-                return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 500)), delay));
-            });
+                    console.warn('Retrying fetch:' + url);
+                    return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 500)), delay));
+                });
         };
 
+        /**
+         * @param {Cache} c 
+         * @returns {Promise<Blob>}
+         */
+        const imageCache = (c) => c.match(url).then((res) => {
+            if (!res) {
+                return fetchPut(c);
+            }
+
+            if (Date.now() <= parseInt(res.headers.get(exp))) {
+                return res.blob();
+            }
+
+            return c.delete(url).then((s) => s ? fetchPut(c) : res.blob());
+        });
+
         await caches.open(cacheName)
-            .then((c) => c.match(url).then((res) => {
-                if (!res) {
-                    return fetchPut(c);
-                }
-
-                if (Date.now() <= parseInt(res.headers.get(exp))) {
-                    return res.blob();
-                }
-
-                return c.delete(url).then((s) => s ? fetchPut(c) : res.blob());
-            }))
-            .then((b) => window.createImageBitmap(b))
-            .then((i) => toWebp(i))
+            .then((c) => imageCache(c))
             .then((b) => {
                 img.src = URL.createObjectURL(b);
                 uniqUrl.set(url, img.src);
