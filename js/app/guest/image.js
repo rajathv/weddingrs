@@ -75,8 +75,23 @@ export const image = (() => {
                 return c.delete(url).then((s) => s ? fetchPut(c) : res.blob());
             }))
             .then((b) => {
-                img.src = URL.createObjectURL(b);
-                uniqUrl.set(url, img.src);
+                const i = new Image();
+                i.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = i.width;
+                    canvas.height = i.height;
+
+                    const callback = (blob) => {
+                        img.src = URL.createObjectURL(blob);
+                        uniqUrl.set(url, img.src);
+                        URL.revokeObjectURL(i.src);
+                    };
+
+                    ctx.drawImage(i, 0, 0);
+                    canvas.toBlob(callback, 'image/webp');
+                };
+                i.src = URL.createObjectURL(b);
             })
             .catch(() => progress.invalid('image'));
     };
