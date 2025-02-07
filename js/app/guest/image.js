@@ -111,7 +111,11 @@ export const image = (() => {
      */
     const getByDefault = (el) => {
         el.onerror = () => progress.invalid('image');
-        el.onload = () => progress.complete('image');
+        el.onload = () => {
+            el.width = el.naturalWidth;
+            el.height = el.naturalHeight;
+            progress.complete('image');
+        };
 
         if (el.complete && el.naturalWidth !== 0 && el.naturalHeight !== 0) {
             progress.complete('image');
