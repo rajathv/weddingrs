@@ -84,7 +84,7 @@ export const like = (() => {
             const likeButton = document.querySelector(`[onclick="undangan.comment.like.love(this)"][data-uuid="${uuid}"]`);
 
             div.setAttribute('data-liked', 'true');
-            await like(likeButton);
+            await love(likeButton);
             div.setAttribute('data-liked', 'false');
         }
 
