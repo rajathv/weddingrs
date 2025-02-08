@@ -122,7 +122,10 @@ export const guest = (() => {
      * @returns {void}
      */
     const modal = (img) => {
-        document.getElementById('show-modal-image').src = img.src;
+        const m = document.getElementById('show-modal-image');
+        m.src = img.src;
+        m.width = img.width;
+        m.height = img.height;
         bs.modal('modal-image').show();
     };
 
