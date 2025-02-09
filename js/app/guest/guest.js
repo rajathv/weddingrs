@@ -84,8 +84,8 @@ export const guest = (() => {
             const div = document.createElement('div');
             div.classList.add('m-2');
             div.innerHTML = `
-                <p class="mt-0 mb-1 mx-0 p-0" style="font-size: 0.95rem;">${guestName?.getAttribute('data-message')}</p>
-                <h2 class="m-0 p-0">${util.escapeHtml(name)}</h2>
+                <small class="mt-0 mb-1 mx-0 p-0">${guestName?.getAttribute('data-message')}</small>
+                <p class="m-0 p-0" style="font-size: 1.5rem">${util.escapeHtml(name)}</p>
             `;
 
             guestName?.appendChild(div);

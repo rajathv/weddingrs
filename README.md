@@ -1,4 +1,4 @@
-# Template website undangan pernikahan sederhana
+# 💌 Template website undangan pernikahan sederhana
 
 ![Thumbnail](/assets/images/banner.png)
 
@@ -37,6 +37,9 @@ Untuk kamu yang ingin mencoba secara gratis:
 
 [https://trial.ulems.my.id](https://trial.ulems.my.id)
 
+## 📊 Stats
+
+[https://stats.uptimerobot.com](https://stats.uptimerobot.com/yNa9zNds6p)
 
 ## ⚙️ Tech stack
 
