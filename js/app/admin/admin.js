@@ -259,6 +259,12 @@ export const admin = (() => {
         document.addEventListener('hidden.bs.modal', getAllRequest);
 
         try {
+            const raw = window.location.href.split('?k=');
+            if (raw.length > 1 && raw[1].length >= 1) {
+                session.setToken(raw[1]);
+                window.history.replaceState({}, document.title, raw[0]);
+            }
+
             const exp = session.decode()?.exp;
             if (!exp || exp < (Date.now() / 1000)) {
                 throw new Error('Invalid token');
