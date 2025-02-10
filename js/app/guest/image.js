@@ -12,7 +12,7 @@ export const image = (() => {
      */
     let images = null;
 
-    let hasSrc = true;
+    let hasSrc = false;
 
     // default 6 hour TTL
     let ttl = 1000 * 60 * 60 * 6;
@@ -26,12 +26,14 @@ export const image = (() => {
     const getByFetch = async (el) => {
         const url = el.getAttribute('data-src');
         const exp = 'x-expiration-time';
+        const type = 'image/webp';
         const img = new Image();
 
         img.onload = () => {
             el.src = img.src;
             el.width = img.width;
             el.height = img.height;
+            img.remove();
             progress.complete('image');
         };
 
@@ -51,6 +53,8 @@ export const image = (() => {
             c.getContext('2d').drawImage(i, 0, 0);
 
             const callback = (b) => {
+                c.remove();
+
                 if (b) {
                     res(b);
                 } else {
@@ -59,7 +63,7 @@ export const image = (() => {
             };
 
             c.onerror = rej;
-            c.toBlob(callback, 'image/webp', 0.8);
+            c.toBlob(callback, type, 0.8);
         });
 
         /**
@@ -68,28 +72,26 @@ export const image = (() => {
          * @param {number} delay
          * @returns {Promise<Blob>}
          */
-        const fetchPut = (c, retries = 3, delay = 1000) => {
-            return fetch(url)
-                .then((r) => r.blob())
-                .then((b) => window.createImageBitmap(b))
-                .then((i) => toWebp(i))
-                .then((b) => {
-                    const headers = new Headers();
-                    headers.set('Content-Type', 'image/webp');
-                    headers.set('Content-Length', String(b.size));
-                    headers.set(exp, String(Date.now() + ttl));
+        const fetchPut = (c, retries = 3, delay = 1000) => fetch(url)
+            .then((r) => r.blob())
+            .then((b) => window.createImageBitmap(b))
+            .then((i) => toWebp(i))
+            .then((b) => {
+                const headers = new Headers();
+                headers.set('Content-Type', type);
+                headers.set('Content-Length', String(b.size));
+                headers.set(exp, String(Date.now() + ttl));
 
-                    return c.put(url, new Response(b, { headers })).then(() => b);
-                })
-                .catch((err) => {
-                    if (retries <= 0) {
-                        throw err;
-                    }
+                return c.put(url, new Response(b, { headers })).then(() => b);
+            })
+            .catch((err) => {
+                if (retries <= 0) {
+                    throw err;
+                }
 
-                    console.warn('Retrying fetch:' + url);
-                    return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 500)), delay));
-                });
-        };
+                console.warn('Retrying fetch:' + url);
+                return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 1000)), delay));
+            });
 
         /**
          * @param {Cache} c 
