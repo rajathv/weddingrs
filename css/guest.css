@@ -98,3 +98,17 @@ html[data-bs-theme="dark"] .bg-white-black {
         width: 75%;
     }
 }
+
+.bg-gradient-custom {
+    pointer-events: none;
+    width: 576px;
+    height: 576px;
+}
+
+html[data-bs-theme="light"] .bg-gradient-custom {
+    background-image: radial-gradient(50% 50% at 50% 50%, #ff4d94, #fff0);
+}
+
+html[data-bs-theme="dark"] .bg-gradient-custom {
+    background-image: radial-gradient(50% 50% at 50% 50%, #4d7cff, #fff0);
+}
