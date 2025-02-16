@@ -87,13 +87,13 @@ html[data-bs-theme="dark"] .bg-white-black {
     width: 25%;
 }
 
-@media screen and (width <=1400px) {
+@media screen and (max-width: 1400px) {
     .width-loading {
         width: 50%;
     }
 }
 
-@media screen and (width <=768px) {
+@media screen and (max-width: 768px) {
     .width-loading {
         width: 75%;
     }

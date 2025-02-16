@@ -19,7 +19,7 @@
     background-color: rgba(192, 192, 192, 1);
 }
 
-@media screen and (width <=767px) {
+@media screen and (max-width: 768px) {
     html {
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
