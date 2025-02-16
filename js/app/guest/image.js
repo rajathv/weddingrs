@@ -1,4 +1,5 @@
 import { progress } from './progress.js';
+import { util } from '../../common/util.js';
 
 export const image = (() => {
 
@@ -90,7 +91,7 @@ export const image = (() => {
                 }
 
                 console.warn('Retrying fetch:' + url);
-                return new Promise((res) => setTimeout(() => res(fetchPut(c, retries - 1, delay + 1000)), delay));
+                return new Promise((res) => util.timeOut(() => res(fetchPut(c, retries - 1, delay + 1000)), delay));
             });
 
         /**

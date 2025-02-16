@@ -32,10 +32,10 @@ export const guest = (() => {
         setInterval(() => {
             const distance = Math.abs(count - Date.now());
 
-            document.getElementById('day').innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
-            document.getElementById('hour').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById('minute').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById('second').innerText = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById('day').innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString();
+            document.getElementById('hour').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString();
+            document.getElementById('minute').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString();
+            document.getElementById('second').innerText = Math.floor((distance % (1000 * 60)) / 1000).toString();
         }, 1000);
     };
 
@@ -83,10 +83,7 @@ export const guest = (() => {
             const guestName = document.getElementById('guest-name');
             const div = document.createElement('div');
             div.classList.add('m-2');
-            div.innerHTML = `
-                <small class="mt-0 mb-1 mx-0 p-0">${guestName?.getAttribute('data-message')}</small>
-                <p class="m-0 p-0" style="font-size: 1.5rem">${util.escapeHtml(name)}</p>
-            `;
+            div.innerHTML = `<small class="mt-0 mb-1 mx-0 p-0">${guestName?.getAttribute('data-message')}</small><p class="m-0 p-0" style="font-size: 1.5rem">${util.escapeHtml(name)}</p>`;
 
             guestName?.appendChild(div);
         }
@@ -160,21 +157,18 @@ export const guest = (() => {
          * @param {string} d 
          * @returns {string}
          */
-        const formatDate = (d) => {
-            return (new Date(d + 'Z')).toISOString().replace(/[-:]/g, '').split('.')[0];
-        };
+        const formatDate = (d) => (new Date(d + ':00Z')).toISOString().replace(/[-:]/g, '').split('.')[0];
 
         const url = new URL('https://calendar.google.com/calendar/render');
         const data = {
             action: 'TEMPLATE',
             text: 'The Wedding of Wahyu and Riski',
-            dates: '2023-03-15 10:00:00/2023-03-15 11:00:00',
+            dates: `${formatDate('2023-03-15 10:00')}/${formatDate('2023-03-15 11:00')}`,
             details: 'Tanpa mengurangi rasa hormat, kami mengundang Anda untuk berkenan menghadiri acara pernikahan kami. Terima kasih atas perhatian dan doa restu Anda, yang menjadi kebahagiaan serta kehormatan besar bagi kami.',
             location: 'https://goo.gl/maps/ALZR6FJZU3kxVwN86',
             ctz: 'Asia/Jakarta',
         };
 
-        data.dates = `${formatDate(data.dates.split('/')[0])}/${formatDate(data.dates.split('/')[1])}`;
         Object.entries(data).forEach(([k, v]) => url.searchParams.set(k, v));
 
         document.querySelector('#home button')?.addEventListener('click', () => window.open(url, '_blank'));

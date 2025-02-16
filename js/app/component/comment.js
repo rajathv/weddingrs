@@ -220,13 +220,13 @@ export const comment = (() => {
                 document.getElementById('comment').scrollIntoView({ behavior: 'smooth' });
             }
 
-            alert('Silakan masukkan nama Anda.');
+            alert('Name cannot be empty.');
             return;
         }
 
         const presence = document.getElementById('form-presence');
         if (!id && presence && presence.value === '0') {
-            alert('Silakan pilih status kehadiran Anda.');
+            alert('Please select your attendance status.');
             return;
         }
 
@@ -240,6 +240,10 @@ export const comment = (() => {
 
         const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
         form.disabled = true;
+
+        if (form.value.length === 0) {
+            alert('Comments cannot be empty.');
+        }
 
         const cancel = document.querySelector(`[onclick="undangan.comment.cancel('${id}')"]`);
         if (cancel) {
@@ -327,7 +331,8 @@ export const comment = (() => {
                 anchorTag.remove();
             }
 
-            containerDiv.querySelector(`button[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`).insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
+            containerDiv.querySelector(`button[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`)
+                .insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
         }
 
         addListenerLike(response.data);
