@@ -65,6 +65,10 @@ export const comment = (() => {
         bodyLike.addEventListener('touchend', () => like.tapTap(bodyLike));
     };
 
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {Promise<void>}
+     */
     const remove = async (button) => {
         if (!confirm('Are you sure?')) {
             return;
@@ -110,6 +114,10 @@ export const comment = (() => {
         }
     };
 
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {Promise<void>}
+     */
     const update = async (button) => {
         const id = button.getAttribute('data-uuid');
 
@@ -204,6 +212,10 @@ export const comment = (() => {
         badge.classList.add('fa-circle-xmark', 'text-danger');
     };
 
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {Promise<void>}
+     */
     const send = async (button) => {
         const id = button.getAttribute('data-uuid');
 
@@ -230,6 +242,12 @@ export const comment = (() => {
             return;
         }
 
+        const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
+        if (form.value.length === 0) {
+            alert('Comments cannot be empty.');
+            return;
+        }
+
         if (!id && name && !session.isAdmin()) {
             name.disabled = true;
         }
@@ -238,12 +256,7 @@ export const comment = (() => {
             presence.disabled = true;
         }
 
-        const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
         form.disabled = true;
-
-        if (form.value.length === 0) {
-            alert('Comments cannot be empty.');
-        }
 
         const cancel = document.querySelector(`[onclick="undangan.comment.cancel('${id}')"]`);
         if (cancel) {
@@ -338,6 +351,10 @@ export const comment = (() => {
         addListenerLike(response.data);
     };
 
+    /**
+     * @param {string} id
+     * @returns {void}
+     */
     const cancel = (id) => {
         const form = document.getElementById(`form-inner-${id}`);
 
@@ -359,6 +376,10 @@ export const comment = (() => {
         }
     };
 
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {void}
+     */
     const reply = (button) => {
         const id = button.getAttribute('data-uuid');
 
@@ -370,6 +391,10 @@ export const comment = (() => {
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
     };
 
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {Promise<void>}
+     */
     const edit = async (button) => {
         const id = button.getAttribute('data-uuid');
 
@@ -388,7 +413,8 @@ export const comment = (() => {
                     return;
                 }
 
-                document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence));
+                const IsParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
+                document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, IsParent));
                 const formInner = document.getElementById(`form-inner-${id}`);
                 formInner.value = res.data.comment;
                 formInner.setAttribute('data-original', util.base64Encode(res.data.comment));
@@ -398,6 +424,28 @@ export const comment = (() => {
         button.disabled = true;
     };
 
+    /**
+     * @param {ReturnType<typeof dto.getCommentsResponse>} items 
+     * @param {ReturnType<typeof dto.commentShowMore>[]} hide 
+     * @returns {ReturnType<typeof dto.commentShowMore>[]}
+     */
+    const traverse = (items, hide) => {
+        items.forEach((item) => {
+            if (!hide.find((i) => i.uuid === item.uuid)) {
+                hide.push(dto.commentShowMore(item.uuid));
+            }
+
+            if (item.comments && item.comments.length > 0) {
+                traverse(item.comments, hide);
+            }
+        });
+
+        return hide;
+    };
+
+    /**
+     * @returns {Promise<ReturnType<typeof dto.getCommentsResponse>>}
+     */
     const show = () => {
         const c = document.getElementById('comments');
 
@@ -418,20 +466,6 @@ export const comment = (() => {
                     return res;
                 }
 
-                const traverse = (items, hide) => {
-                    items.forEach((item) => {
-                        if (!hide.find((i) => i.uuid === item.uuid)) {
-                            hide.push(dto.commentShowMore(item.uuid));
-                        }
-
-                        if (item.comments && item.comments.length > 0) {
-                            traverse(item.comments, hide);
-                        }
-                    });
-
-                    return hide;
-                };
-
                 showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
                 c.innerHTML = res.data.map((i) => card.renderContent(i)).join('');
 
@@ -442,6 +476,10 @@ export const comment = (() => {
             });
     };
 
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {void}
+     */
     const showOrHide = (button) => {
         const ids = button.getAttribute('data-uuids').split(',');
         const isShow = button.getAttribute('data-show') === 'true';

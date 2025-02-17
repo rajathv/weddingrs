@@ -136,9 +136,9 @@ export const dto = (() => {
     };
 
     /**
-     * @param {boolean} presence
+     * @param {boolean|null} presence
      * @param {string} comment
-     * @returns {{presence: boolean, comment: string}}
+     * @returns {{presence: boolean|null, comment: string}}
      */
     const updateCommentRequest = (presence, comment) => {
         return {
