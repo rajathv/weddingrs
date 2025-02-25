@@ -461,7 +461,7 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="d-block mb-3" id="comment-form-default">
                                 <div id="information" class="alert alert-info alert-dismissible fade show rounded-4" role="alert">
                                     <button type="button" class="btn-close rounded-4 p-3" data-bs-dismiss="alert" aria-label="Close" onclick="undangan.guest.closeInformation()"></button>
 
@@ -472,8 +472,13 @@
                                 </div>
 
                                 <label for="form-comment" class="form-label my-1"><i class="fa-solid fa-comment me-2"></i>Ucapan &amp; Doa</label>
-                                <textarea class="form-control shadow-sm rounded-4" id="form-comment" rows="4" minlength="1" maxlength="1000" placeholder="Tulis Ucapan dan Doa" autocomplete="off" data-offline-disabled="false"></textarea>
+                                <div class="position-relative">
+                                    <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1 position-absolute bottom-0 end-0" onclick="undangan.comment.gif.open('default')" data-offline-disabled="false"><i class="fa-solid fa-photo-film"></i></button>
+                                    <textarea class="form-control shadow-sm rounded-4" id="form-comment" rows="4" minlength="1" maxlength="1000" placeholder="Tulis Ucapan dan Doa" autocomplete="off" data-offline-disabled="false"></textarea>
+                                </div>
                             </div>
+
+                            <div class="d-none mb-3" id="gif-form-default"></div>
 
                             <div class="d-grid">
                                 <button class="btn btn-primary btn-sm rounded-4 shadow m-1" onclick="undangan.comment.send(this)" data-offline-disabled="false">

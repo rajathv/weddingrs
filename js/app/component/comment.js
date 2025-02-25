@@ -1,3 +1,4 @@
+import { gif } from './gif.js';
 import { card } from './card.js';
 import { like } from './like.js';
 import { util } from '../../common/util.js';
@@ -128,21 +129,26 @@ export const comment = (() => {
             isPresent = presence.value === '1';
         }
 
-        const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
-
         let isChecklist = false;
         const badge = document.getElementById(`badge-${id}`);
         if (badge) {
             isChecklist = badge.classList.contains('text-success');
         }
 
-        if (id && util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) {
+        const gifContainer = document.getElementById(`gif-form-${id}`);
+        const gifIsOpen = gifContainer === null ? false : !gifContainer.classList.contains('d-none');
+        const gifId = document.getElementById(`gif-result-${id}`)?.getAttribute('data-id');
+        const form = document.getElementById(`form-inner-${id}`);
+
+        if (id && !gifIsOpen && util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) {
             changeButton(id, false);
             document.getElementById(`inner-${id}`).remove();
             return;
         }
 
-        form.disabled = true;
+        if (form) {
+            form.disabled = true;
+        }
 
         const cancel = document.querySelector(`[onclick="undangan.comment.cancel('${id}')"]`);
         if (cancel) {
@@ -153,11 +159,14 @@ export const comment = (() => {
 
         const status = await request(HTTP_PUT, '/api/comment/' + owns.get(id))
             .token(session.getToken())
-            .body(dto.updateCommentRequest(presence ? isPresent : null, form.value))
+            .body(dto.updateCommentRequest(presence ? isPresent : null, form.value, gifId))
             .send(dto.statusResponse)
             .then((res) => res.data.status, () => false);
 
-        form.disabled = false;
+        if (form) {
+            form.disabled = false;
+        }
+
         if (cancel) {
             cancel.disabled = false;
         }
@@ -175,21 +184,23 @@ export const comment = (() => {
         changeButton(id, false);
         document.getElementById(`inner-${id}`).remove();
 
-        const show = document.querySelector(`[onclick="undangan.comment.showMore(this, '${id}')"]`);
-        const original = card.convertMarkdownToHTML(util.escapeHtml(form.value));
-        const content = document.getElementById(`content-${id}`);
+        if (!gifIsOpen) {
+            const show = document.querySelector(`[onclick="undangan.comment.showMore(this, '${id}')"]`);
+            const original = card.convertMarkdownToHTML(util.escapeHtml(form.value));
+            const content = document.getElementById(`content-${id}`);
 
-        if (original.length > card.maxCommentLength) {
-            content.innerHTML = show?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original;
-            content.setAttribute('data-comment', util.base64Encode(original));
-            if (show?.style.display === 'none') {
-                show.style.display = 'block';
-            }
-        } else {
-            content.innerHTML = original;
-            content.removeAttribute('data-comment');
-            if (show?.style.display === 'block') {
-                show.style.display = 'none';
+            if (original.length > card.maxCommentLength) {
+                content.innerHTML = show?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original;
+                content.setAttribute('data-comment', util.base64Encode(original));
+                if (show?.style.display === 'none') {
+                    show.style.display = 'block';
+                }
+            } else {
+                content.innerHTML = original;
+                content.removeAttribute('data-comment');
+                if (show?.style.display === 'block') {
+                    show.style.display = 'none';
+                }
             }
         }
 
@@ -227,12 +238,12 @@ export const comment = (() => {
         }
 
         if (nameValue.length === 0) {
+            alert('Name cannot be empty.');
+
             if (id) {
                 // scroll to form.
                 document.getElementById('comment').scrollIntoView({ behavior: 'smooth' });
             }
-
-            alert('Name cannot be empty.');
             return;
         }
 
@@ -242,8 +253,15 @@ export const comment = (() => {
             return;
         }
 
+        const gifIsOpen = !document.getElementById(`gif-form-${id ? id : 'default'}`)?.classList.contains('d-none');
+        const gifId = document.getElementById(`gif-result-${id ? id : 'default'}`)?.getAttribute('data-id');
+        if (gifIsOpen && !gifId) {
+            alert('Gif cannot be empty.');
+            return;
+        }
+
         const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
-        if (form.value.length === 0) {
+        if (!gifIsOpen && form.value.length === 0) {
             alert('Comments cannot be empty.');
             return;
         }
@@ -252,11 +270,13 @@ export const comment = (() => {
             name.disabled = true;
         }
 
-        if (presence && presence.value !== '0') {
+        if (!session.isAdmin() && presence && presence.value !== '0') {
             presence.disabled = true;
         }
 
-        form.disabled = true;
+        if (form) {
+            form.disabled = true;
+        }
 
         const cancel = document.querySelector(`[onclick="undangan.comment.cancel('${id}')"]`);
         if (cancel) {
@@ -277,7 +297,7 @@ export const comment = (() => {
 
         const response = await request(HTTP_POST, '/api/comment')
             .token(session.getToken())
-            .body(dto.postCommentRequest(id, nameValue, isPresence, form.value))
+            .body(dto.postCommentRequest(id, nameValue, isPresence, form.value, gifId))
             .send(dto.getCommentResponse)
             .then((res) => res, () => null);
 
@@ -285,7 +305,10 @@ export const comment = (() => {
             name.disabled = false;
         }
 
-        form.disabled = false;
+        if (form) {
+            form.disabled = false;
+        }
+
         if (cancel) {
             cancel.disabled = false;
         }
@@ -301,7 +324,10 @@ export const comment = (() => {
         }
 
         owns.set(response.data.uuid, response.data.own);
-        form.value = null;
+
+        if (form) {
+            form.value = null;
+        }
 
         if (!id) {
             const newPage = await pagination.reset();
@@ -318,7 +344,8 @@ export const comment = (() => {
             }
 
             response.data.is_admin = session.isAdmin();
-            c.innerHTML = card.renderContent(response.data) + c.innerHTML;
+            const newComment = await card.renderContent(response.data);
+            c.innerHTML = newComment + c.innerHTML;
             scroll();
         }
 
@@ -330,7 +357,7 @@ export const comment = (() => {
             document.getElementById(`inner-${id}`).remove();
 
             response.data.is_admin = session.isAdmin();
-            document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', card.renderInnerContent(response.data));
+            document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderInnerContent(response.data));
 
             const containerDiv = document.getElementById(`button-${id}`);
             const anchorTag = containerDiv.querySelector('a');
@@ -370,6 +397,19 @@ export const comment = (() => {
             isChecklist = badge.classList.contains('text-success');
         }
 
+        const gifContainer = document.getElementById(`gif-form-${id}`);
+        const gifIsOpen = gifContainer === null ? false : !gifContainer.classList.contains('d-none');
+        const gifId = document.getElementById(`gif-result-${id}`)?.getAttribute('data-id');
+
+        if (gifIsOpen) {
+            if (!gifId || confirm('Are you sure?')) {
+                gif.remove(id);
+                changeButton(id, false);
+                document.getElementById(`inner-${id}`).remove();
+            }
+            return;
+        }
+
         if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
             changeButton(id, false);
             document.getElementById(`inner-${id}`).remove();
@@ -389,6 +429,10 @@ export const comment = (() => {
 
         changeButton(id, true);
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
+
+        document.getElementById(`gif-form-${id}`).addEventListener('gif.open', () => {
+            document.querySelector(`[for="gif-search-${id}"]`)?.remove();
+        });
     };
 
     /**
@@ -410,14 +454,26 @@ export const comment = (() => {
             .send(dto.commentResponse)
             .then((res) => {
                 if (res.code !== HTTP_STATUS_OK) {
-                    return;
+                    return res;
                 }
 
-                const IsParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
-                document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, IsParent));
+                const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
+                const isGif = res.data.gif_url !== null && res.data.gif_url !== undefined;
+                document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, isParent, isGif));
+
+                if (isGif) {
+                    document.getElementById(`gif-form-${id}`).addEventListener('gif.open', () => {
+                        document.querySelector(`[for="gif-search-${id}"]`)?.remove();
+                        document.querySelector(`[onclick="undangan.comment.gif.back('${id}')"]`)?.remove();
+                    });
+
+                    return gif.open(id);
+                }
+
                 const formInner = document.getElementById(`form-inner-${id}`);
                 formInner.value = res.data.comment;
                 formInner.setAttribute('data-original', util.base64Encode(res.data.comment));
+                return res;
             });
 
         btn.restore();
@@ -457,7 +513,7 @@ export const comment = (() => {
         return request(HTTP_GET, `/api/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
             .token(session.getToken())
             .send(dto.getCommentsResponse)
-            .then((res) => {
+            .then(async (res) => {
                 pagination.setResultData(res.data.length);
                 c.setAttribute('data-loading', 'false');
 
@@ -467,7 +523,12 @@ export const comment = (() => {
                 }
 
                 showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
-                c.innerHTML = res.data.map((i) => card.renderContent(i)).join('');
+
+                let data = '';
+                for (const i of res.data) {
+                    data += await card.renderContent(i);
+                }
+                c.innerHTML = data;
 
                 res.data.forEach(fetchTracker);
                 res.data.forEach(addListenerLike);
@@ -487,8 +548,7 @@ export const comment = (() => {
 
         if (isShow) {
             button.setAttribute('data-show', 'false');
-            button.innerText = 'Show replies';
-            button.innerText += ' (' + ids.length + ')';
+            button.innerText = `Show replies (${ids.length})`;
 
             showHide.set('show', showHide.get('show').filter((i) => i !== uuid));
         } else {
@@ -565,6 +625,7 @@ export const comment = (() => {
      * @returns {void}
      */
     const init = () => {
+        gif.init();
         like.init();
         card.init();
         pagination.init();
@@ -584,6 +645,7 @@ export const comment = (() => {
     };
 
     return {
+        gif,
         like,
         pagination,
         init,

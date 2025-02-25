@@ -225,8 +225,16 @@
 
                         <!-- Form -->
                         <div class="bg-theme-auto p-3 mt-2 rounded-4 shadow">
-                            <label for="form-comment" class="form-label fw-bold my-1"><i class="fa-solid fa-comment me-2"></i>Comment</label>
-                            <textarea class="form-control shadow-sm mb-3 rounded-4" id="form-comment" name="form-comment" rows="3" minlength="1" maxlength="1000" placeholder="Type to comment" data-offline-disabled="false"></textarea>
+                            <div class="d-block" id="comment-form-default">
+                                <label for="form-comment" class="form-label fw-bold my-1"><i class="fa-solid fa-comment me-2"></i>Comment</label>
+
+                                <div class="position-relative">
+                                    <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1 position-absolute bottom-0 end-0" onclick="undangan.comment.gif.open('default')" data-offline-disabled="false"><i class="fa-solid fa-photo-film"></i></button>
+                                    <textarea class="form-control shadow-sm mb-3 rounded-4" id="form-comment" name="form-comment" rows="3" minlength="1" maxlength="1000" placeholder="Type to comment" data-offline-disabled="false"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-none mb-3" id="gif-form-default"></div>
 
                             <div class="d-flex justify-content-end mb-0">
                                 <button onclick="undangan.comment.send(this)" class="btn btn-primary btn-sm rounded-4 shadow-sm" data-offline-disabled="false"><i class="fa-solid fa-paper-plane me-2"></i>Send</button>

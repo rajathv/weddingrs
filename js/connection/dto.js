@@ -26,10 +26,10 @@ export const dto = (() => {
     };
 
     /**
-     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string, created_at: string, is_admin: boolean, ip: string, user_agent: string, comments: ReturnType<getCommentResponse>[], like: { love: number } }} data
-     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string, created_at: string, is_admin: boolean, ip: string, user_agent: string, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }}
+     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }} data
+     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }}
      */
-    const getCommentResponse = ({ uuid, own, name, presence, comment, created_at, is_admin, ip, user_agent, comments, like }) => {
+    const getCommentResponse = ({ uuid, own, name, presence, comment, created_at, is_admin, gif_url, ip, user_agent, comments, like }) => {
         return {
             uuid,
             own,
@@ -38,6 +38,7 @@ export const dto = (() => {
             comment,
             created_at,
             is_admin: is_admin ?? false,
+            gif_url,
             ip,
             user_agent,
             comments: comments?.map(getCommentResponse) ?? [],
@@ -46,8 +47,8 @@ export const dto = (() => {
     };
 
     /**
-     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string, created_at: string, is_admin: boolean, ip: string, user_agent: string, comments: ReturnType<getCommentResponse>[], like: { love: number } }[]} data
-     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string, created_at: string, is_admin: boolean, ip: string, user_agent: string, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }[]}
+     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }[]} data
+     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }[]}
      */
     const getCommentsResponse = (data) => data.map(getCommentResponse);
 
@@ -82,15 +83,16 @@ export const dto = (() => {
     };
 
     /**
-     * @param {{name: string, presence: boolean, comment: string, is_admin: boolean, created_at: string}} commentData
-     * @returns {{name: string, presence: boolean, comment: string, is_admin: boolean, created_at: string}}
+     * @param {{name: string, presence: boolean, comment: string|null, is_admin: boolean, gif_url: string|null, created_at: string}} commentData
+     * @returns {{name: string, presence: boolean, comment: string|null, is_admin: boolean, gif_url: string|null, created_at: string}}
      */
-    const commentResponse = ({ name, presence, comment, is_admin, created_at }) => {
+    const commentResponse = ({ name, presence, comment, is_admin, gif_url, created_at }) => {
         return {
             name,
             presence,
             comment,
             is_admin,
+            gif_url,
             created_at,
         };
     };
@@ -111,15 +113,17 @@ export const dto = (() => {
      * @param {string} id
      * @param {string} name
      * @param {boolean} presence
-     * @param {string} comment
-     * @returns {{id: string, name: string, presence: boolean, comment: string}}
+     * @param {string|null} comment
+     * @param {string|null} gif_id
+     * @returns {{id: string, name: string, presence: boolean, comment: string|null, gif_id: string|null}}
      */
-    const postCommentRequest = (id, name, presence, comment) => {
+    const postCommentRequest = (id, name, presence, comment, gif_id) => {
         return {
             id,
             name,
             presence,
             comment,
+            gif_id,
         };
     };
 
@@ -137,13 +141,15 @@ export const dto = (() => {
 
     /**
      * @param {boolean|null} presence
-     * @param {string} comment
-     * @returns {{presence: boolean|null, comment: string}}
+     * @param {string|null} comment
+     * @param {string|null} gif_id
+     * @returns {{presence: boolean|null, comment: string|null, gif_id: string|null}}
      */
-    const updateCommentRequest = (presence, comment) => {
+    const updateCommentRequest = (presence, comment, gif_id) => {
         return {
             presence: presence,
-            comment: comment
+            comment: comment,
+            gif_id: gif_id,
         };
     };
 

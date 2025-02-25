@@ -1,3 +1,4 @@
+import { gif } from './gif.js';
 import { util } from '../../common/util.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
@@ -186,18 +187,29 @@ export const card = (() => {
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
      * @param {boolean} is_parent
-     * @returns {string}
+     * @returns {Promise<string>}
      */
-    const renderBody = (c, is_parent) => {
+    const renderBody = async (c, is_parent) => {
         const original = convertMarkdownToHTML(util.escapeHtml(c.comment));
         const moreThanMaxLength = original.length > maxCommentLength;
+        const isGif = c.gif_url !== null && c.gif_url !== undefined;
 
-        return `
+        const temp = `
         <div class="d-flex justify-content-between align-items-center">
             <p class="text-theme-auto text-truncate m-0 p-0" style="font-size: 0.95rem;">${renderTitle(c, is_parent)}</p>
             <small class="text-theme-auto m-0 p-0" style="font-size: 0.75rem;">${c.created_at}</small>
         </div>
         <hr class="my-1">
+        `;
+
+        if (isGif) {
+            const img = await gif.cache(c.gif_url);
+            return temp + `
+            <img src="${img}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
+            `;
+        }
+
+        return temp + `
         <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" ${moreThanMaxLength ? `data-comment="${util.base64Encode(original)}"` : ''} id="content-${c.uuid}">${moreThanMaxLength ? (original.slice(0, maxCommentLength) + '...') : original}</p>
         ${moreThanMaxLength ? `<p class="mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem; display: block;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
     };
@@ -205,17 +217,24 @@ export const card = (() => {
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
      * @param {boolean} is_parent
-     * @returns {string}
+     * @returns {Promise<string>}
      */
-    const renderContent = (c, is_parent) => {
+    const renderContent = async (c, is_parent) => {
+        const body = await renderBody(c, is_parent);
+
+        let data = '';
+        for (const i of c.comments) {
+            data += await renderContent(i, false);
+        }
+
         return `
         <div ${renderHeader(c, is_parent)} id="${c.uuid}" style="overflow-wrap: break-word !important;">
             <div id="body-content-${c.uuid}" data-tapTime="0" data-liked="false" tabindex="0">
-                ${renderBody(c, is_parent)}
+                ${body}
             </div>
             ${renderTracker(c)}
             ${renderButton(c)}
-            <div id="reply-content-${c.uuid}">${c.comments.map((i) => renderContent(i, false)).join('')}</div>
+            <div id="reply-content-${c.uuid}">${data}</div>
         </div>`;
     };
 
@@ -228,8 +247,14 @@ export const card = (() => {
         inner.classList.add('my-2');
         inner.id = `inner-${id}`;
         inner.innerHTML = `
-        <label for="form-inner-${id}" class="form-label my-1" style="font-size: 0.95rem;"><i class="fa-solid fa-reply me-2"></i>Reply</label>
-        <textarea class="form-control shadow-sm rounded-4 mb-2" id="form-inner-${id}" minlength="1" maxlength="1000" placeholder="Type reply comment" rows="3" data-offline-disabled="false"></textarea>
+        <p class="my-1 mx-0 p-0" style="font-size: 0.95rem;"><i class="fa-solid fa-reply me-2"></i>Reply</p>
+        <div class="d-block mb-2" id="comment-form-${id}">
+            <div class="position-relative">
+                <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1 position-absolute bottom-0 end-0" onclick="undangan.comment.gif.open('${id}')" data-offline-disabled="false"><i class="fa-solid fa-photo-film"></i></button>
+                <textarea class="form-control shadow-sm rounded-4 mb-2" id="form-inner-${id}" minlength="1" maxlength="1000" placeholder="Type reply comment" rows="3" data-offline-disabled="false"></textarea>
+            </div>
+        </div>
+        <div class="d-none mb-2" id="gif-form-${id}"></div>
         <div class="d-flex justify-content-end align-items-center mb-0">
             <button style="font-size: 0.8rem;" onclick="undangan.comment.cancel('${id}')" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1" data-offline-disabled="false">Cancel</button>
             <button style="font-size: 0.8rem;" onclick="undangan.comment.send(this)" data-uuid="${id}" class="btn btn-sm btn-outline-auto rounded-4 py-0" data-offline-disabled="false">Send</button>
@@ -242,20 +267,22 @@ export const card = (() => {
      * @param {string} id 
      * @param {boolean} presence 
      * @param {boolean} is_parent 
+     * @param {boolean} is_gif 
      * @returns {HTMLDivElement}
      */
-    const renderEdit = (id, presence, is_parent) => {
+    const renderEdit = (id, presence, is_parent, is_gif) => {
         const inner = document.createElement('div');
         inner.classList.add('my-2');
         inner.id = `inner-${id}`;
         inner.innerHTML = `
-        <label for="form-inner-${id}" class="form-label my-1" style="font-size: 0.95rem;"><i class="fa-solid fa-pen me-2"></i>Edit</label>
+        <p class="my-1 mx-0 p-0" style="font-size: 0.95rem;"><i class="fa-solid fa-pen me-2"></i>Edit</p>
         ${!is_parent ? '' : `
         <select class="form-select shadow-sm mb-2 rounded-4" id="form-inner-presence-${id}" data-offline-disabled="false">
             <option value="1" ${presence ? 'selected' : ''}>Datang</option>
             <option value="2" ${presence ? '' : 'selected'}>Berhalangan</option>
         </select>`}
-        <textarea class="form-control shadow-sm rounded-4 mb-2" id="form-inner-${id}" minlength="1" maxlength="1000" placeholder="Type update comment" rows="3" data-offline-disabled="false"></textarea>
+        ${!is_gif ? `<textarea class="form-control shadow-sm rounded-4 mb-2" id="form-inner-${id}" minlength="1" maxlength="1000" placeholder="Type update comment" rows="3" data-offline-disabled="false"></textarea>    
+        ` : `<div class="d-none mb-2" id="gif-form-${id}"></div>`}
         <div class="d-flex justify-content-end align-items-center mb-0">
             <button style="font-size: 0.8rem;" onclick="undangan.comment.cancel('${id}')" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1" data-offline-disabled="false">Cancel</button>
             <button style="font-size: 0.8rem;" onclick="undangan.comment.update(this)" data-uuid="${id}" class="btn btn-sm btn-outline-auto rounded-4 py-0" data-offline-disabled="false">Update</button>

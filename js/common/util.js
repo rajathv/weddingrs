@@ -15,10 +15,10 @@ export const util = (() => {
 
     /**
      * @param {function} callback
-     * @param {number} timeout
+     * @param {number} delay
      * @returns {void}
      */
-    const timeOut = (callback, timeout) => {
+    const timeOut = (callback, delay) => {
         let clear = null;
         const c = () => {
             callback();
@@ -26,7 +26,20 @@ export const util = (() => {
             clear = null;
         };
 
-        clear = setTimeout(c, timeout);
+        clear = setTimeout(c, delay);
+    };
+
+    /**
+     * @param {function} callback
+     * @param {number} delay
+     * @returns {function}
+     */
+    const debounce = (callback, delay) => {
+        let timeout = null;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => callback(...args), delay);
+        };
     };
 
     /**
@@ -163,6 +176,7 @@ export const util = (() => {
     return {
         copy,
         timeOut,
+        debounce,
         escapeHtml,
         base64Encode,
         base64Decode,
