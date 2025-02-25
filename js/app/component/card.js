@@ -205,7 +205,9 @@ export const card = (() => {
         if (isGif) {
             const img = await gif.cache(c.gif_url);
             return temp + `
-            <img src="${img}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
+            <div class="d-flex justify-content-center align-items-center my-2">
+                <img src="${img}" id="img-gif-${c.uuid}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
+            </div>
             `;
         }
 
