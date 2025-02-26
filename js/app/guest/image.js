@@ -1,5 +1,6 @@
 import { progress } from './progress.js';
 import { util } from '../../common/util.js';
+import { request, HTTP_GET } from '../../connection/request.js';
 
 export const image = (() => {
 
@@ -73,7 +74,8 @@ export const image = (() => {
          * @param {number} delay
          * @returns {Promise<Blob>}
          */
-        const fetchPut = (c, retries = 3, delay = 1000) => fetch(url)
+        const fetchPut = (c, retries = 3, delay = 1000) => request(HTTP_GET, url)
+            .default()
             .then((r) => r.blob())
             .then((b) => window.createImageBitmap(b))
             .then((i) => toWebp(i))

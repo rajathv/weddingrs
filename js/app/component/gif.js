@@ -1,5 +1,6 @@
 import { util } from '../../common/util.js';
 import { storage } from '../../common/storage.js';
+import { request, HTTP_GET } from '../../connection/request.js';
 
 export const gif = (() => {
 
@@ -42,7 +43,8 @@ export const gif = (() => {
         * @param {number} delay
         * @returns {Promise<Blob>}
         */
-        const fetchPut = (c, retries = 3, delay = 1000) => fetch(url)
+        const fetchPut = (c, retries = 3, delay = 1000) => request(HTTP_GET, url)
+            .default()
             .then((r) => r.blob().then((b) => c.put(url, new Response(b, { headers: r.headers })).then(() => b)))
             .catch((err) => {
                 if (retries <= 0) {
@@ -174,8 +176,8 @@ export const gif = (() => {
     const get = (path, params) => {
         params = {
             key: conf.get('key'),
-            media_filter: 'tinygif',
-            client_key: 'undangan_app',
+            media_filter: conf.get('media_filter'),
+            client_key: conf.get('client_key'),
             country: conf.get('country'),
             locale: conf.get('locale'),
             ...(params ?? {}),
@@ -186,7 +188,7 @@ export const gif = (() => {
             .map((k) => `${k}=${encodeURIComponent(params[k])}`).join('&');
 
         const url = 'https://tenor.googleapis.com/v2';
-        return fetch(`${url + path}?${param}`).then((r) => r.json());
+        return request(HTTP_GET, `${url + path}?${param}`).default().then((r) => r.json());
     };
 
     /**
@@ -410,6 +412,8 @@ export const gif = (() => {
         conf.set('key', 'AIzaSyB-Z10TLX7MbkcMT5S_YA1iEqCmGzutV7s');
         conf.set('country', 'ID');
         conf.set('locale', 'id_ID');
+        conf.set('media_filter', 'tinygif');
+        conf.set('client_key', 'undangan_app');
     };
 
     return {

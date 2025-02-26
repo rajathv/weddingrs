@@ -111,6 +111,14 @@ export const request = (method, path) => {
                 });
         },
         /**
+         * @param {object|null} header 
+         * @returns {Promise<Response>}
+         */
+        default(header = null) {
+            req.headers = new Headers(header ?? {});
+            return fetch(path, req);
+        },
+        /**
          * @param {string} token
          * @returns {ReturnType<typeof request>}
          */

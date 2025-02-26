@@ -611,7 +611,8 @@ export const comment = (() => {
             return;
         }
 
-        fetch(`https://freeipapi.com/api/json/${c.ip}`)
+        request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
+            .default()
             .then((res) => res.json())
             .then((res) => {
                 let result = res.cityName + ' - ' + res.regionName;
