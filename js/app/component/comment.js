@@ -336,6 +336,7 @@ export const comment = (() => {
         if (!id) {
             const newPage = await pagination.reset();
             if (newPage) {
+                await show();
                 scroll();
                 return;
             }
@@ -539,6 +540,7 @@ export const comment = (() => {
 
                 res.data.forEach(fetchTracker);
                 res.data.forEach(addListenerLike);
+                c.dispatchEvent(new Event('comment.result'));
 
                 return res;
             });
@@ -637,6 +639,7 @@ export const comment = (() => {
         like.init();
         card.init();
         pagination.init();
+        document.getElementById('comments').addEventListener('comment.show', show);
 
         owns = storage('owns');
         user = storage('user');

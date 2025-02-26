@@ -1,5 +1,3 @@
-import { comment } from './comment.js';
-
 export const pagination = (() => {
 
     let perPage = 10;
@@ -25,6 +23,11 @@ export const pagination = (() => {
      * @type {HTMLElement|null}
      */
     let paginate = null;
+
+    /**
+     * @type {HTMLElement|null}
+     */
+    let comment = null;
 
     /**
      * @param {number} num 
@@ -88,12 +91,15 @@ export const pagination = (() => {
         button.innerHTML = `<span class="spinner-border spinner-border-sm my-0 mx-1 p-0" style="height: 0.8rem; width: 0.8rem;"></span>`;
 
         const process = async () => {
-            await comment.show();
+            const result = new Promise((res) => comment.addEventListener('comment.result', res));
+            comment.dispatchEvent(new Event('comment.show'));
+
+            await result;
 
             button.disabled = false;
             button.innerHTML = tmp;
 
-            comment.scroll();
+            comment.scrollIntoView({ behavior: 'smooth' });
         };
 
         const next = async () => {
@@ -119,9 +125,9 @@ export const pagination = (() => {
     };
 
     /**
-     * @returns {Promise<boolean>}
+     * @returns {boolean}
      */
-    const reset = async () => {
+    const reset = () => {
         if (pageNow === 0) {
             return false;
         }
@@ -132,7 +138,6 @@ export const pagination = (() => {
 
         disabledNext();
         disabledPrevious();
-        await comment.show();
 
         return true;
     };
@@ -209,6 +214,7 @@ export const pagination = (() => {
             </li>
         </ul>`;
 
+        comment = document.getElementById('comments');
         page = document.getElementById('page');
         liPrev = document.getElementById('previous');
         liNext = document.getElementById('next');
