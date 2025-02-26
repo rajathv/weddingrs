@@ -181,6 +181,10 @@ export const comment = (() => {
             return;
         }
 
+        if (gifIsOpen) {
+            document.getElementById(`img-gif-${id}`).src = document.getElementById(`gif-result-${id}`).querySelector('img').src;
+        }
+
         changeButton(id, false);
         document.getElementById(`inner-${id}`).remove();
 
@@ -428,6 +432,7 @@ export const comment = (() => {
         }
 
         changeButton(id, true);
+        gif.remove(id);
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
 
         document.getElementById(`gif-form-${id}`).addEventListener('gif.open', () => {
@@ -459,6 +464,7 @@ export const comment = (() => {
 
                 const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
                 const isGif = res.data.gif_url !== null && res.data.gif_url !== undefined;
+                gif.remove(id);
                 document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, isParent, isGif));
 
                 if (isGif) {
@@ -522,6 +528,7 @@ export const comment = (() => {
                     return res;
                 }
 
+                gif.remove();
                 showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
 
                 let data = '';

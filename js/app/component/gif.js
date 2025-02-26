@@ -394,10 +394,10 @@ export const gif = (() => {
     };
 
     /**
-     * @param {string} uuid 
+     * @param {string|null} uuid 
      * @returns {boolean}
      */
-    const remove = (uuid) => objectPool.delete(uuid);
+    const remove = (uuid = null) => uuid ? objectPool.delete(uuid) : objectPool.clear();
 
     /**
      * @returns {void}
