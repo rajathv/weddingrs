@@ -138,7 +138,12 @@ export const comment = (() => {
         const gifContainer = document.getElementById(`gif-form-${id}`);
         const gifIsOpen = gifContainer === null ? false : !gifContainer.classList.contains('d-none');
         const gifId = document.getElementById(`gif-result-${id}`)?.getAttribute('data-id');
+        const gifCancel = document.getElementById(`gif-cancel-${id}`);
         const form = document.getElementById(`form-inner-${id}`);
+
+        if (gifIsOpen && gifId) {
+            gifCancel.classList.replace('d-flex', 'd-none');
+        }
 
         if (id && !gifIsOpen && util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) {
             changeButton(id, false);
@@ -177,12 +182,17 @@ export const comment = (() => {
 
         btn.restore();
 
+        if (gifIsOpen && gifId) {
+            gifCancel.classList.replace('d-none', 'd-flex');
+        }
+
         if (!status) {
             return;
         }
 
-        if (gifIsOpen) {
+        if (gifIsOpen && gifId) {
             document.getElementById(`img-gif-${id}`).src = document.getElementById(`gif-result-${id}`).querySelector('img').src;
+            gifCancel.dispatchEvent(new Event('click'));
         }
 
         changeButton(id, false);
@@ -259,9 +269,15 @@ export const comment = (() => {
 
         const gifIsOpen = !document.getElementById(`gif-form-${id ? id : 'default'}`)?.classList.contains('d-none');
         const gifId = document.getElementById(`gif-result-${id ? id : 'default'}`)?.getAttribute('data-id');
+        const gifCancel = document.getElementById(`gif-cancel-${id ? id : 'default'}`);
+
         if (gifIsOpen && !gifId) {
             alert('Gif cannot be empty.');
             return;
+        }
+
+        if (gifIsOpen && gifId) {
+            gifCancel.classList.replace('d-flex', 'd-none');
         }
 
         const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
@@ -321,6 +337,10 @@ export const comment = (() => {
             presence.disabled = false;
         }
 
+        if (gifIsOpen && gifId) {
+            gifCancel.classList.replace('d-none', 'd-flex');
+        }
+
         btn.restore();
 
         if (!response || response.code !== HTTP_STATUS_CREATED) {
@@ -331,6 +351,10 @@ export const comment = (() => {
 
         if (form) {
             form.value = null;
+        }
+
+        if (gifIsOpen && gifId) {
+            gifCancel.dispatchEvent(new Event('click'));
         }
 
         if (!id) {
