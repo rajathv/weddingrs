@@ -13,6 +13,27 @@ export const gif = (() => {
         768: 5,
     };
 
+    const countryMapping = {
+        'id': 'ID',
+        'en': 'US',
+        'fr': 'FR',
+        'de': 'DE',
+        'es': 'ES',
+        'zh': 'CN',
+        'ja': 'JP',
+        'ko': 'KR',
+        'ar': 'SA',
+        'ru': 'RU',
+        'it': 'IT',
+        'nl': 'NL',
+        'pt': 'PT',
+        'tr': 'TR',
+        'th': 'TH',
+        'vi': 'VN',
+        'ms': 'MY',
+        'hi': 'IN',
+    };
+
     /**
      * @type {Map<string, string>|null}
      */
@@ -197,9 +218,14 @@ export const gif = (() => {
      */
     const infinite = async (ctx) => {
         const isQuery = ctx.query && ctx.query.trim().length;
-        const params = isQuery ? { q: ctx.query, pos: ctx.next, limit: ctx.limit } : { pos: ctx.next, limit: ctx.limit };
+        const params = { pos: ctx.next, limit: ctx.limit };
+
+        if (isQuery) {
+            params.q = ctx.query;
+        }
 
         const scrollableHeight = (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9;
+
         if (ctx.lists.scrollTop > scrollableHeight && ctx.lists.getAttribute('data-continue') === 'true') {
             await render(ctx, get(isQuery ? '/search' : '/featured', params));
         }
@@ -409,9 +435,13 @@ export const gif = (() => {
         objectPool = new Map();
         conf = storage('config');
 
+        let lang = document.documentElement.lang ?? 'en';
+        lang = lang.split('-')[0].toLowerCase();
+
+        conf.set('country', countryMapping[lang] ?? 'US');
+        conf.set('locale', `${lang}_${conf.get('country')}`);
+
         conf.set('key', 'AIzaSyB-Z10TLX7MbkcMT5S_YA1iEqCmGzutV7s');
-        conf.set('country', 'ID');
-        conf.set('locale', 'id_ID');
         conf.set('media_filter', 'tinygif');
         conf.set('client_key', 'undangan_app');
     };
