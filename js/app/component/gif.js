@@ -428,6 +428,40 @@ export const gif = (() => {
     const remove = (uuid = null) => uuid ? objectPool.delete(uuid) : objectPool.clear();
 
     /**
+     * @param {string} uuid 
+     * @returns {boolean}
+     */
+    const isOpen = (uuid) => {
+        if (!objectPool.has(uuid)) {
+            return false;
+        }
+
+        const ses = objectPool.get(uuid);
+        return ses.container === null ? false : !ses.container.classList.contains('d-none');
+    };
+
+    /**
+     * @param {string} uuid 
+     * @returns {string|null}
+     */
+    const getResultId = (uuid) => objectPool.get(uuid)?.result?.getAttribute('data-id');
+
+    /**
+     * @param {string} uuid 
+     * @param {function} callback 
+     */
+    const onOpen = (uuid, callback) => {
+        objectPool.get(uuid)?.container?.addEventListener('gif.open', callback);
+    };
+
+    /**
+     * @param {string} uuid 
+     * @param {string} att 
+     * @returns {null|string|number|HTMLElement}
+     */
+    const getAttribute = (uuid, att) => objectPool.get(uuid)[att];
+
+    /**
      * @returns {void}
      */
     const init = () => {
@@ -454,5 +488,9 @@ export const gif = (() => {
         cancel,
         click,
         remove,
+        isOpen,
+        onOpen,
+        getResultId,
+        getAttribute,
     };
 })();

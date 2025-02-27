@@ -49,11 +49,6 @@ export const comment = (() => {
     };
 
     /**
-     * @returns {void}
-     */
-    const scroll = () => document.getElementById('comments').scrollIntoView({ behavior: 'smooth' });
-
-    /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
      * @returns {void}
      */
@@ -135,9 +130,8 @@ export const comment = (() => {
             isChecklist = badge.classList.contains('text-success');
         }
 
-        const gifContainer = document.getElementById(`gif-form-${id}`);
-        const gifIsOpen = gifContainer === null ? false : !gifContainer.classList.contains('d-none');
-        const gifId = document.getElementById(`gif-result-${id}`)?.getAttribute('data-id');
+        const gifIsOpen = gif.isOpen(id);
+        const gifId = gif.getResultId(id);
         const gifCancel = document.getElementById(`gif-cancel-${id}`);
         const form = document.getElementById(`form-inner-${id}`);
 
@@ -164,7 +158,7 @@ export const comment = (() => {
 
         const status = await request(HTTP_PUT, '/api/comment/' + owns.get(id))
             .token(session.getToken())
-            .body(dto.updateCommentRequest(presence ? isPresent : null, form?.value, gifId))
+            .body(dto.updateCommentRequest(presence ? isPresent : null, form.value.length ? form.value : null, gifId))
             .send(dto.statusResponse)
             .then((res) => res.data.status, () => false);
 
@@ -191,7 +185,7 @@ export const comment = (() => {
         }
 
         if (gifIsOpen && gifId) {
-            document.getElementById(`img-gif-${id}`).src = document.getElementById(`gif-result-${id}`).querySelector('img').src;
+            document.getElementById(`img-gif-${id}`).src = gif.getAttribute(id, 'result').querySelector('img').src;
             gifCancel.dispatchEvent(new Event('click'));
         }
 
@@ -206,6 +200,7 @@ export const comment = (() => {
             if (original.length > card.maxCommentLength) {
                 content.innerHTML = show?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original;
                 content.setAttribute('data-comment', util.base64Encode(original));
+                // todo: use bootstrap class
                 if (show?.style.display === 'none') {
                     show.style.display = 'block';
                 }
@@ -267,8 +262,8 @@ export const comment = (() => {
             return;
         }
 
-        const gifIsOpen = !document.getElementById(`gif-form-${id ? id : 'default'}`)?.classList.contains('d-none');
-        const gifId = document.getElementById(`gif-result-${id ? id : 'default'}`)?.getAttribute('data-id');
+        const gifIsOpen = gif.isOpen(id ? id : 'default');
+        const gifId = gif.getResultId(id ? id : 'default');
         const gifCancel = document.getElementById(`gif-cancel-${id ? id : 'default'}`);
 
         if (gifIsOpen && !gifId) {
@@ -317,7 +312,7 @@ export const comment = (() => {
 
         const response = await request(HTTP_POST, '/api/comment')
             .token(session.getToken())
-            .body(dto.postCommentRequest(id, nameValue, isPresence, form?.value, gifId))
+            .body(dto.postCommentRequest(id, nameValue, isPresence, form.value.length ? form.value : null, gifId))
             .send(dto.getCommentResponse)
             .then((res) => res, () => null);
 
@@ -358,24 +353,25 @@ export const comment = (() => {
         }
 
         if (!id) {
+            const comments = document.getElementById('comments');
             const newPage = await pagination.reset();
+
             if (newPage) {
                 await show();
-                scroll();
+                comments.scrollIntoView({ behavior: 'smooth' });
                 return;
             }
 
-            const c = document.getElementById('comments');
-            pagination.setResultData(c.children.length);
-
+            pagination.setResultData(comments.children.length);
             if (pagination.getResultData() === pagination.getPer()) {
-                c.lastElementChild.remove();
+                comments.lastElementChild.remove();
             }
 
             response.data.is_admin = session.isAdmin();
             const newComment = await card.renderContent(response.data);
-            c.innerHTML = newComment + c.innerHTML;
-            scroll();
+
+            comments.insertAdjacentHTML('afterbegin', newComment);
+            comments.scrollIntoView({ behavior: 'smooth' });
         }
 
         if (id) {
@@ -400,8 +396,8 @@ export const comment = (() => {
                 anchorTag.remove();
             }
 
-            containerDiv.querySelector(`button[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`)
-                .insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
+            const query = `button[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`;
+            containerDiv.querySelector(query).insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
         }
 
         addListenerLike(response.data);
@@ -426,16 +422,13 @@ export const comment = (() => {
             isChecklist = badge.classList.contains('text-success');
         }
 
-        const gifContainer = document.getElementById(`gif-form-${id}`);
-        const gifIsOpen = gifContainer === null ? false : !gifContainer.classList.contains('d-none');
-        const gifId = document.getElementById(`gif-result-${id}`)?.getAttribute('data-id');
-
-        if (gifIsOpen) {
-            if (!gifId || confirm('Are you sure?')) {
+        if (gif.isOpen(id)) {
+            if (!gif.getResultId(id) || confirm('Are you sure?')) {
                 gif.remove(id);
                 changeButton(id, false);
                 document.getElementById(`inner-${id}`).remove();
             }
+
             return;
         }
 
@@ -460,7 +453,7 @@ export const comment = (() => {
         gif.remove(id);
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
 
-        document.getElementById(`gif-form-${id}`).addEventListener('gif.open', () => {
+        gif.onOpen(id, () => {
             document.querySelector(`[for="gif-search-${id}"]`)?.remove();
         });
     };
@@ -487,13 +480,16 @@ export const comment = (() => {
                     return res;
                 }
 
-                const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
                 const isGif = res.data.gif_url !== null && res.data.gif_url !== undefined;
-                gif.remove(id);
+                if (isGif) {
+                    gif.remove(id);
+                }
+
+                const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
                 document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, isParent, isGif));
 
                 if (isGif) {
-                    document.getElementById(`gif-form-${id}`).addEventListener('gif.open', () => {
+                    gif.onOpen(id, () => {
                         document.querySelector(`[for="gif-search-${id}"]`)?.remove();
                         document.querySelector(`[onclick="undangan.comment.gif.back('${id}')"]`)?.remove();
                     });
@@ -534,37 +530,37 @@ export const comment = (() => {
      * @returns {Promise<ReturnType<typeof dto.getCommentsResponse>>}
      */
     const show = () => {
-        const c = document.getElementById('comments');
+        const comments = document.getElementById('comments');
 
-        if (c.getAttribute('data-loading') === 'false') {
-            c.setAttribute('data-loading', 'true');
-            c.innerHTML = card.renderLoading().repeat(pagination.getPer());
+        if (comments.getAttribute('data-loading') === 'false') {
+            comments.setAttribute('data-loading', 'true');
+            comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
         }
 
         return request(HTTP_GET, `/api/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
             .token(session.getToken())
             .send(dto.getCommentsResponse)
             .then(async (res) => {
+                gif.remove();
                 pagination.setResultData(res.data.length);
-                c.setAttribute('data-loading', 'false');
+                comments.setAttribute('data-loading', 'false');
 
                 if (res.data.length === 0) {
-                    c.innerHTML = onNullComment();
+                    comments.innerHTML = onNullComment();
                     return res;
                 }
 
-                gif.remove();
                 showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
 
                 let data = '';
                 for (const i of res.data) {
                     data += await card.renderContent(i);
                 }
-                c.innerHTML = data;
+                comments.innerHTML = data;
 
                 res.data.forEach(fetchTracker);
                 res.data.forEach(addListenerLike);
-                c.dispatchEvent(new Event('comment.result'));
+                comments.dispatchEvent(new Event('comment.result'));
 
                 return res;
             });
@@ -611,11 +607,11 @@ export const comment = (() => {
      * @returns {void}
      */
     const showMore = (anchor, uuid) => {
-        const c = document.getElementById(`content-${uuid}`);
-        const original = util.base64Decode(c.getAttribute('data-comment'));
+        const comments = document.getElementById(`content-${uuid}`);
+        const original = util.base64Decode(comments.getAttribute('data-comment'));
         const isCollapsed = anchor.getAttribute('data-show') === 'false';
 
-        c.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
+        comments.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
         anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
         anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
@@ -637,6 +633,16 @@ export const comment = (() => {
             return;
         }
 
+        /**
+         * @param {string} uuid 
+         * @param {string} ip 
+         * @param {string} result 
+         * @returns {void}
+         */
+        const setResult = (uuid, ip, result) => {
+            document.getElementById(`ip-${uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`;
+        };
+
         request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
             .default()
             .then((res) => res.json())
@@ -648,11 +654,9 @@ export const comment = (() => {
                 }
 
                 tracker.set(c.ip, result);
-                document.getElementById(`ip-${c.uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <strong>${result}</strong>`;
+                setResult(c.uuid, c.ip, result);
             })
-            .catch((err) => {
-                document.getElementById(`ip-${c.uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <strong>${util.escapeHtml(err.message)}</strong>`;
-            });
+            .catch((err) => setResult(c.uuid, c.ip, err.message));
     };
 
     /**
@@ -684,13 +688,12 @@ export const comment = (() => {
         like,
         pagination,
         init,
-        scroll,
-        cancel,
         send,
         edit,
         reply,
         remove,
         update,
+        cancel,
         show,
         showMore,
         showOrHide,
