@@ -31,6 +31,11 @@ export const comment = (() => {
     let showHide = null;
 
     /**
+     * @type {object[]}
+     */
+    let lastRender = [];
+
+    /**
      * @returns {string}
      */
     const onNullComment = () => {
@@ -403,20 +408,6 @@ export const comment = (() => {
      * @returns {void}
      */
     const cancel = (id) => {
-        const form = document.getElementById(`form-inner-${id}`);
-
-        let isPresent = false;
-        const presence = document.getElementById(`form-inner-presence-${id}`);
-        if (presence) {
-            isPresent = presence.value === '1';
-        }
-
-        let isChecklist = false;
-        const badge = document.getElementById(`badge-${id}`);
-        if (badge) {
-            isChecklist = badge.classList.contains('text-success');
-        }
-
         if (gif.isOpen(id)) {
             if (!gif.getResultId(id) || confirm('Are you sure?')) {
                 gif.remove(id);
@@ -426,6 +417,14 @@ export const comment = (() => {
 
             return;
         }
+
+        const form = document.getElementById(`form-inner-${id}`);
+
+        const presence = document.getElementById(`form-inner-presence-${id}`);
+        const isPresent = presence ? presence.value === '1' : false;
+
+        const badge = document.getElementById(`badge-${id}`);
+        const isChecklist = badge ? badge.classList.contains('text-success') : false;
 
         if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
             changeButton(id, false);
@@ -444,13 +443,11 @@ export const comment = (() => {
             return;
         }
 
-        changeButton(id, true);
         gif.remove(id);
+        changeButton(id, true);
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
 
-        gif.onOpen(id, () => {
-            document.querySelector(`[for="gif-search-${id}"]`)?.remove();
-        });
+        gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
     };
 
     /**
@@ -507,7 +504,7 @@ export const comment = (() => {
      * @param {ReturnType<typeof dto.commentShowMore>[]} hide 
      * @returns {ReturnType<typeof dto.commentShowMore>[]}
      */
-    const traverse = (items, hide) => {
+    const traverse = (items, hide = []) => {
         items.forEach((item) => {
             if (!hide.find((i) => i.uuid === item.uuid)) {
                 hide.push(dto.commentShowMore(item.uuid));
@@ -536,15 +533,16 @@ export const comment = (() => {
             .token(session.getToken())
             .send(dto.getCommentsResponse)
             .then(async (res) => {
-                gif.remove();
+                lastRender.map((i) => i.uuid).forEach((u) => gif.remove(u));
                 pagination.setResultData(res.data.length);
                 comments.setAttribute('data-loading', 'false');
 
-                if (res.data.length === 0) {
+                if (pagination.getResultData() === 0) {
                     comments.innerHTML = onNullComment();
                     return res;
                 }
 
+                lastRender = traverse(res.data);
                 showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
 
                 let data = '';

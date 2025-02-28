@@ -448,18 +448,23 @@ export const gif = (() => {
 
     /**
      * @param {string} uuid 
-     * @param {function} callback 
-     */
-    const onOpen = (uuid, callback) => {
-        objectPool.get(uuid)?.container?.addEventListener('gif.open', callback);
-    };
-
-    /**
-     * @param {string} uuid 
      * @param {string} att 
      * @returns {null|string|number|HTMLElement}
      */
     const getAttribute = (uuid, att) => objectPool.get(uuid)[att];
+
+    /**
+     * @param {string} uuid 
+     * @param {function} callback 
+     */
+    const onOpen = (uuid, callback) => {
+        const container = getAttribute(uuid, 'container');
+        if (!container) {
+            throw new Error('trying to add event on null');
+        }
+
+        container.addEventListener('gif.open', callback);
+    };
 
     /**
      * @returns {void}
