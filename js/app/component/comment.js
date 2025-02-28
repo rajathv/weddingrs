@@ -158,7 +158,7 @@ export const comment = (() => {
 
         const status = await request(HTTP_PUT, '/api/comment/' + owns.get(id))
             .token(session.getToken())
-            .body(dto.updateCommentRequest(presence ? isPresent : null, form.value.length ? form.value : null, gifId))
+            .body(dto.updateCommentRequest(presence ? isPresent : null, gif.isOpen(id) ? null : form.value, gifId))
             .send(dto.statusResponse)
             .then((res) => res.data.status, () => false);
 
@@ -312,7 +312,7 @@ export const comment = (() => {
 
         const response = await request(HTTP_POST, '/api/comment')
             .token(session.getToken())
-            .body(dto.postCommentRequest(id, nameValue, isPresence, form.value.length ? form.value : null, gifId))
+            .body(dto.postCommentRequest(id, nameValue, isPresence, gif.isOpen(id) ? null : form.value, gifId))
             .send(dto.getCommentResponse)
             .then((res) => res, () => null);
 
