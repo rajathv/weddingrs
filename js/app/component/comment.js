@@ -200,16 +200,11 @@ export const comment = (() => {
             if (original.length > card.maxCommentLength) {
                 content.innerHTML = show?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original;
                 content.setAttribute('data-comment', util.base64Encode(original));
-                // todo: use bootstrap class
-                if (show?.style.display === 'none') {
-                    show.style.display = 'block';
-                }
+                show?.classList.replace('d-none', 'd-block');
             } else {
                 content.innerHTML = original;
                 content.removeAttribute('data-comment');
-                if (show?.style.display === 'block') {
-                    show.style.display = 'none';
-                }
+                show?.classList.replace('d-block', 'd-none');
             }
         }
 
