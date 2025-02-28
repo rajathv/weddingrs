@@ -45,6 +45,11 @@ export const gif = (() => {
     let objectPool = null;
 
     /**
+     * @type {Map<string, function>|null}
+     */
+    let queue = null;
+
+    /**
      * @type {ReturnType<typeof storage>|null}
      */
     let conf = null;
@@ -404,7 +409,6 @@ export const gif = (() => {
         const ses = singleton(uuid);
         ses.comment?.classList.toggle('d-none', false);
         ses.container.classList.toggle('d-none', true);
-        ses.container.dispatchEvent(new Event('gif.close'));
     };
 
     /**
@@ -415,7 +419,10 @@ export const gif = (() => {
         const ses = singleton(uuid);
         ses.comment?.classList.toggle('d-none', true);
         ses.container.classList.toggle('d-none', false);
-        ses.container.dispatchEvent(new Event('gif.open'));
+
+        if (queue.has(uuid)) {
+            queue.get(uuid)();
+        }
 
         await bootUp(ses);
         await render(ses, get('/featured', { limit: ses.limit }));
@@ -451,26 +458,26 @@ export const gif = (() => {
      * @param {string} att 
      * @returns {null|string|number|HTMLElement}
      */
-    const getAttribute = (uuid, att) => objectPool.get(uuid)[att];
+    const getAttribute = (uuid, att) => {
+        try {
+            return objectPool.get(uuid)[att];
+        } catch {
+            return null;
+        }
+    };
 
     /**
      * @param {string} uuid 
      * @param {function} callback 
      */
-    const onOpen = (uuid, callback) => {
-        const container = getAttribute(uuid, 'container');
-        if (!container) {
-            throw new Error('trying to add event on null');
-        }
-
-        container.addEventListener('gif.open', callback);
-    };
+    const onOpen = (uuid, callback) => queue.set(uuid, callback);
 
     /**
      * @returns {void}
      */
     const init = () => {
         urls = new Map();
+        queue = new Map();
         objectPool = new Map();
         conf = storage('config');
 
