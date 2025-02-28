@@ -149,9 +149,10 @@ export const gif = (() => {
      */
     const loading = (ctx) => {
         const list = ctx.lists;
+        const load = document.getElementById(`gif-loading-${ctx.uuid}`);
 
         if (!list.classList.contains('d-none')) {
-            ctx.loading.classList.replace('d-none', 'd-flex');
+            load.classList.replace('d-none', 'd-flex');
         }
 
         list.setAttribute('data-continue', 'false');
@@ -159,7 +160,7 @@ export const gif = (() => {
 
         const release = () => {
             if (!list.classList.contains('d-none')) {
-                ctx.loading.classList.replace('d-flex', 'd-none');
+                load.classList.replace('d-flex', 'd-none');
             }
 
             list.setAttribute('data-continue', 'true');
@@ -253,7 +254,7 @@ export const gif = (() => {
             <div class="position-absolute d-flex justify-content-center align-items-center top-50 start-50 translate-middle w-100 h-100 bg-overlay-auto rounded-4 z-3" id="gif-loading-${uuid}">
                 <div class="spinner-border" role="status"></div>
             </div>
-            <div id="gif-lists-${uuid}" class="d-flex rounded-4 p-0 overflow-y-scroll" data-continue="true" style="height: 15rem;"></div>
+            <div id="gif-lists-${uuid}" class="d-flex rounded-4 p-0 overflow-y-scroll border" data-continue="true" style="height: 15rem;"></div>
         </div>
 
         <figure class="d-flex m-0 position-relative" id="gif-result-${uuid}">
@@ -325,10 +326,6 @@ export const gif = (() => {
      *   gifs: object[], 
      *   limit: number|null, 
      *   lists: HTMLElement, 
-     *   loading: HTMLElement, 
-     *   form: HTMLElement, 
-     *   comment: HTMLElement, 
-     *   nav: HTMLElement, 
      *   result: HTMLElement
      * }}
      */
@@ -351,17 +348,13 @@ export const gif = (() => {
                 gifs: [],
                 limit: null,
                 lists: document.getElementById(`gif-lists-${uuid}`),
-                loading: document.getElementById(`gif-loading-${uuid}`),
-                form: document.getElementById(`gif-search-${uuid}`),
-                comment: document.getElementById(`comment-form-${uuid}`),
-                nav: document.getElementById(`gif-search-nav-${uuid}`),
                 result: document.getElementById(`gif-result-${uuid}`),
             });
 
             const ses = objectPool.get(uuid);
             ses.lists.addEventListener('scroll', () => infinite(ses));
-            ses.form.addEventListener('input', (e) => debounceSearch(ses, e.target));
             window.addEventListener('resize', () => debounceRender(ses));
+            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => debounceSearch(ses, e.target));
         }
 
         return objectPool.get(uuid);
@@ -381,7 +374,7 @@ export const gif = (() => {
         ses.result.insertAdjacentHTML('beforeend', `<img src="${urls.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
 
         ses.lists.classList.replace('d-flex', 'd-none');
-        ses.nav.classList.replace('d-flex', 'd-none');
+        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
 
         get('/registershare', { id: id, q: ses.query });
     };
@@ -398,7 +391,7 @@ export const gif = (() => {
         ses.result.querySelector('img').remove();
 
         ses.lists.classList.replace('d-none', 'd-flex');
-        ses.nav.classList.replace('d-none', 'd-flex');
+        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-none', 'd-flex');
     };
 
     /**
@@ -407,8 +400,8 @@ export const gif = (() => {
      */
     const back = (uuid) => {
         const ses = singleton(uuid);
-        ses.comment?.classList.toggle('d-none', false);
         ses.container.classList.toggle('d-none', true);
+        document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', false);
     };
 
     /**
@@ -417,8 +410,8 @@ export const gif = (() => {
      */
     const open = async (uuid) => {
         const ses = singleton(uuid);
-        ses.comment?.classList.toggle('d-none', true);
         ses.container.classList.toggle('d-none', false);
+        document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
         if (queue.has(uuid)) {
             queue.get(uuid)();
@@ -481,9 +474,7 @@ export const gif = (() => {
         objectPool = new Map();
         conf = storage('config');
 
-        let lang = document.documentElement.lang ?? 'en';
-        lang = lang.split('-')[0].toLowerCase();
-
+        const lang = document.documentElement.lang.split('-')[0].toLowerCase();
         conf.set('country', countryMapping[lang] ?? 'US');
         conf.set('locale', `${lang}_${conf.get('country')}`);
 
