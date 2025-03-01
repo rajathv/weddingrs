@@ -1,3 +1,5 @@
+import { util } from '../../common/util.js';
+
 export const pagination = (() => {
 
     let perPage = 10;
@@ -88,7 +90,7 @@ export const pagination = (() => {
     const buttonAction = (button) => {
         button.disabled = true;
         const tmp = button.innerHTML;
-        button.innerHTML = `<span class="spinner-border spinner-border-sm my-0 mx-1 p-0" style="height: 0.8rem; width: 0.8rem;"></span>`;
+        button.innerHTML = util.loader.replace('ms-0 me-1', 'mx-1');
 
         const process = async () => {
             const result = new Promise((res) => comment.addEventListener('comment.result', res));

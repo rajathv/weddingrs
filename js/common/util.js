@@ -1,6 +1,6 @@
 export const util = (() => {
 
-    const loader = '<span class="spinner-border spinner-border-sm my-0 ms-0 me-1 p-0" style="height: 0.8rem; width: 0.8rem"></span>';
+    const loader = '<span class="spinner-border spinner-border-sm my-0 ms-0 me-1 p-0" style="height: 0.8rem; width: 0.8rem;"></span>';
 
     /**
      * @param {string} unsafe
@@ -202,6 +202,7 @@ export const util = (() => {
     };
 
     return {
+        loader,
         copy,
         timeOut,
         debounce,

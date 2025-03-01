@@ -188,7 +188,7 @@ export const guest = (() => {
             }
         });
 
-        async function nextSlide() {
+        const nextSlide = async () => {
             await util.changeOpacity(slides[currentIndex], false);
             slides[currentIndex].classList.remove("slide-desktop-active");
 
@@ -196,7 +196,7 @@ export const guest = (() => {
 
             slides[currentIndex].classList.add("slide-desktop-active");
             await util.changeOpacity(slides[currentIndex], true);
-        }
+        };
 
         setInterval(nextSlide, 5000);
     };
