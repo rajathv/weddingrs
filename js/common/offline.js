@@ -1,3 +1,5 @@
+import { util } from './util.js';
+
 export const offline = (() => {
 
     /**
@@ -10,31 +12,6 @@ export const offline = (() => {
      * @returns {boolean}
      */
     const isOnline = () => online;
-
-    /**
-     * @param {boolean} isUp 
-     * @returns {Promise<void>}
-     */
-    const show = (isUp) => new Promise((res) => {
-        let op = parseFloat(alert.style.opacity);
-        let clear = null;
-
-        const step = isUp ? 0.05 : -0.05;
-        const target = isUp ? 1 : 0;
-
-        const callback = () => {
-            op = Math.max(0, Math.min(1, op + step));
-            alert.style.opacity = op.toFixed(2);
-
-            if (op === target) {
-                res();
-                clearInterval(clear);
-                clear = null;
-            }
-        };
-
-        clear = setInterval(callback, 10);
-    });
 
     /**
      * @returns {void}
@@ -60,7 +37,7 @@ export const offline = (() => {
      * @returns {Promise<void>}
      */
     const setDefaultState = async () => {
-        await show(false);
+        await util.changeOpacity(alert, false);
         setOffline();
     };
 
@@ -110,7 +87,7 @@ export const offline = (() => {
         online = false;
 
         setOffline();
-        show(true);
+        util.changeOpacity(alert, true);
         changeState();
     };
 

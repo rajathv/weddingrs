@@ -98,3 +98,12 @@ html[data-bs-theme="dark"] .bg-white-black {
         width: 75%;
     }
 }
+
+.slide-desktop {
+    transform: scale(1);
+    transition: transform 10s linear;
+}
+
+.slide-desktop-active {
+    transform: scale(1.2);
+}

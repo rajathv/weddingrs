@@ -1,5 +1,7 @@
 export const util = (() => {
 
+    const loader = '<span class="spinner-border spinner-border-sm my-0 ms-0 me-1 p-0" style="height: 0.8rem; width: 0.8rem"></span>';
+
     /**
      * @param {string} unsafe
      * @returns {string}
@@ -12,6 +14,32 @@ export const util = (() => {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
     };
+
+    /**
+     * @param {HTMLElement} el 
+     * @param {boolean} isUp 
+     * @returns {Promise<void>}
+     */
+    const changeOpacity = (el, isUp) => new Promise((res) => {
+        let op = parseFloat(el.style.opacity);
+        let clear = null;
+
+        const step = isUp ? 0.05 : -0.05;
+        const target = isUp ? 1 : 0;
+
+        const callback = () => {
+            op = Math.max(0, Math.min(1, op + step));
+            el.style.opacity = op.toFixed(2);
+
+            if (op === target) {
+                res();
+                clearInterval(clear);
+                clear = null;
+            }
+        };
+
+        clear = setInterval(callback, 10);
+    });
 
     /**
      * @param {function} callback
@@ -51,7 +79,7 @@ export const util = (() => {
         button.disabled = true;
 
         const tmp = button.innerHTML;
-        button.innerHTML = `<span class="spinner-border spinner-border-sm my-0 ms-0 me-1 p-0" style="height: 0.8rem; width: 0.8rem"></span>${message}`;
+        button.innerHTML = loader + message;
 
         return {
             restore: () => {
@@ -70,7 +98,7 @@ export const util = (() => {
 
         const label = document.querySelector(`label[for="${checkbox.id}"]`);
         const tmp = label.innerHTML;
-        label.innerHTML = `<span class="spinner-border spinner-border-sm my-0 ms-0 me-1 p-0" style="height: 0.8rem; width: 0.8rem"></span>${tmp}`;
+        label.innerHTML = loader + tmp;
 
         return {
             restore: () => {
@@ -183,5 +211,6 @@ export const util = (() => {
         disableButton,
         disableCheckbox,
         parseUserAgent,
+        changeOpacity,
     };
 })();

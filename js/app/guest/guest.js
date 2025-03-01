@@ -177,7 +177,35 @@ export const guest = (() => {
     /**
      * @returns {void}
      */
+    const slide = () => {
+        let currentIndex = 0;
+        const slides = document.querySelectorAll('.slide-desktop');
+
+        slides.forEach((s, i) => {
+            if (i === currentIndex) {
+                s.classList.add("slide-desktop-active");
+                util.changeOpacity(s, true);
+            }
+        });
+
+        async function nextSlide() {
+            await util.changeOpacity(slides[currentIndex], false);
+            slides[currentIndex].classList.remove("slide-desktop-active");
+
+            currentIndex = (currentIndex + 1) % slides.length;
+
+            slides[currentIndex].classList.add("slide-desktop-active");
+            await util.changeOpacity(slides[currentIndex], true);
+        }
+
+        setInterval(nextSlide, 5000);
+    };
+
+    /**
+     * @returns {void}
+     */
     const booting = () => {
+        slide();
         animateSvg();
         countDownDate();
         showGuestName();
