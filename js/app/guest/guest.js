@@ -178,24 +178,24 @@ export const guest = (() => {
      * @returns {void}
      */
     const slide = () => {
-        let currentIndex = 0;
+        let index = 0;
         const slides = document.querySelectorAll('.slide-desktop');
 
         slides.forEach((s, i) => {
-            if (i === currentIndex) {
-                s.classList.add("slide-desktop-active");
+            if (i === index) {
+                s.classList.add('slide-desktop-active');
                 util.changeOpacity(s, true);
             }
         });
 
         const nextSlide = async () => {
-            await util.changeOpacity(slides[currentIndex], false);
-            slides[currentIndex].classList.remove("slide-desktop-active");
+            await util.changeOpacity(slides[index], false);
+            slides[index].classList.remove('slide-desktop-active');
 
-            currentIndex = (currentIndex + 1) % slides.length;
+            index = (index + 1) % slides.length;
 
-            slides[currentIndex].classList.add("slide-desktop-active");
-            await util.changeOpacity(slides[currentIndex], true);
+            slides[index].classList.add('slide-desktop-active');
+            await util.changeOpacity(slides[index], true);
         };
 
         setInterval(nextSlide, 5000);
