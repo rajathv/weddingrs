@@ -202,9 +202,9 @@ export const gif = (() => {
      */
     const get = (path, params) => {
         params = {
-            key: conf.get('key'),
-            media_filter: conf.get('media_filter'),
-            client_key: conf.get('client_key'),
+            key: conf.get('tenor_key'),
+            media_filter: 'tinygif',
+            client_key: 'undangan_app',
             country: conf.get('country'),
             locale: conf.get('locale'),
             ...(params ?? {}),
@@ -477,10 +477,6 @@ export const gif = (() => {
         const lang = document.documentElement.lang.split('-')[0].toLowerCase();
         conf.set('country', countryMapping[lang] ?? 'US');
         conf.set('locale', `${lang}_${conf.get('country')}`);
-
-        conf.set('key', 'AIzaSyB-Z10TLX7MbkcMT5S_YA1iEqCmGzutV7s');
-        conf.set('media_filter', 'tinygif');
-        conf.set('client_key', 'undangan_app');
     };
 
     return {
