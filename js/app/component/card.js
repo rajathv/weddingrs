@@ -101,14 +101,8 @@ export const card = (() => {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.reply(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Reply</button>`;
         }
 
-        if (owns.has(c.uuid) && (config.get('can_edit') === true || config.get('can_edit') === undefined)) {
-            let result = `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Edit</button>`;
-
-            if (isGif && config.get('tenor_key') === null) {
-                result = '';
-            }
-
-            action += result;
+        if (owns.has(c.uuid) && (config.get('can_edit') === true || config.get('can_edit') === undefined) && !(isGif && config.get('tenor_key') === null)) {
+            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Edit</button>`;
         }
 
         if (session.isAdmin()) {

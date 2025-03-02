@@ -217,7 +217,16 @@ export const gif = (() => {
             .map((k) => `${k}=${encodeURIComponent(params[k])}`).join('&');
 
         const url = 'https://tenor.googleapis.com/v2';
-        return request(HTTP_GET, `${url + path}?${param}`).default().then((r) => r.json());
+        return request(HTTP_GET, `${url + path}?${param}`)
+            .default()
+            .then((r) => r.json())
+            .then((j) => {
+                if (j.error) {
+                    throw j.error.message;
+                }
+
+                return j;
+            });
     };
 
     /**
