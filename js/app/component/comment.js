@@ -408,8 +408,14 @@ export const comment = (() => {
      * @returns {void}
      */
     const cancel = (id) => {
+        const presence = document.getElementById(`form-inner-presence-${id}`);
+        const isPresent = presence ? presence.value === '1' : false;
+
+        const badge = document.getElementById(`badge-${id}`);
+        const isChecklist = badge ? badge.classList.contains('text-success') : false;
+
         if (gif.isOpen(id)) {
-            if (!gif.getResultId(id) || confirm('Are you sure?')) {
+            if ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?')) {
                 gif.remove(id);
                 changeButton(id, false);
                 document.getElementById(`inner-${id}`).remove();
@@ -419,13 +425,6 @@ export const comment = (() => {
         }
 
         const form = document.getElementById(`form-inner-${id}`);
-
-        const presence = document.getElementById(`form-inner-presence-${id}`);
-        const isPresent = presence ? presence.value === '1' : false;
-
-        const badge = document.getElementById(`badge-${id}`);
-        const isChecklist = badge ? badge.classList.contains('text-success') : false;
-
         if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
             changeButton(id, false);
             document.getElementById(`inner-${id}`).remove();
