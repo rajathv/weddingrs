@@ -120,12 +120,13 @@ export const admin = (() => {
         const form = document.getElementById('dashboard-tenorkey');
 
         form.disabled = true;
-        await request(HTTP_PATCH, '/api/user').
-            token(session.getToken()).
-            body({
+        await request(HTTP_PATCH, '/api/user')
+            .token(session.getToken())
+            .body({
                 tenor_key: form.value.length ? form.value : null
-            }).
-            send();
+            })
+            .send()
+            .then(() => alert(`success ${form.value.length ? 'add' : 'remove'} tenor key`));
 
         form.disabled = false;
         btn.restore();
