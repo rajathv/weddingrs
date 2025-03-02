@@ -229,7 +229,7 @@
                                 <label for="form-comment" class="form-label fw-bold my-1"><i class="fa-solid fa-comment me-2"></i>Comment</label>
 
                                 <div class="position-relative">
-                                    <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1 position-absolute bottom-0 end-0" onclick="undangan.comment.gif.open('default')" aria-label="button gif" data-offline-disabled="false"><i class="fa-solid fa-photo-film"></i></button>
+                                    <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1 position-absolute bottom-0 end-0" onclick="undangan.comment.gif.open(undangan.comment.gif.default)" aria-label="button gif" data-offline-disabled="false"><i class="fa-solid fa-photo-film"></i></button>
                                     <textarea class="form-control shadow-sm mb-3 rounded-4" id="form-comment" name="form-comment" rows="3" minlength="1" maxlength="1000" placeholder="Type to comment" data-offline-disabled="false"></textarea>
                                 </div>
                             </div>
@@ -287,6 +287,20 @@
 
                             <div class="d-flex justify-content-end">
                                 <button type="button" class="btn btn-sm btn-primary rounded-4 shadow-sm" onclick="undangan.admin.regenerate(this)" data-offline-disabled="false">Regenerate</button>
+                            </div>
+                        </div>
+
+                        <!-- Tenor Key -->
+                        <div class="p-3 bg-theme-auto mb-3 rounded-4 shadow">
+                            <p class="mx-0 mt-0 mb-1 p-0 fw-bold"><i class="fa-solid fa-photo-film me-2"></i>Tenor Key</p>
+
+                            <div class="input-group input-group-sm rounded-4 mb-3">
+                                <input type="text" class="form-control form-control-sm rounded-start-4 shadow-sm" id="dashboard-tenorkey" placeholder="Api key tenor" autocomplete="off">
+                                <button class="btn btn-sm btn-outline-secondary rounded-end-4 shadow-sm" type="button" onclick="document.getElementById('dashboard-tenorkey').value = null"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-sm btn-primary rounded-4 shadow-sm" onclick="undangan.admin.tenor(this)" data-offline-disabled="false">Save</button>
                             </div>
                         </div>
 

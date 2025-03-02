@@ -6,6 +6,8 @@ export const gif = (() => {
 
     const cacheName = 'gifs';
 
+    const gifDefault = 'default';
+
     const breakPoint = {
         128: 2,
         256: 3,
@@ -477,9 +479,14 @@ export const gif = (() => {
         const lang = document.documentElement.lang.split('-')[0].toLowerCase();
         conf.set('country', countryMapping[lang] ?? 'US');
         conf.set('locale', `${lang}_${conf.get('country')}`);
+
+        if (conf.get('tenor_key') === null) {
+            document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]').remove();
+        }
     };
 
     return {
+        default: gifDefault,
         init,
         cache,
         back,

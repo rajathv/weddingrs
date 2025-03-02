@@ -27,6 +27,9 @@ export const admin = (() => {
             document.getElementById('replyComment').checked = Boolean(res.data.can_reply);
             document.getElementById('editComment').checked = Boolean(res.data.can_edit);
             document.getElementById('deleteComment').checked = Boolean(res.data.can_delete);
+            document.getElementById('dashboard-tenorkey').value = res.data.tenor_key;
+
+            storage('config').set('tenor_key', res.data.tenor_key);
         });
 
         request(HTTP_GET, '/api/stats').token(session.getToken()).send().then((res) => {
@@ -36,6 +39,7 @@ export const admin = (() => {
             document.getElementById('count-absent').innerHTML = String(res.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         });
 
+        comment.init();
         comment.show();
     };
 
@@ -105,6 +109,26 @@ export const admin = (() => {
             send();
 
         label.restore();
+    };
+
+    /**
+     * @param {HTMLButtonElement} button
+     * @returns {Promise<void>}
+     */
+    const tenor = async (button) => {
+        const btn = util.disableButton(button);
+        const form = document.getElementById('dashboard-tenorkey');
+
+        form.disabled = true;
+        await request(HTTP_PATCH, '/api/user').
+            token(session.getToken()).
+            body({
+                tenor_key: form.value.length ? form.value : null
+            }).
+            send();
+
+        form.disabled = false;
+        btn.restore();
     };
 
     /**
@@ -253,7 +277,6 @@ export const admin = (() => {
      */
     const domLoaded = () => {
         offline.init();
-        comment.init();
         theme.spyTop();
 
         document.addEventListener('hidden.bs.modal', getAllRequest);
@@ -303,6 +326,7 @@ export const admin = (() => {
                 auth,
                 navbar,
                 logout,
+                tenor,
                 download,
                 regenerate,
                 editComment,

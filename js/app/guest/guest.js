@@ -95,6 +95,33 @@ export const guest = (() => {
     };
 
     /**
+     * @returns {void}
+     */
+    const slide = () => {
+        let index = 0;
+        const slides = document.querySelectorAll('.slide-desktop');
+
+        slides.forEach((s, i) => {
+            if (i === index) {
+                s.classList.add('slide-desktop-active');
+                util.changeOpacity(s, true);
+            }
+        });
+
+        const nextSlide = async () => {
+            await util.changeOpacity(slides[index], false);
+            slides[index].classList.remove('slide-desktop-active');
+
+            index = (index + 1) % slides.length;
+
+            slides[index].classList.add('slide-desktop-active');
+            await util.changeOpacity(slides[index], true);
+        };
+
+        setInterval(nextSlide, 5000);
+    };
+
+    /**
      * @param {HTMLButtonElement} button
      * @returns {void}
      */
@@ -106,6 +133,7 @@ export const guest = (() => {
             document.getElementById('button-theme').style.display = 'block';
         }
 
+        slide();
         audio.init();
         theme.spyTop();
 
@@ -177,35 +205,7 @@ export const guest = (() => {
     /**
      * @returns {void}
      */
-    const slide = () => {
-        let index = 0;
-        const slides = document.querySelectorAll('.slide-desktop');
-
-        slides.forEach((s, i) => {
-            if (i === index) {
-                s.classList.add('slide-desktop-active');
-                util.changeOpacity(s, true);
-            }
-        });
-
-        const nextSlide = async () => {
-            await util.changeOpacity(slides[index], false);
-            slides[index].classList.remove('slide-desktop-active');
-
-            index = (index + 1) % slides.length;
-
-            slides[index].classList.add('slide-desktop-active');
-            await util.changeOpacity(slides[index], true);
-        };
-
-        setInterval(nextSlide, 5000);
-    };
-
-    /**
-     * @returns {void}
-     */
     const booting = () => {
-        slide();
         animateSvg();
         countDownDate();
         showGuestName();
