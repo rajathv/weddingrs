@@ -73,7 +73,7 @@ export const gif = (() => {
         */
         const fetchPut = (c, retries = 3, delay = 1000) => request(HTTP_GET, url)
             .default()
-            .then((r) => r.blob().then((b) => c.put(url, new Response(b, { headers: r.headers })).then(() => b)))
+            .then((r) => r.blob().then((b) => c.put(url, new Response(b, { headers: new Headers(r.headers) })).then(() => b)))
             .catch((err) => {
                 if (retries <= 0) {
                     throw err;
