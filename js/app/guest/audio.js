@@ -12,11 +12,6 @@ export const audio = (() => {
      */
     let audioEl = null;
 
-    /**
-     * @type {Promise<void>|null}
-     */
-    let canPlay = null;
-
     let isPlay = false;
 
     const statePlay = '<i class="fa-solid fa-circle-pause spin-button"></i>';
@@ -29,8 +24,6 @@ export const audio = (() => {
         if (!navigator.onLine) {
             return;
         }
-
-        await canPlay;
 
         music.disabled = true;
         try {
@@ -69,8 +62,6 @@ export const audio = (() => {
         audioEl.autoplay = false;
         audioEl.controls = false;
 
-        canPlay = new Promise((res) => audioEl.addEventListener('canplay', res, { once: true }));
-
         const context = new AudioContext();
         const source = context.createMediaElementSource(audioEl);
         source.connect(context.destination);
@@ -86,8 +77,8 @@ export const audio = (() => {
                     return;
                 }
 
-                sourceBuffer.appendBuffer(value.buffer);
                 sourceBuffer.addEventListener('updateend', push, { once: true });
+                sourceBuffer.appendBuffer(value.buffer);
             });
 
             push();
