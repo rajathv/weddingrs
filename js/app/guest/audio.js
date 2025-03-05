@@ -23,8 +23,6 @@ export const audio = (() => {
             return;
         }
 
-        await canPlay;
-
         music.disabled = true;
         try {
             await audioEl.play();
