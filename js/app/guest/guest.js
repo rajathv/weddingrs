@@ -127,7 +127,6 @@ export const guest = (() => {
      */
     const open = (button) => {
         button.disabled = true;
-        document.dispatchEvent(new Event('undangan.open'));
         document.body.scrollIntoView({ behavior: 'instant' });
 
         if (theme.isAutoMode()) {
@@ -135,7 +134,7 @@ export const guest = (() => {
         }
 
         slide();
-        audio.play();
+        audio.init();
         theme.spyTop();
 
         basicAnimation();
@@ -233,7 +232,6 @@ export const guest = (() => {
      * @returns {void}
      */
     const domLoaded = () => {
-        audio.init();
         offline.init();
         progress.init();
         information = storage('information');

@@ -1,5 +1,3 @@
-import { request, HTTP_GET } from '../../connection/request.js';
-
 export const audio = (() => {
 
     /**
@@ -11,11 +9,6 @@ export const audio = (() => {
      * @type {HTMLAudioElement|null}
      */
     let audioEl = null;
-
-    /**
-     * @type {Promise<void>|null}
-     */
-    let canPlay = null;
 
     let isPlay = false;
 
@@ -58,47 +51,22 @@ export const audio = (() => {
      */
     const init = () => {
         music = document.getElementById('button-music');
-        document.addEventListener('undangan.open', () => {
-            music.style.display = 'block';
-        });
+        music.style.display = 'block';
 
-        const url = music.getAttribute('data-url');
-        const mediaSource = new MediaSource();
-        audioEl = new Audio(URL.createObjectURL(mediaSource));
+        audioEl = new Audio(music.getAttribute('data-url'));
+        audioEl.volume = 1;
         audioEl.loop = true;
+        audioEl.muted = false;
+        audioEl.currentTime = 0;
         audioEl.autoplay = false;
         audioEl.controls = false;
 
-        canPlay = new Promise((res) => audioEl.addEventListener('canplay', res, { once: true }));
-
-        const context = new AudioContext();
-        const source = context.createMediaElementSource(audioEl);
-        source.connect(context.destination);
-
-        mediaSource.addEventListener('sourceopen', async () => {
-            const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
-            const res = await request(HTTP_GET, url).default();
-            const reader = res.body.getReader();
-
-            const push = () => reader.read().then(({ value, done }) => {
-                if (done) {
-                    mediaSource.endOfStream();
-                    return;
-                }
-
-                sourceBuffer.appendBuffer(value.buffer);
-                sourceBuffer.addEventListener('updateend', push, { once: true });
-            });
-
-            push();
-        });
-
+        audioEl.addEventListener('canplay', play);
         music.addEventListener('offline', pause);
         music.addEventListener('click', () => isPlay ? pause() : play());
     };
 
     return {
         init,
-        play,
     };
 })();
