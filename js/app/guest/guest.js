@@ -279,6 +279,7 @@ export const guest = (() => {
                 comment.show()
                     .then(() => progress.complete('comment'))
                     .catch(() => progress.invalid('comment'));
+
             }).catch(() => progress.invalid('config')));
         }
     };

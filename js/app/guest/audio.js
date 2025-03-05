@@ -114,6 +114,10 @@ export const audio = (() => {
         music = document.getElementById('button-music');
         url = music.getAttribute('data-url');
 
+        document.addEventListener('undangan.open', () => {
+            music.style.display = 'block';
+        });
+
         audioEl = new Audio(await getUrl());
         audioEl.volume = 1;
         audioEl.loop = true;
@@ -124,9 +128,6 @@ export const audio = (() => {
 
         canPlay = new Promise((res) => audioEl.addEventListener('canplay', res, { once: true }));
 
-        document.addEventListener('undangan.open', () => {
-            music.style.display = 'block';
-        });
         music.addEventListener('offline', pause);
         music.addEventListener('click', () => isPlay ? pause() : play());
     };
