@@ -128,13 +128,14 @@ export const guest = (() => {
     const open = (button) => {
         button.disabled = true;
         document.body.scrollIntoView({ behavior: 'instant' });
+        document.dispatchEvent(new Event('undangan.open'));
 
         if (theme.isAutoMode()) {
             document.getElementById('button-theme').style.display = 'block';
         }
 
         slide();
-        audio.init();
+        audio.play();
         theme.spyTop();
 
         basicAnimation();
@@ -241,14 +242,16 @@ export const guest = (() => {
         document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
 
         if (!token || token.length <= 0) {
+            audio.init();
             image.init().load();
             document.getElementById('comment')?.remove();
             document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
         }
 
         if (token.length > 0) {
-            // add 2 progress for config and comment.
+            // add 23progress for config, comment, and audio.
             // before img.load();
+            progress.add();
             progress.add();
             progress.add();
 
@@ -267,6 +270,10 @@ export const guest = (() => {
                 if (img.hasDataSrc()) {
                     img.load();
                 }
+
+                audio.init()
+                    .then(() => progress.complete('audio'))
+                    .catch(() => progress.invalid('audio'));
 
                 comment.init();
                 comment.show()
