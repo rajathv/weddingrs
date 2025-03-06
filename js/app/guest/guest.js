@@ -118,7 +118,7 @@ export const guest = (() => {
             await util.changeOpacity(slides[index], true);
         };
 
-        setInterval(nextSlide, 5000);
+        setInterval(nextSlide, 6000);
     };
 
     /**

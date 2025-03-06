@@ -105,5 +105,5 @@ html[data-bs-theme="dark"] .bg-white-black {
 }
 
 .slide-desktop-active {
-    transform: scale(1.2);
+    transform: scale(1.15);
 }
