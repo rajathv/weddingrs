@@ -14,8 +14,8 @@ export const admin = (() => {
     /**
      * @returns {Promise<void>}
      */
-    const getAllRequest = async () => {
-        await auth.getDetailUser().then((res) => {
+    const getAllRequest = () => {
+        return auth.getDetailUser().then((res) => {
 
             document.getElementById('dashboard-name').innerHTML = `${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`;
             document.getElementById('dashboard-email').innerHTML = res.data.email;
@@ -31,16 +31,18 @@ export const admin = (() => {
 
             storage('config').set('tenor_key', res.data.tenor_key);
         });
+    };
 
+    /**
+     * @returns {void}
+     */
+    const getStatsComment = () => {
         request(HTTP_GET, '/api/stats').token(session.getToken()).send().then((res) => {
             document.getElementById('count-comment').innerHTML = String(res.data.comments).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             document.getElementById('count-like').innerHTML = String(res.data.likes).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             document.getElementById('count-present').innerHTML = String(res.data.present).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             document.getElementById('count-absent').innerHTML = String(res.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         });
-
-        comment.init();
-        comment.show();
     };
 
     /**
@@ -280,7 +282,15 @@ export const admin = (() => {
         offline.init();
         theme.spyTop();
 
-        document.addEventListener('hidden.bs.modal', getAllRequest);
+        const booted = async () => {
+            await getAllRequest();
+            getStatsComment();
+
+            comment.init();
+            comment.show();
+        };
+
+        document.addEventListener('hidden.bs.modal', booted);
 
         try {
             const raw = window.location.href.split('?k=');
@@ -294,7 +304,7 @@ export const admin = (() => {
                 throw new Error('Invalid token');
             }
 
-            getAllRequest();
+            booted();
         } catch {
             auth.clearSession();
         }

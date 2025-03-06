@@ -252,7 +252,7 @@ export const guest = (() => {
         }
 
         if (token.length > 0) {
-            // add 23progress for config, comment, and audio.
+            // add 3 progress for config, comment, and audio.
             // before img.load();
             progress.add();
             progress.add();
