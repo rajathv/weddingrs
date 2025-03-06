@@ -204,9 +204,9 @@ export const guest = (() => {
     };
 
     /**
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const booting = () => {
+    const booting = async () => {
         animateSvg();
         countDownDate();
         showGuestName();
@@ -224,6 +224,9 @@ export const guest = (() => {
 
         window.AOS.init();
         document.body.scrollIntoView({ behavior: 'instant' });
+
+        // wait until welcome screen is show.
+        await util.changeOpacity(document.getElementById('welcome'), true);
 
         // remove loading screen and show welcome screen.
         opacity('loading', 0.025);

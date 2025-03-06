@@ -19,7 +19,7 @@ export const audio = (() => {
     let url = null;
 
     /**
-     * @type {Promise<void>}
+     * @type {Promise<void>|null}
      */
     let canPlay = null;
 
