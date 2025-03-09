@@ -532,11 +532,12 @@ export const comment = (() => {
             .token(session.getToken())
             .send(dto.getCommentsResponse)
             .then(async (res) => {
-                lastRender.map((i) => i.uuid).forEach((u) => gif.remove(u));
-                pagination.setResultData(res.data.length);
+                const commentLength = res.data.length;
                 comments.setAttribute('data-loading', 'false');
+                lastRender.map((i) => i.uuid).forEach((u) => gif.remove(u));
 
-                if (pagination.getResultData() === 0) {
+                if (commentLength === 0) {
+                    pagination.setResultData(commentLength);
                     comments.innerHTML = onNullComment();
                     return res;
                 }
@@ -552,6 +553,8 @@ export const comment = (() => {
 
                 res.data.forEach(fetchTracker);
                 res.data.forEach(addListenerLike);
+
+                pagination.setResultData(commentLength);
                 comments.dispatchEvent(new Event('comment.result'));
 
                 return res;
