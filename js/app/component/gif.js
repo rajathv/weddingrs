@@ -136,9 +136,9 @@ export const gif = (() => {
                         <div onclick="undangan.comment.gif.click('${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
                             <i class="fa-solid fa-circle-check"></i>
                         </div>
-                        <img src="${uri}" class="img-fluid" alt="${description}" style="width: 100%;">
+                        <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
                     </figure>
-                    `);
+                `);
                 });
             }
             k++;
@@ -181,9 +181,10 @@ export const gif = (() => {
      * @returns {Promise<void>}
      */
     const render = async (ctx, reqCancel, response) => {
+        let run = true;
+
         ctx.last = new Promise((res) => {
             const load = loading(ctx);
-            let run = true;
 
             (async () => {
                 await reqCancel;
@@ -207,10 +208,10 @@ export const gif = (() => {
                     } else {
                         alert(err);
                     }
+                } finally {
+                    load.release();
+                    res();
                 }
-
-                load.release();
-                res();
             })();
         });
     };
@@ -258,6 +259,11 @@ export const gif = (() => {
      * @returns {Promise<void>}
      */
     const infinite = async (ctx) => {
+        // Don't try to load more if there's no next page token
+        if (!ctx.next || ctx.next.length === 0) {
+            return;
+        }
+
         const isQuery = ctx.query && ctx.query.trim().length;
         const params = { pos: ctx.next, limit: ctx.limit };
 
@@ -498,7 +504,20 @@ export const gif = (() => {
      * @param {string|null} uuid 
      * @returns {void}
      */
-    const remove = (uuid = null) => uuid ? objectPool.delete(uuid) : objectPool.clear();
+    const remove = (uuid = null) => {
+        if (uuid) {
+            if (objectPool.has(uuid)) {
+                objectPool.get(uuid).reqs.forEach(f => f());
+
+                objectPool.delete(uuid);
+                queue.delete(uuid);
+            }
+        } else {
+            objectPool.forEach((ses) => ses.reqs.forEach(f => f()));
+            objectPool.clear();
+            queue.clear();
+        }
+    };
 
     /**
      * @param {string} uuid 
