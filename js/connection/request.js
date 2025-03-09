@@ -111,6 +111,18 @@ export const request = (method, path) => {
                 });
         },
         /**
+         * @param {Promise<void>} cancel
+         * @returns {ReturnType<typeof request>}
+         */
+        withCancel(cancel) {
+            (async () => {
+                await cancel;
+                ac.abort();
+            })();
+
+            return this;
+        },
+        /**
          * @param {object|null} header 
          * @returns {Promise<Response>}
          */

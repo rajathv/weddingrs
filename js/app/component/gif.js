@@ -176,25 +176,43 @@ export const gif = (() => {
 
     /**
      * @param {object} ctx
+     * @param {Promise<void>} reqCancel
      * @param {Promise<object>} response
      * @returns {Promise<void>}
      */
-    const render = async (ctx, response) => {
-        const load = loading(ctx);
+    const render = async (ctx, reqCancel, response) => {
+        ctx.last = new Promise((res) => {
+            const load = loading(ctx);
+            let run = true;
 
-        try {
-            const data = await response;
-            ctx.next = data?.next;
+            (async () => {
+                await reqCancel;
+                run = false;
+            })();
 
-            for (const el of data.results) {
-                ctx.gifs.push(el);
-                await show(ctx, el);
-            }
-        } catch (err) {
-            alert(err);
-        }
+            (async () => {
+                try {
+                    const data = await response;
+                    ctx.next = data?.next;
 
-        load.release();
+                    for (const el of data.results) {
+                        if (run) {
+                            ctx.gifs.push(el);
+                            await show(ctx, el);
+                        }
+                    }
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        console.warn('Fetch abort:', err);
+                    } else {
+                        alert(err);
+                    }
+                }
+
+                load.release();
+                res();
+            })();
+        });
     };
 
     /**
@@ -214,18 +232,24 @@ export const gif = (() => {
 
         const param = Object.keys(params)
             .filter((k) => params[k] !== null && params[k] !== undefined)
-            .map((k) => `${k}=${encodeURIComponent(params[k])}`).join('&');
+            .filter((k) => typeof params[k] !== 'object')
+            .map((k) => `${k}=${encodeURIComponent(params[k])}`)
+            .join('&');
 
-        const url = 'https://tenor.googleapis.com/v2';
-        return request(HTTP_GET, `${url + path}?${param}`)
-            .default()
+        let req = request(HTTP_GET, `https://tenor.googleapis.com/v2${path}?${param}`);
+
+        if (params.reqCancel) {
+            req = req.withCancel(params.reqCancel);
+        }
+
+        return req.default()
             .then((r) => r.json())
             .then((j) => {
-                if (j.error) {
-                    throw j.error.message;
+                if (!j.error) {
+                    return j;
                 }
 
-                return j;
+                throw new Error(j.error.message);
             });
     };
 
@@ -241,10 +265,19 @@ export const gif = (() => {
             params.q = ctx.query;
         }
 
+        if (ctx.last) {
+            await ctx.last;
+            ctx.last = null;
+        }
+
+        params.reqCancel = new Promise((res) => {
+            ctx.reqs.push(res);
+        });
+
         const scrollableHeight = (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9;
 
         if (ctx.lists.scrollTop > scrollableHeight && ctx.lists.getAttribute('data-continue') === 'true') {
-            await render(ctx, get(isQuery ? '/search' : '/featured', params));
+            await render(ctx, params.reqCancel, get(isQuery ? '/search' : '/featured', params));
         }
     };
 
@@ -318,24 +351,38 @@ export const gif = (() => {
             ctx.query = null;
         }
 
+        ctx.reqs.forEach((f) => f());
+        ctx.reqs = [];
+
+        if (ctx.last) {
+            await ctx.last;
+            ctx.last = null;
+        }
+
+        const reqCancel = new Promise((res) => {
+            ctx.reqs.push(res);
+        });
+
         ctx.next = null;
         ctx.gifs = [];
         ctx.pointer = -1;
         await bootUp(ctx);
-        await render(ctx, get(ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit }));
+        await render(ctx, reqCancel, get(ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit, reqCancel: reqCancel }));
     };
 
     /**
      * @param {string} uuid
      * @returns {{
      *   uuid: string, 
-     *   container: HTMLElement, 
+     *   last: Promise<void>|null,
+     *   limit: number|null,
      *   query: string|null, 
      *   next: string|null, 
      *   col: number|null, 
      *   pointer: number, 
-     *   gifs: object[], 
-     *   limit: number|null, 
+     *   gifs: object[],
+     *   reqs: function[],
+     *   container: HTMLElement,
      *   lists: HTMLElement, 
      *   result: HTMLElement
      * }}
@@ -346,26 +393,28 @@ export const gif = (() => {
             const container = document.getElementById(`gif-form-${uuid}`);
             container.innerHTML = template(uuid);
 
-            const debounceRender = util.debounce(bootUp, 500);
-            const debounceSearch = util.debounce(search, 500);
+            const deBootUp = util.debounce(bootUp, 500);
+            const deSearch = util.debounce(search, 500);
 
             objectPool.set(uuid, {
                 uuid: uuid,
-                container: container,
+                last: null,
+                limit: null,
                 query: null,
                 next: null,
                 col: null,
                 pointer: -1,
                 gifs: [],
-                limit: null,
+                reqs: [],
+                container: container,
                 lists: document.getElementById(`gif-lists-${uuid}`),
                 result: document.getElementById(`gif-result-${uuid}`),
             });
 
             const ses = objectPool.get(uuid);
             ses.lists.addEventListener('scroll', () => infinite(ses));
-            window.addEventListener('resize', () => debounceRender(ses));
-            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => debounceSearch(ses, e.target));
+            window.addEventListener('resize', () => deBootUp(ses));
+            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ses, e.target));
         }
 
         return objectPool.get(uuid);
@@ -387,6 +436,7 @@ export const gif = (() => {
         ses.lists.classList.replace('d-flex', 'd-none');
         document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
 
+        // send analytic to tenor.
         get('/registershare', { id: id, q: ses.query });
     };
 
@@ -428,13 +478,25 @@ export const gif = (() => {
             queue.get(uuid)();
         }
 
+        ses.reqs.forEach((f) => f());
+        ses.reqs = [];
+
+        if (ses.last) {
+            await ses.last;
+            ses.last = null;
+        }
+
+        const reqCancel = new Promise((res) => {
+            ses.reqs.push(res);
+        });
+
         await bootUp(ses);
-        await render(ses, get('/featured', { limit: ses.limit }));
+        await render(ses, reqCancel, get('/featured', { limit: ses.limit, reqCancel: reqCancel }));
     };
 
     /**
      * @param {string|null} uuid 
-     * @returns {boolean}
+     * @returns {void}
      */
     const remove = (uuid = null) => uuid ? objectPool.delete(uuid) : objectPool.clear();
 
@@ -472,7 +534,8 @@ export const gif = (() => {
 
     /**
      * @param {string} uuid 
-     * @param {function} callback 
+     * @param {function} callback
+     * @returns {void}
      */
     const onOpen = (uuid, callback) => queue.set(uuid, callback);
 
@@ -485,12 +548,12 @@ export const gif = (() => {
         objectPool = new Map();
         conf = storage('config');
 
-        const lang = document.documentElement.lang.split('-')[0].toLowerCase();
+        const lang = document.documentElement.lang.toLowerCase();
         conf.set('country', countryMapping[lang] ?? 'US');
         conf.set('locale', `${lang}_${conf.get('country')}`);
 
         if (conf.get('tenor_key') === null) {
-            document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]').remove();
+            document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.remove();
         }
     };
 
