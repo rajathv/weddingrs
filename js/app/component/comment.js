@@ -67,6 +67,147 @@ export const comment = (() => {
     };
 
     /**
+     * @param {ReturnType<typeof dto.getCommentResponse>} c
+     * @returns {void}
+     */
+    const fetchTracker = (c) => {
+        if (!session.isAdmin()) {
+            return;
+        }
+
+        if (c.comments) {
+            c.comments.forEach(fetchTracker);
+        }
+
+        if (c.ip === undefined || c.user_agent === undefined || c.is_admin || tracker.has(c.ip)) {
+            return;
+        }
+
+        /**
+         * @param {string} uuid 
+         * @param {string} ip 
+         * @param {string} result 
+         * @returns {void}
+         */
+        const setResult = (uuid, ip, result) => {
+            document.getElementById(`ip-${uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`;
+        };
+
+        request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
+            .default()
+            .then((res) => res.json())
+            .then((res) => {
+                let result = res.cityName + ' - ' + res.regionName;
+
+                if (res.cityName === '-' && res.regionName === '-') {
+                    result = 'localhost';
+                }
+
+                tracker.set(c.ip, result);
+                setResult(c.uuid, c.ip, result);
+            })
+            .catch((err) => setResult(c.uuid, c.ip, err.message));
+    };
+
+    /**
+     * @param {ReturnType<typeof dto.getCommentsResponse>} items 
+     * @param {ReturnType<typeof dto.commentShowMore>[]} hide 
+     * @returns {ReturnType<typeof dto.commentShowMore>[]}
+     */
+    const traverse = (items, hide = []) => {
+        items.forEach((item) => {
+            if (!hide.find((i) => i.uuid === item.uuid)) {
+                hide.push(dto.commentShowMore(item.uuid));
+            }
+
+            if (item.comments && item.comments.length > 0) {
+                traverse(item.comments, hide);
+            }
+        });
+
+        return hide;
+    };
+
+    /**
+     * @returns {Promise<ReturnType<typeof dto.getCommentsResponse>>}
+     */
+    const show = () => {
+        const comments = document.getElementById('comments');
+
+        if (comments.getAttribute('data-loading') === 'false') {
+            comments.setAttribute('data-loading', 'true');
+            comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
+        }
+
+        return request(HTTP_GET, `/api/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
+            .token(session.getToken())
+            .send(dto.getCommentsResponse)
+            .then(async (res) => {
+                const commentLength = res.data.length;
+                comments.setAttribute('data-loading', 'false');
+                lastRender.map((i) => i.uuid).forEach((u) => gif.remove(u));
+
+                if (commentLength === 0) {
+                    pagination.setResultData(commentLength);
+                    comments.innerHTML = onNullComment();
+                    return res;
+                }
+
+                lastRender = traverse(res.data);
+                showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
+
+                let data = '';
+                for (const i of res.data) {
+                    data += await card.renderContent(i);
+                }
+                comments.innerHTML = data;
+
+                res.data.forEach(fetchTracker);
+                res.data.forEach(addListenerLike);
+
+                pagination.setResultData(commentLength);
+                comments.dispatchEvent(new Event('comment.result'));
+
+                return res;
+            });
+    };
+
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {void}
+     */
+    const showOrHide = (button) => {
+        const ids = button.getAttribute('data-uuids').split(',');
+        const isShow = button.getAttribute('data-show') === 'true';
+        const uuid = button.getAttribute('data-uuid');
+
+        if (isShow) {
+            button.setAttribute('data-show', 'false');
+            button.innerText = `Show replies (${ids.length})`;
+
+            showHide.set('show', showHide.get('show').filter((i) => i !== uuid));
+        } else {
+            button.setAttribute('data-show', 'true');
+            button.innerText = 'Hide replies';
+
+            showHide.set('show', showHide.get('show').concat([uuid]));
+        }
+
+        for (const id of ids) {
+            showHide.set('hidden', showHide.get('hidden').map((i) => {
+                if (i.uuid === id) {
+                    i.show = !isShow;
+                }
+
+                return i;
+            }));
+
+            const cls = document.getElementById(id).classList;
+            isShow ? cls.add('d-none') : cls.remove('d-none');
+        }
+    };
+
+    /**
      * @param {HTMLButtonElement} button 
      * @returns {Promise<void>}
      */
@@ -198,18 +339,18 @@ export const comment = (() => {
         document.getElementById(`inner-${id}`).remove();
 
         if (!gifIsOpen) {
-            const show = document.querySelector(`[onclick="undangan.comment.showMore(this, '${id}')"]`);
+            const showButton = document.querySelector(`[onclick="undangan.comment.showMore(this, '${id}')"]`);
             const original = card.convertMarkdownToHTML(util.escapeHtml(form.value));
             const content = document.getElementById(`content-${id}`);
 
             if (original.length > card.maxCommentLength) {
-                content.innerHTML = show?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original;
+                content.innerHTML = showButton?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original;
                 content.setAttribute('data-comment', util.base64Encode(original));
-                show?.classList.replace('d-none', 'd-block');
+                showButton?.classList.replace('d-none', 'd-block');
             } else {
                 content.innerHTML = original;
                 content.removeAttribute('data-comment');
-                show?.classList.replace('d-block', 'd-none');
+                showButton?.classList.replace('d-block', 'd-none');
             }
         }
 
@@ -499,104 +640,6 @@ export const comment = (() => {
     };
 
     /**
-     * @param {ReturnType<typeof dto.getCommentsResponse>} items 
-     * @param {ReturnType<typeof dto.commentShowMore>[]} hide 
-     * @returns {ReturnType<typeof dto.commentShowMore>[]}
-     */
-    const traverse = (items, hide = []) => {
-        items.forEach((item) => {
-            if (!hide.find((i) => i.uuid === item.uuid)) {
-                hide.push(dto.commentShowMore(item.uuid));
-            }
-
-            if (item.comments && item.comments.length > 0) {
-                traverse(item.comments, hide);
-            }
-        });
-
-        return hide;
-    };
-
-    /**
-     * @returns {Promise<ReturnType<typeof dto.getCommentsResponse>>}
-     */
-    const show = () => {
-        const comments = document.getElementById('comments');
-
-        if (comments.getAttribute('data-loading') === 'false') {
-            comments.setAttribute('data-loading', 'true');
-            comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
-        }
-
-        return request(HTTP_GET, `/api/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
-            .token(session.getToken())
-            .send(dto.getCommentsResponse)
-            .then(async (res) => {
-                const commentLength = res.data.length;
-                comments.setAttribute('data-loading', 'false');
-                lastRender.map((i) => i.uuid).forEach((u) => gif.remove(u));
-
-                if (commentLength === 0) {
-                    pagination.setResultData(commentLength);
-                    comments.innerHTML = onNullComment();
-                    return res;
-                }
-
-                lastRender = traverse(res.data);
-                showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
-
-                let data = '';
-                for (const i of res.data) {
-                    data += await card.renderContent(i);
-                }
-                comments.innerHTML = data;
-
-                res.data.forEach(fetchTracker);
-                res.data.forEach(addListenerLike);
-
-                pagination.setResultData(commentLength);
-                comments.dispatchEvent(new Event('comment.result'));
-
-                return res;
-            });
-    };
-
-    /**
-     * @param {HTMLButtonElement} button 
-     * @returns {void}
-     */
-    const showOrHide = (button) => {
-        const ids = button.getAttribute('data-uuids').split(',');
-        const isShow = button.getAttribute('data-show') === 'true';
-        const uuid = button.getAttribute('data-uuid');
-
-        if (isShow) {
-            button.setAttribute('data-show', 'false');
-            button.innerText = `Show replies (${ids.length})`;
-
-            showHide.set('show', showHide.get('show').filter((i) => i !== uuid));
-        } else {
-            button.setAttribute('data-show', 'true');
-            button.innerText = 'Hide replies';
-
-            showHide.set('show', showHide.get('show').concat([uuid]));
-        }
-
-        for (const id of ids) {
-            showHide.set('hidden', showHide.get('hidden').map((i) => {
-                if (i.uuid === id) {
-                    i.show = !isShow;
-                }
-
-                return i;
-            }));
-
-            const cls = document.getElementById(id).classList;
-            isShow ? cls.add('d-none') : cls.remove('d-none');
-        }
-    };
-
-    /**
      * @param {HTMLAnchorElement} anchor 
      * @param {string} uuid 
      * @returns {void}
@@ -609,49 +652,6 @@ export const comment = (() => {
         comments.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
         anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
         anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
-    };
-
-    /**
-     * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @returns {void}
-     */
-    const fetchTracker = (c) => {
-        if (!session.isAdmin()) {
-            return;
-        }
-
-        if (c.comments) {
-            c.comments.forEach(fetchTracker);
-        }
-
-        if (c.ip === undefined || c.user_agent === undefined || c.is_admin || tracker.has(c.ip)) {
-            return;
-        }
-
-        /**
-         * @param {string} uuid 
-         * @param {string} ip 
-         * @param {string} result 
-         * @returns {void}
-         */
-        const setResult = (uuid, ip, result) => {
-            document.getElementById(`ip-${uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`;
-        };
-
-        request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
-            .default()
-            .then((res) => res.json())
-            .then((res) => {
-                let result = res.cityName + ' - ' + res.regionName;
-
-                if (res.cityName === '-' && res.regionName === '-') {
-                    result = 'localhost';
-                }
-
-                tracker.set(c.ip, result);
-                setResult(c.uuid, c.ip, result);
-            })
-            .catch((err) => setResult(c.uuid, c.ip, err.message));
     };
 
     /**

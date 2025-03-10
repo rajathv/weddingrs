@@ -15,7 +15,7 @@ export const request = (method, path) => {
     const ac = new AbortController();
 
     let url = document.body.getAttribute('data-url');
-    let req = {
+    const req = {
         signal: ac.signal,
         method: String(method).toUpperCase(),
         headers: new Headers({

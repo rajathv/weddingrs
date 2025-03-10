@@ -102,13 +102,15 @@ export const gif = (() => {
             return res.blob();
         });
 
-        return caches.open(cacheName)
+        const result = await caches.open(cacheName)
             .then((c) => imageCache(c))
             .then((b) => URL.createObjectURL(b))
             .then((uri) => {
                 urls.set(url, uri);
                 return uri;
             });
+
+        return result;
     };
 
     /**
@@ -178,9 +180,9 @@ export const gif = (() => {
      * @param {object} ctx
      * @param {Promise<void>} reqCancel
      * @param {Promise<object>} response
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const render = async (ctx, reqCancel, response) => {
+    const render = (ctx, reqCancel, response) => {
         let run = true;
 
         ctx.last = new Promise((res) => {
@@ -283,7 +285,7 @@ export const gif = (() => {
         const scrollableHeight = (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9;
 
         if (ctx.lists.scrollTop > scrollableHeight && ctx.lists.getAttribute('data-continue') === 'true') {
-            await render(ctx, params.reqCancel, get(isQuery ? '/search' : '/featured', params));
+            render(ctx, params.reqCancel, get(isQuery ? '/search' : '/featured', params));
         }
     };
 
@@ -373,7 +375,7 @@ export const gif = (() => {
         ctx.gifs = [];
         ctx.pointer = -1;
         await bootUp(ctx);
-        await render(ctx, reqCancel, get(ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit, reqCancel: reqCancel }));
+        render(ctx, reqCancel, get(ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit, reqCancel: reqCancel }));
     };
 
     /**
@@ -497,7 +499,7 @@ export const gif = (() => {
         });
 
         await bootUp(ses);
-        await render(ses, reqCancel, get('/featured', { limit: ses.limit, reqCancel: reqCancel }));
+        render(ses, reqCancel, get('/featured', { limit: ses.limit, reqCancel: reqCancel }));
     };
 
     /**
@@ -507,13 +509,13 @@ export const gif = (() => {
     const remove = (uuid = null) => {
         if (uuid) {
             if (objectPool.has(uuid)) {
-                objectPool.get(uuid).reqs.forEach(f => f());
+                objectPool.get(uuid).reqs.forEach((f) => f());
 
                 objectPool.delete(uuid);
                 queue.delete(uuid);
             }
         } else {
-            objectPool.forEach((ses) => ses.reqs.forEach(f => f()));
+            objectPool.forEach((ses) => ses.reqs.forEach((f) => f()));
             objectPool.clear();
             queue.clear();
         }

@@ -107,6 +107,8 @@ export const audio = (() => {
         }))
         .then((b) => URL.createObjectURL(b));
 
+    const setTtl = (num) => ttl = Number(num);
+
     /**
      * @returns {Promise<void>}
      */
@@ -135,5 +137,6 @@ export const audio = (() => {
     return {
         init,
         play,
+        setTtl,
     };
 })();

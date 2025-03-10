@@ -15,7 +15,7 @@ export const storage = (table) => {
      * @returns {void}
      */
     const set = (key, value) => {
-        let data = get();
+        const data = get();
         data[String(key)] = value;
         localStorage.setItem(table, JSON.stringify(data));
     };
@@ -35,7 +35,7 @@ export const storage = (table) => {
             return;
         }
 
-        let data = get();
+        const data = get();
         delete data[String(key)];
         localStorage.setItem(table, JSON.stringify(data));
     };
