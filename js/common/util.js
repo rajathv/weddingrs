@@ -18,27 +18,27 @@ export const util = (() => {
     /**
      * @param {HTMLElement} el 
      * @param {boolean} isUp 
-     * @returns {Promise<void>}
+     * @param {number} step
+     * @returns {Promise<HTMLElement>}
      */
-    const changeOpacity = (el, isUp) => new Promise((res) => {
+    const changeOpacity = (el, isUp, step = 0.05) => new Promise((res) => {
         let op = parseFloat(el.style.opacity);
-        let clear = null;
-
-        const step = isUp ? 0.05 : -0.05;
         const target = isUp ? 1 : 0;
 
-        const callback = () => {
-            op = Math.max(0, Math.min(1, op + step));
+        const animate = () => {
+            op += isUp ? step : -step;
+            op = Math.max(0, Math.min(1, op));
             el.style.opacity = op.toFixed(2);
 
-            if (op === target) {
-                res();
-                clearInterval(clear);
-                clear = null;
+            if ((isUp && op >= target) || (!isUp && op <= target)) {
+                el.style.opacity = target.toString();
+                res(el);
+            } else {
+                requestAnimationFrame(animate);
             }
         };
 
-        clear = setInterval(callback, 10);
+        requestAnimationFrame(animate);
     });
 
     /**

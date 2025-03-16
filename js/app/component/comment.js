@@ -495,9 +495,8 @@ export const comment = (() => {
 
         if (!id) {
             const comments = document.getElementById('comments');
-            const newPage = await pagination.reset();
 
-            if (newPage) {
+            if (pagination.reset()) {
                 await show();
                 comments.scrollIntoView({ behavior: 'smooth' });
                 return;

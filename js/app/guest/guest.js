@@ -40,31 +40,6 @@ export const guest = (() => {
     };
 
     /**
-     * @param {string} id
-     * @param {number} speed
-     * @returns {void}
-     */
-    const opacity = (id, speed = 0.01) => {
-        const el = document.getElementById(id);
-        let op = parseFloat(el.style.opacity);
-
-        let clear = null;
-        const callback = () => {
-            if (op > 0) {
-                el.style.opacity = op.toFixed(3);
-                op -= speed;
-                return;
-            }
-
-            clearInterval(clear);
-            clear = null;
-            el.remove();
-        };
-
-        clear = setInterval(callback, 10);
-    };
-
-    /**
      * @returns {void}
      */
     const showGuestName = () => {
@@ -139,8 +114,11 @@ export const guest = (() => {
         theme.spyTop();
 
         basicAnimation();
-        opacity('welcome', 0.025);
-        util.timeOut(openAnimation, 1500);
+        util.changeOpacity(document.getElementById('welcome'), false, 0.03)
+            .then((el) => {
+                el.remove();
+                openAnimation();
+            });
     };
 
     /**
@@ -229,7 +207,7 @@ export const guest = (() => {
         await util.changeOpacity(document.getElementById('welcome'), true);
 
         // remove loading screen and show welcome screen.
-        opacity('loading', 0.025);
+        util.changeOpacity(document.getElementById('loading'), false, 0.03).then((el) => el.remove());
     };
 
     /**
