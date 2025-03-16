@@ -1,3 +1,4 @@
+import { progress } from './progress.js';
 import { util } from '../../common/util.js';
 import { request, HTTP_GET } from '../../connection/request.js';
 
@@ -120,15 +121,20 @@ export const audio = (() => {
             music.style.display = 'block';
         });
 
-        audioEl = new Audio(await getUrl());
-        audioEl.volume = 1;
-        audioEl.loop = true;
-        audioEl.muted = false;
-        audioEl.currentTime = 0;
-        audioEl.autoplay = false;
-        audioEl.controls = false;
+        try {
+            audioEl = new Audio(await getUrl());
+            audioEl.volume = 1;
+            audioEl.loop = true;
+            audioEl.muted = false;
+            audioEl.currentTime = 0;
+            audioEl.autoplay = false;
+            audioEl.controls = false;
 
-        canPlay = new Promise((res) => audioEl.addEventListener('canplay', res, { once: true }));
+            canPlay = new Promise((res) => audioEl.addEventListener('canplay', res, { once: true }));
+            progress.complete('audio');
+        } catch {
+            progress.invalid('audio');
+        }
 
         music.addEventListener('offline', pause);
         music.addEventListener('click', () => isPlay ? pause() : play());

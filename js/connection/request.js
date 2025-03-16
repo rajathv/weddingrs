@@ -28,7 +28,7 @@ export const request = (method, path) => {
     window.addEventListener('popstate', () => ac.abort());
     window.addEventListener('beforeunload', () => ac.abort());
 
-    if (url.slice(-1) === '/') {
+    if (url && url.slice(-1) === '/') {
         url = url.slice(0, -1);
     }
 

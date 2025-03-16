@@ -220,13 +220,14 @@ export const guest = (() => {
         document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
 
         if (!token || token.length <= 0) {
-            audio.init();
+            progress.add(); // for audio.
             image.init().load();
+            audio.init();
             document.getElementById('comment')?.remove();
             document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
         }
 
-        if (token.length > 0) {
+        if (token && token.length > 0) {
             // add 3 progress for config, comment, and audio.
             // before img.load();
             progress.add();
@@ -249,10 +250,7 @@ export const guest = (() => {
                     img.load();
                 }
 
-                audio.init()
-                    .then(() => progress.complete('audio'))
-                    .catch(() => progress.invalid('audio'));
-
+                audio.init();
                 comment.init();
                 comment.show()
                     .then(() => progress.complete('comment'))
