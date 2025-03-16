@@ -114,11 +114,8 @@ export const guest = (() => {
         theme.spyTop();
 
         basicAnimation();
-        util.changeOpacity(document.getElementById('welcome'), false, 0.03)
-            .then((el) => {
-                el.remove();
-                openAnimation();
-            });
+        util.timeOut(openAnimation, 1500);
+        util.changeOpacity(document.getElementById('welcome'), false, 0.04).then((el) => el.remove());
     };
 
     /**
@@ -207,7 +204,7 @@ export const guest = (() => {
         await util.changeOpacity(document.getElementById('welcome'), true);
 
         // remove loading screen and show welcome screen.
-        util.changeOpacity(document.getElementById('loading'), false, 0.03).then((el) => el.remove());
+        await util.changeOpacity(document.getElementById('loading'), false, 0.04).then((el) => el.remove());
     };
 
     /**
