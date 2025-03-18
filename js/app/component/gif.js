@@ -102,7 +102,7 @@ export const gif = (() => {
             return res.blob();
         });
 
-        const result = await caches.open(cacheName)
+        const res = await caches.open(cacheName)
             .then((c) => imageCache(c))
             .then((b) => URL.createObjectURL(b))
             .then((uri) => {
@@ -110,7 +110,7 @@ export const gif = (() => {
                 return uri;
             });
 
-        return result;
+        return res;
     };
 
     /**
@@ -392,7 +392,6 @@ export const gif = (() => {
      *   reqs: function[],
      *   container: HTMLElement,
      *   lists: HTMLElement, 
-     *   result: HTMLElement
      * }}
      */
     const singleton = (uuid) => {
@@ -416,7 +415,6 @@ export const gif = (() => {
                 reqs: [],
                 container: container,
                 lists: document.getElementById(`gif-lists-${uuid}`),
-                result: document.getElementById(`gif-result-${uuid}`),
             });
 
             const ses = objectPool.get(uuid);
@@ -435,17 +433,13 @@ export const gif = (() => {
      * @returns {void}
      */
     const click = (uuid, id, urlBase64) => {
-        const ses = singleton(uuid);
+        const res = document.getElementById(`gif-result-${uuid}`);
+        res.setAttribute('data-id', id);
+        res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
+        res.insertAdjacentHTML('beforeend', `<img src="${urls.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
 
-        ses.result.setAttribute('data-id', id);
-        ses.result.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
-        ses.result.insertAdjacentHTML('beforeend', `<img src="${urls.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
-
-        ses.lists.classList.replace('d-flex', 'd-none');
+        singleton(uuid).lists.classList.replace('d-flex', 'd-none');
         document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
-
-        // send analytic to tenor.
-        get('/registershare', { id: id, q: ses.query });
     };
 
     /**
@@ -453,13 +447,12 @@ export const gif = (() => {
      * @returns {void} 
      */
     const cancel = (uuid) => {
-        const ses = singleton(uuid);
+        const res = document.getElementById(`gif-result-${uuid}`);
+        res.removeAttribute('data-id');
+        res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-flex', 'd-none');
+        res.querySelector('img').remove();
 
-        ses.result.removeAttribute('data-id');
-        ses.result.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-flex', 'd-none');
-        ses.result.querySelector('img').remove();
-
-        ses.lists.classList.replace('d-none', 'd-flex');
+        singleton(uuid).lists.classList.replace('d-none', 'd-flex');
         document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-none', 'd-flex');
     };
 
@@ -538,7 +531,7 @@ export const gif = (() => {
      * @param {string} uuid 
      * @returns {string|null}
      */
-    const getResultId = (uuid) => objectPool.get(uuid)?.result?.getAttribute('data-id');
+    const getResultId = (uuid) => document.getElementById(`gif-result-${uuid}`)?.getAttribute('data-id');
 
     /**
      * @param {string} uuid 
