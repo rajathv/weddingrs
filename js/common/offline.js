@@ -6,7 +6,15 @@ export const offline = (() => {
      * @type {HTMLElement|null}
      */
     let alert = null;
+
     let online = true;
+
+    const classes = [
+        'input[data-offline-disabled]',
+        'button[data-offline-disabled]',
+        'select[data-offline-disabled]',
+        'textarea[data-offline-disabled]',
+    ];
 
     /**
      * @returns {boolean}
@@ -37,6 +45,10 @@ export const offline = (() => {
      * @returns {Promise<void>}
      */
     const setDefaultState = async () => {
+        if (!online) {
+            return;
+        }
+
         await util.changeOpacity(alert, false);
         setOffline();
     };
@@ -44,30 +56,8 @@ export const offline = (() => {
     /**
      * @returns {void}
      */
-    const hide = () => {
-        let t = null;
-        t = setTimeout(() => {
-            clearTimeout(t);
-            t = null;
-
-            if (online) {
-                setDefaultState();
-            }
-        }, 3000);
-    };
-
-    /**
-     * @returns {void}
-     */
     const changeState = () => {
-        const classes = [
-            'input[data-offline-disabled]',
-            'button[data-offline-disabled]',
-            'select[data-offline-disabled]',
-            'textarea[data-offline-disabled]'
-        ].join(', ');
-
-        document.querySelectorAll(classes).forEach((e) => {
+        document.querySelectorAll(classes.join(', ')).forEach((e) => {
 
             e.dispatchEvent(new Event(isOnline() ? 'online' : 'offline'));
             e.setAttribute('data-offline-disabled', isOnline() ? 'false' : 'true');
@@ -98,7 +88,7 @@ export const offline = (() => {
         online = true;
 
         setOnline();
-        hide();
+        util.timeOut(setDefaultState, 3000);
         changeState();
     };
 
