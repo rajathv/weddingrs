@@ -535,19 +535,6 @@ export const gif = (() => {
 
     /**
      * @param {string} uuid 
-     * @param {string} att 
-     * @returns {null|string|number|HTMLElement}
-     */
-    const getAttribute = (uuid, att) => {
-        try {
-            return objectPool.get(uuid)[att];
-        } catch {
-            return null;
-        }
-    };
-
-    /**
-     * @param {string} uuid 
      * @param {function} callback
      * @returns {void}
      */
@@ -583,6 +570,5 @@ export const gif = (() => {
         isOpen,
         onOpen,
         getResultId,
-        getAttribute,
     };
 })();

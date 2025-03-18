@@ -331,7 +331,7 @@ export const comment = (() => {
         }
 
         if (gifIsOpen && gifId) {
-            document.getElementById(`img-gif-${id}`).src = gif.getAttribute(id, 'result').querySelector('img').src;
+            document.getElementById(`img-gif-${id}`).src = document.getElementById(`gif-result-${id}`)?.querySelector('img').src;
             gifCancel.dispatchEvent(new Event('click'));
         }
 
