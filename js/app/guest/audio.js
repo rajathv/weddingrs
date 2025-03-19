@@ -108,7 +108,13 @@ export const audio = (() => {
         }))
         .then((b) => URL.createObjectURL(b));
 
-    const setTtl = (num) => ttl = Number(num);
+    /**
+     * @param {number} num
+     * @returns {void}
+     */
+    const setTtl = (num) => {
+        ttl = Number(num);
+    };
 
     /**
      * @returns {Promise<void>}

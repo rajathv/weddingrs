@@ -183,10 +183,10 @@ export const gif = (() => {
      * @returns {void}
      */
     const render = (ctx, reqCancel, response) => {
-        let run = true;
-
         ctx.last = new Promise((res) => {
             const load = loading(ctx);
+
+            let run = true;
 
             (async () => {
                 await reqCancel;
@@ -390,19 +390,13 @@ export const gif = (() => {
      *   pointer: number, 
      *   gifs: object[],
      *   reqs: function[],
-     *   container: HTMLElement,
      *   lists: HTMLElement, 
      * }}
      */
     const singleton = (uuid) => {
         if (!objectPool.has(uuid)) {
 
-            const container = document.getElementById(`gif-form-${uuid}`);
-            container.innerHTML = template(uuid);
-
-            const deBootUp = util.debounce(bootUp, 500);
-            const deSearch = util.debounce(search, 500);
-
+            document.getElementById(`gif-form-${uuid}`).innerHTML = template(uuid);
             objectPool.set(uuid, {
                 uuid: uuid,
                 last: null,
@@ -413,11 +407,13 @@ export const gif = (() => {
                 pointer: -1,
                 gifs: [],
                 reqs: [],
-                container: container,
                 lists: document.getElementById(`gif-lists-${uuid}`),
             });
 
             const ses = objectPool.get(uuid);
+            const deBootUp = util.debounce(bootUp, 500);
+            const deSearch = util.debounce(search, 500);
+
             ses.lists.addEventListener('scroll', () => infinite(ses));
             window.addEventListener('resize', () => deBootUp(ses));
             document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ses, e.target));
@@ -461,8 +457,7 @@ export const gif = (() => {
      * @returns {void} 
      */
     const back = (uuid) => {
-        const ses = singleton(uuid);
-        ses.container.classList.toggle('d-none', true);
+        document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', true);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', false);
     };
 
@@ -472,7 +467,7 @@ export const gif = (() => {
      */
     const open = async (uuid) => {
         const ses = singleton(uuid);
-        ses.container.classList.toggle('d-none', false);
+        document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
         if (queue.has(uuid)) {
@@ -519,12 +514,8 @@ export const gif = (() => {
      * @returns {boolean}
      */
     const isOpen = (uuid) => {
-        if (!objectPool.has(uuid)) {
-            return false;
-        }
-
-        const ses = objectPool.get(uuid);
-        return ses.container === null ? false : !ses.container.classList.contains('d-none');
+        const container = document.getElementById(`gif-form-${uuid}`);
+        return container === null ? false : !container.classList.contains('d-none');
     };
 
     /**

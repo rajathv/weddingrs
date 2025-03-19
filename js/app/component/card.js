@@ -35,7 +35,7 @@ export const card = (() => {
      */
     let showHide = null;
 
-    const maxCommentLength = 250;
+    const maxCommentLength = 300;
 
     const listsMarkDown = [
         ['*', `<strong class="text-theme-auto">$1</strong>`],
@@ -191,28 +191,24 @@ export const card = (() => {
      * @returns {Promise<string>}
      */
     const renderBody = async (c, is_parent) => {
-        const original = convertMarkdownToHTML(util.escapeHtml(c.comment));
-        const moreThanMaxLength = original.length > maxCommentLength;
-        const isGif = c.gif_url !== null && c.gif_url !== undefined;
-
-        const temp = `
+        const head = `
         <div class="d-flex justify-content-between align-items-center">
             <p class="text-theme-auto text-truncate m-0 p-0" style="font-size: 0.95rem;">${renderTitle(c, is_parent)}</p>
             <small class="text-theme-auto m-0 p-0" style="font-size: 0.75rem;">${c.created_at}</small>
         </div>
-        <hr class="my-1">
-        `;
+        <hr class="my-1">`;
 
-        if (isGif) {
-            const img = await gif.cache(c.gif_url);
-            return temp + `
+        if (c.gif_url !== null && c.gif_url !== undefined) {
+            return head + `
             <div class="d-flex justify-content-center align-items-center my-2">
-                <img src="${img}" id="img-gif-${c.uuid}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
-            </div>
-            `;
+                <img src="${await gif.cache(c.gif_url)}" id="img-gif-${c.uuid}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
+            </div>`;
         }
 
-        return temp + `
+        const original = convertMarkdownToHTML(util.escapeHtml(c.comment));
+        const moreThanMaxLength = original.length > maxCommentLength;
+
+        return head + `
         <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" ${moreThanMaxLength ? `data-comment="${util.base64Encode(original)}"` : ''} id="content-${c.uuid}">${moreThanMaxLength ? (original.slice(0, maxCommentLength) + '...') : original}</p>
         ${moreThanMaxLength ? `<p class="d-block mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem; display: block;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
     };
