@@ -145,7 +145,10 @@ export const comment = (() => {
             .then(async (res) => {
                 const commentLength = res.data.length;
                 comments.setAttribute('data-loading', 'false');
-                lastRender.map((i) => i.uuid).forEach((u) => gif.remove(u));
+
+                for (const u of lastRender.map((i) => i.uuid)) {
+                    await gif.remove(u);
+                }
 
                 if (commentLength === 0) {
                     pagination.setResultData(commentLength);
@@ -545,9 +548,9 @@ export const comment = (() => {
 
     /**
      * @param {string} id
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const cancel = (id) => {
+    const cancel = async (id) => {
         const presence = document.getElementById(`form-inner-presence-${id}`);
         const isPresent = presence ? presence.value === '1' : false;
 
@@ -556,7 +559,7 @@ export const comment = (() => {
 
         if (gif.isOpen(id)) {
             if ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?')) {
-                gif.remove(id);
+                await gif.remove(id);
                 changeButton(id, false);
                 document.getElementById(`inner-${id}`).remove();
             }
@@ -573,20 +576,22 @@ export const comment = (() => {
 
     /**
      * @param {HTMLButtonElement} button 
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const reply = (button) => {
+    const reply = async (button) => {
+        const btn = util.disableButton(button);
         const id = button.getAttribute('data-uuid');
 
         if (document.getElementById(`inner-${id}`)) {
             return;
         }
 
-        gif.remove(id);
+        await gif.remove(id);
         changeButton(id, true);
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
 
         gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
+        btn.restore();
     };
 
     /**
@@ -606,14 +611,14 @@ export const comment = (() => {
         await request(HTTP_GET, '/api/comment/' + id)
             .token(session.getToken())
             .send(dto.commentResponse)
-            .then((res) => {
+            .then(async (res) => {
                 if (res.code !== HTTP_STATUS_OK) {
                     return res;
                 }
 
                 const isGif = res.data.gif_url !== null && res.data.gif_url !== undefined;
                 if (isGif) {
-                    gif.remove(id);
+                    await gif.remove(id);
                 }
 
                 const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
