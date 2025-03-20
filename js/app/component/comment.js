@@ -622,7 +622,7 @@ export const comment = (() => {
                 if (isGif) {
                     gif.onOpen(id, () => {
                         document.querySelector(`[for="gif-search-${id}"]`)?.remove();
-                        document.querySelector(`[onclick="undangan.comment.gif.back('${id}')"]`)?.remove();
+                        document.querySelector(`[onclick="undangan.comment.gif.back(this, '${id}')"]`)?.remove();
                     });
 
                     return gif.open(id);

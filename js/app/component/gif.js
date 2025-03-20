@@ -139,8 +139,7 @@ export const gif = (() => {
                             <i class="fa-solid fa-circle-check"></i>
                         </div>
                         <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
-                    </figure>
-                `);
+                    </figure>`);
                 });
             }
             k++;
@@ -178,11 +177,31 @@ export const gif = (() => {
 
     /**
      * @param {object} ctx
-     * @param {Promise<void>} reqCancel
-     * @param {Promise<object>} response
+     * @param {string} path 
+     * @param {object} params
      * @returns {void}
      */
-    const render = (ctx, reqCancel, response) => {
+    const render = (ctx, path, params) => {
+        params = {
+            media_filter: 'tinygif',
+            client_key: 'undangan_app',
+            key: conf.get('tenor_key'),
+            country: conf.get('country'),
+            locale: conf.get('locale'),
+            ...(params ?? {}),
+        };
+
+        const param = Object.keys(params)
+            .filter((k) => params[k] !== null && params[k] !== undefined)
+            .map((k) => `${k}=${encodeURIComponent(params[k])}`)
+            .join('&');
+
+        const url = `https://tenor.googleapis.com/v2${path}?${param}`;
+
+        const reqCancel = new Promise((r) => {
+            ctx.reqs.push(r);
+        });
+
         ctx.last = new Promise((res) => {
             const load = loading(ctx);
 
@@ -195,9 +214,19 @@ export const gif = (() => {
 
             (async () => {
                 try {
-                    const data = await response;
-                    ctx.next = data?.next;
+                    const data = await request(HTTP_GET, url)
+                        .withCancel(reqCancel)
+                        .default()
+                        .then((r) => r.json())
+                        .then((j) => {
+                            if (!j.error) {
+                                return j;
+                            }
 
+                            throw new Error(j.error.message);
+                        });
+
+                    ctx.next = data?.next;
                     for (const el of data.results) {
                         if (run) {
                             ctx.gifs.push(el);
@@ -219,77 +248,6 @@ export const gif = (() => {
     };
 
     /**
-     * @param {string} path 
-     * @param {object} params 
-     * @returns {Promise<object>}
-     */
-    const get = (path, params) => {
-        params = {
-            key: conf.get('tenor_key'),
-            media_filter: 'tinygif',
-            client_key: 'undangan_app',
-            country: conf.get('country'),
-            locale: conf.get('locale'),
-            ...(params ?? {}),
-        };
-
-        const param = Object.keys(params)
-            .filter((k) => params[k] !== null && params[k] !== undefined)
-            .filter((k) => typeof params[k] !== 'object')
-            .map((k) => `${k}=${encodeURIComponent(params[k])}`)
-            .join('&');
-
-        let req = request(HTTP_GET, `https://tenor.googleapis.com/v2${path}?${param}`);
-
-        if (params.reqCancel) {
-            req = req.withCancel(params.reqCancel);
-        }
-
-        return req.default()
-            .then((r) => r.json())
-            .then((j) => {
-                if (!j.error) {
-                    return j;
-                }
-
-                throw new Error(j.error.message);
-            });
-    };
-
-    /**
-     * @param {object} ctx
-     * @returns {Promise<void>}
-     */
-    const infinite = async (ctx) => {
-        // Don't try to load more if there's no next page token
-        if (!ctx.next || ctx.next.length === 0) {
-            return;
-        }
-
-        const isQuery = ctx.query && ctx.query.trim().length;
-        const params = { pos: ctx.next, limit: ctx.limit };
-
-        if (isQuery) {
-            params.q = ctx.query;
-        }
-
-        if (ctx.last) {
-            await ctx.last;
-            ctx.last = null;
-        }
-
-        params.reqCancel = new Promise((res) => {
-            ctx.reqs.push(res);
-        });
-
-        const scrollableHeight = (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9;
-
-        if (ctx.lists.scrollTop > scrollableHeight && ctx.lists.getAttribute('data-continue') === 'true') {
-            render(ctx, params.reqCancel, get(isQuery ? '/search' : '/featured', params));
-        }
-    };
-
-    /**
      * @param {string} uuid 
      * @returns {string}
      */
@@ -298,7 +256,7 @@ export const gif = (() => {
         <label for="gif-search-${uuid}" class="form-label my-1"><i class="fa-solid fa-photo-film me-2"></i>Gif</label>
 
         <div class="d-flex mb-3" id="gif-search-nav-${uuid}">
-            <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1" onclick="undangan.comment.gif.back('${uuid}')" data-offline-disabled="false"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1" onclick="undangan.comment.gif.back(this, '${uuid}')" data-offline-disabled="false"><i class="fa-solid fa-arrow-left"></i></button>
             <input type="text" name="gif-search" id="gif-search-${uuid}" autocomplete="off" class="form-control shadow-sm rounded-4" placeholder="Cari GIF oleh Tenor" data-offline-disabled="false">
         </div>
 
@@ -350,15 +308,9 @@ export const gif = (() => {
 
     /**
      * @param {object} ctx
-     * @param {HTMLInputElement} input
      * @returns {Promise<void>}
      */
-    const search = async (ctx, input) => {
-        ctx.query = input.value;
-        if (!ctx.query || ctx.query.trim().length === 0) {
-            ctx.query = null;
-        }
-
+    const waitLastRequest = async (ctx) => {
         ctx.reqs.forEach((f) => f());
         ctx.reqs = [];
 
@@ -366,16 +318,53 @@ export const gif = (() => {
             await ctx.last;
             ctx.last = null;
         }
+    };
 
-        const reqCancel = new Promise((res) => {
-            ctx.reqs.push(res);
-        });
+    /**
+     * @param {object} ctx
+     * @returns {Promise<void>}
+     */
+    const infinite = async (ctx) => {
+        // Don't try to load more if there's no next page token
+        if (!ctx.next || ctx.next.length === 0) {
+            return;
+        }
+
+        await waitLastRequest(ctx);
+
+        const isQuery = ctx.query && ctx.query.trim().length;
+        const params = { pos: ctx.next, limit: ctx.limit };
+
+        if (isQuery) {
+            params.q = ctx.query;
+        }
+
+        const scrollableHeight = (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9;
+
+        if (ctx.lists.scrollTop > scrollableHeight && ctx.lists.getAttribute('data-continue') === 'true') {
+            render(ctx, isQuery ? '/search' : '/featured', params);
+        }
+    };
+
+    /**
+     * @param {object} ctx
+     * @param {HTMLInputElement} input
+     * @returns {Promise<void>}
+     */
+    const search = async (ctx, input) => {
+        await waitLastRequest(ctx);
+
+        ctx.query = input.value;
+        if (!ctx.query || ctx.query.trim().length === 0) {
+            ctx.query = null;
+        }
 
         ctx.next = null;
         ctx.gifs = [];
         ctx.pointer = -1;
+
         await bootUp(ctx);
-        render(ctx, reqCancel, get(ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit, reqCancel: reqCancel }));
+        render(ctx, ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit });
     };
 
     /**
@@ -410,13 +399,13 @@ export const gif = (() => {
                 lists: document.getElementById(`gif-lists-${uuid}`),
             });
 
-            const ses = objectPool.get(uuid);
-            const deBootUp = util.debounce(bootUp, 500);
-            const deSearch = util.debounce(search, 500);
+            const ctx = objectPool.get(uuid);
+            const deBootUp = util.debounce(bootUp, 750);
+            const deSearch = util.debounce(search, 750);
 
-            ses.lists.addEventListener('scroll', () => infinite(ses));
-            window.addEventListener('resize', () => deBootUp(ses));
-            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ses, e.target));
+            window.addEventListener('resize', () => deBootUp(ctx));
+            ctx.lists.addEventListener('scroll', () => infinite(ctx));
+            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ctx, e.target));
         }
 
         return objectPool.get(uuid);
@@ -453,10 +442,32 @@ export const gif = (() => {
     };
 
     /**
-     * @param {string} uuid
-     * @returns {void} 
+     * @param {string|null} uuid 
+     * @returns {Promise<void>}
      */
-    const back = (uuid) => {
+    const remove = async (uuid = null) => {
+        if (uuid) {
+            if (objectPool.has(uuid)) {
+                await waitLastRequest(objectPool.get(uuid));
+                objectPool.delete(uuid);
+                queue.delete(uuid);
+            }
+        } else {
+            await Promise.all(Array.from(objectPool.keys()).map((k) => waitLastRequest(objectPool.get(k))));
+            objectPool.clear();
+            queue.clear();
+        }
+    };
+
+    /**
+     * @param {HTMLButtonElement} btn
+     * @param {string} uuid
+     * @returns {Promise<void>} 
+     */
+    const back = async (btn, uuid) => {
+        btn.disabled = true;
+        btn.innerHTML = util.loader.replace('me-1', 'me-0');
+        await remove(uuid);
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', true);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', false);
     };
@@ -466,7 +477,7 @@ export const gif = (() => {
      * @returns {Promise<void>} 
      */
     const open = async (uuid) => {
-        const ses = singleton(uuid);
+        const ctx = singleton(uuid);
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
@@ -474,39 +485,9 @@ export const gif = (() => {
             queue.get(uuid)();
         }
 
-        ses.reqs.forEach((f) => f());
-        ses.reqs = [];
-
-        if (ses.last) {
-            await ses.last;
-            ses.last = null;
-        }
-
-        const reqCancel = new Promise((res) => {
-            ses.reqs.push(res);
-        });
-
-        await bootUp(ses);
-        render(ses, reqCancel, get('/featured', { limit: ses.limit, reqCancel: reqCancel }));
-    };
-
-    /**
-     * @param {string|null} uuid 
-     * @returns {void}
-     */
-    const remove = (uuid = null) => {
-        if (uuid) {
-            if (objectPool.has(uuid)) {
-                objectPool.get(uuid).reqs.forEach((f) => f());
-
-                objectPool.delete(uuid);
-                queue.delete(uuid);
-            }
-        } else {
-            objectPool.forEach((ses) => ses.reqs.forEach((f) => f()));
-            objectPool.clear();
-            queue.clear();
-        }
+        await waitLastRequest(ctx);
+        await bootUp(ctx);
+        render(ctx, '/featured', { limit: ctx.limit });
     };
 
     /**
