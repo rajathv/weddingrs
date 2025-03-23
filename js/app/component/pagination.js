@@ -93,7 +93,7 @@ export const pagination = (() => {
         button.innerHTML = util.loader.replace('ms-0 me-1', 'mx-1');
 
         const process = async () => {
-            const result = new Promise((res) => comment.addEventListener('comment.result', res));
+            const result = new Promise((res) => comment.addEventListener('comment.result', res, { once: true }));
             comment.dispatchEvent(new Event('comment.show'));
 
             await result;

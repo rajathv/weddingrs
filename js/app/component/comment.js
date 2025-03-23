@@ -31,6 +31,11 @@ export const comment = (() => {
     let showHide = null;
 
     /**
+     * @type {HTMLElement|null}
+     */
+    let comments = null;
+
+    /**
      * @type {object[]}
      */
     let lastRender = [];
@@ -132,8 +137,6 @@ export const comment = (() => {
      * @returns {Promise<ReturnType<typeof dto.getCommentsResponse>>}
      */
     const show = () => {
-        const comments = document.getElementById('comments');
-
         if (comments.getAttribute('data-loading') === 'false') {
             comments.setAttribute('data-loading', 'true');
             comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
@@ -253,7 +256,6 @@ export const comment = (() => {
         owns.unset(id);
         document.getElementById(id).remove();
 
-        const comments = document.getElementById('comments');
         if (comments.children.length === 0) {
             comments.innerHTML = onNullComment();
         }
@@ -497,8 +499,6 @@ export const comment = (() => {
         }
 
         if (!id) {
-            const comments = document.getElementById('comments');
-
             if (pagination.reset()) {
                 await show();
                 comments.scrollIntoView({ behavior: 'smooth' });
@@ -649,11 +649,11 @@ export const comment = (() => {
      * @returns {void}
      */
     const showMore = (anchor, uuid) => {
-        const comments = document.getElementById(`content-${uuid}`);
-        const original = util.base64Decode(comments.getAttribute('data-comment'));
+        const content = document.getElementById(`content-${uuid}`);
+        const original = util.base64Decode(content.getAttribute('data-comment'));
         const isCollapsed = anchor.getAttribute('data-show') === 'false';
 
-        comments.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
+        content.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
         anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
         anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
@@ -666,7 +666,9 @@ export const comment = (() => {
         like.init();
         card.init();
         pagination.init();
-        document.getElementById('comments').addEventListener('comment.show', show);
+
+        comments = document.getElementById('comments');
+        comments.addEventListener('comment.show', show);
 
         owns = storage('owns');
         user = storage('user');

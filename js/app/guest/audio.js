@@ -136,7 +136,7 @@ export const audio = (() => {
             audioEl.autoplay = false;
             audioEl.controls = false;
 
-            canPlay = new Promise((res) => audioEl.addEventListener('canplay', res, { once: true }));
+            canPlay = new Promise((res) => audioEl.addEventListener('canplay', res));
             progress.complete('audio');
         } catch {
             progress.invalid('audio');

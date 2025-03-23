@@ -293,7 +293,7 @@ export const gif = (() => {
 
         ctx.pointer = -1;
         ctx.limit = ctx.col * 5;
-        ctx.lists.innerHTML = `<div class="d-flex flex-column"></div>`.repeat(ctx.col);
+        ctx.lists.innerHTML = '<div class="d-flex flex-column"></div>'.repeat(ctx.col);
 
         if (ctx.gifs.length === 0) {
             return;
@@ -332,7 +332,7 @@ export const gif = (() => {
 
         await waitLastRequest(ctx);
 
-        const isQuery = ctx.query && ctx.query.trim().length;
+        const isQuery = ctx.query && ctx.query.trim().length > 0;
         const params = { pos: ctx.next, limit: ctx.limit };
 
         if (isQuery) {
@@ -477,7 +477,6 @@ export const gif = (() => {
      * @returns {Promise<void>} 
      */
     const open = async (uuid) => {
-        const ctx = singleton(uuid);
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
@@ -485,6 +484,7 @@ export const gif = (() => {
             queue.get(uuid)();
         }
 
+        const ctx = singleton(uuid);
         await waitLastRequest(ctx);
         await bootUp(ctx);
         render(ctx, '/featured', { limit: ctx.limit });
