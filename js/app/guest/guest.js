@@ -115,7 +115,7 @@ export const guest = (() => {
 
         basicAnimation();
         util.timeOut(openAnimation, 1500);
-        util.changeOpacity(document.getElementById('welcome'), false, 0.04).then((el) => el.remove());
+        util.changeOpacity(document.getElementById('welcome'), false).then((el) => el.remove());
     };
 
     /**
@@ -204,7 +204,7 @@ export const guest = (() => {
         await util.changeOpacity(document.getElementById('welcome'), true);
 
         // remove loading screen and show welcome screen.
-        await util.changeOpacity(document.getElementById('loading'), false, 0.04).then((el) => el.remove());
+        await util.changeOpacity(document.getElementById('loading'), false).then((el) => el.remove());
     };
 
     /**
