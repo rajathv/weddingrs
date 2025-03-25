@@ -153,6 +153,13 @@ export const gif = (() => {
     const loading = (ctx) => {
         const list = ctx.lists;
         const load = document.getElementById(`gif-loading-${ctx.uuid}`);
+        const prog = document.getElementById(`progress-bar-${ctx.uuid}`);
+        const info = document.getElementById(`progress-info-${ctx.uuid}`);
+
+        let total = 0;
+        let loaded = 0;
+
+        info.innerText = `${loaded}/${total}`;
 
         if (!list.classList.contains('d-none')) {
             load.classList.replace('d-none', 'd-flex');
@@ -162,6 +169,9 @@ export const gif = (() => {
         list.classList.replace('overflow-y-scroll', 'overflow-y-hidden');
 
         const release = () => {
+            info.innerText = `${loaded}/${total}`;
+            prog.style.width = '0%';
+
             if (!list.classList.contains('d-none')) {
                 load.classList.replace('d-flex', 'd-none');
             }
@@ -170,8 +180,24 @@ export const gif = (() => {
             list.classList.replace('overflow-y-hidden', 'overflow-y-scroll');
         };
 
+        /**
+         * @param {number} num 
+         */
+        const until = (num) => {
+            total = num;
+            info.innerText = `${loaded}/${total}`;
+        };
+
+        const step = () => {
+            loaded += 1;
+            info.innerText = `${loaded}/${total}`;
+            prog.style.width = Math.min((loaded / total) * 100, 100).toString() + '%';
+        };
+
         return {
             release,
+            until,
+            step,
         };
     };
 
@@ -227,10 +253,12 @@ export const gif = (() => {
                         });
 
                     ctx.next = data?.next;
+                    load.until(data.results.length);
                     for (const el of data.results) {
                         if (run) {
                             ctx.gifs.push(el);
                             await show(ctx, el);
+                            load.step();
                         }
                     }
                 } catch (err) {
@@ -261,8 +289,11 @@ export const gif = (() => {
         </div>
 
         <div class="position-relative">
-            <div class="position-absolute d-flex justify-content-center align-items-center top-50 start-50 translate-middle w-100 h-100 bg-overlay-auto rounded-4 z-3" id="gif-loading-${uuid}">
-                <div class="spinner-border" role="status"></div>
+            <div class="position-absolute d-flex flex-column justify-content-center align-items-center top-50 start-50 translate-middle w-100 h-100 bg-overlay-auto rounded-4 z-3" id="gif-loading-${uuid}">
+                <div class="progress w-25" role="progressbar" style="height: 0.5rem;" aria-label="progress bar">
+                    <div class="progress-bar" id="progress-bar-${uuid}" style="width: 0%"></div>
+                </div>
+                <small class="mt-1 text-theme-auto bg-theme-auto py-0 px-2 rounded-4" id="progress-info-${uuid}" style="font-size: 0.7rem;"></small>
             </div>
             <div id="gif-lists-${uuid}" class="d-flex rounded-4 p-0 overflow-y-scroll border" data-continue="true" style="height: 15rem;"></div>
         </div>
