@@ -229,8 +229,6 @@ export const gif = (() => {
         });
 
         ctx.last = new Promise((res) => {
-            const load = loading(ctx);
-
             let run = true;
 
             (async () => {
@@ -239,6 +237,8 @@ export const gif = (() => {
             })();
 
             (async () => {
+                const load = loading(ctx);
+
                 try {
                     const data = await request(HTTP_GET, url)
                         .withCancel(reqCancel)
@@ -508,6 +508,7 @@ export const gif = (() => {
      * @returns {Promise<void>} 
      */
     const open = async (uuid) => {
+        const ctx = singleton(uuid);
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
@@ -515,7 +516,6 @@ export const gif = (() => {
             queue.get(uuid)();
         }
 
-        const ctx = singleton(uuid);
         await waitLastRequest(ctx);
         await bootUp(ctx);
         render(ctx, '/featured', { limit: ctx.limit });

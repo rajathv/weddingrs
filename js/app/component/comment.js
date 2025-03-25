@@ -555,7 +555,7 @@ export const comment = (() => {
         const isPresent = presence ? presence.value === '1' : false;
 
         const badge = document.getElementById(`badge-${id}`);
-        const isChecklist = badge ? badge.classList.contains('text-success') : false;
+        const isChecklist = badge && owns.has(id) ? badge.classList.contains('text-success') : false;
 
         if (gif.isOpen(id)) {
             if ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?')) {

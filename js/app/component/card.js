@@ -228,9 +228,7 @@ export const card = (() => {
 
         return `
         <div ${renderHeader(c, is_parent)} id="${c.uuid}" style="overflow-wrap: break-word !important;">
-            <div id="body-content-${c.uuid}" data-tapTime="0" data-liked="false" tabindex="0">
-                ${body}
-            </div>
+            <div id="body-content-${c.uuid}" data-tapTime="0" data-liked="false" tabindex="0">${body}</div>
             ${renderTracker(c)}
             ${renderButton(c)}
             <div id="reply-content-${c.uuid}">${data}</div>
