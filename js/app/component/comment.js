@@ -587,11 +587,12 @@ export const comment = (() => {
         }
 
         await gif.remove(id);
-        changeButton(id, true);
-        document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
 
-        gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
         btn.restore();
+        changeButton(id, true);
+
+        document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
+        gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
     };
 
     /**

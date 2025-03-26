@@ -449,13 +449,13 @@ export const gif = (() => {
      * @returns {void}
      */
     const click = (uuid, id, urlBase64) => {
+        singleton(uuid).lists.classList.replace('d-flex', 'd-none');
+        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
+
         const res = document.getElementById(`gif-result-${uuid}`);
         res.setAttribute('data-id', id);
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
         res.insertAdjacentHTML('beforeend', `<img src="${urls.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
-
-        singleton(uuid).lists.classList.replace('d-flex', 'd-none');
-        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
     };
 
     /**
@@ -463,13 +463,13 @@ export const gif = (() => {
      * @returns {void} 
      */
     const cancel = (uuid) => {
+        singleton(uuid).lists.classList.replace('d-none', 'd-flex');
+        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-none', 'd-flex');
+
         const res = document.getElementById(`gif-result-${uuid}`);
         res.removeAttribute('data-id');
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-flex', 'd-none');
         res.querySelector('img').remove();
-
-        singleton(uuid).lists.classList.replace('d-none', 'd-flex');
-        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-none', 'd-flex');
     };
 
     /**
@@ -498,7 +498,8 @@ export const gif = (() => {
     const back = async (btn, uuid) => {
         btn.disabled = true;
         btn.innerHTML = util.loader.replace('me-1', 'me-0');
-        await remove(uuid);
+        await waitLastRequest(objectPool.get(uuid));
+
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', true);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', false);
     };
