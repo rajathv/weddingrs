@@ -73,13 +73,14 @@ export const util = (() => {
     /**
      * @param {HTMLElement} button
      * @param {string} [message='Loading']
+     * @param {boolean} [replace=false]
      * @returns {object}
      */
-    const disableButton = (button, message = 'Loading') => {
+    const disableButton = (button, message = 'Loading', replace = false) => {
         button.disabled = true;
 
         const tmp = button.innerHTML;
-        button.innerHTML = loader + message;
+        button.innerHTML = replace ? message : loader + message;
 
         return {
             restore: () => {

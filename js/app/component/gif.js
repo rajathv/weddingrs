@@ -331,9 +331,13 @@ export const gif = (() => {
         }
 
         const load = loading(ctx);
+        load.until(ctx.gifs.length);
+
         for (const el of ctx.gifs) {
             await show(ctx, el);
+            load.step();
         }
+
         load.release();
     };
 
@@ -491,14 +495,14 @@ export const gif = (() => {
     };
 
     /**
-     * @param {HTMLButtonElement} btn
+     * @param {HTMLButtonElement} button
      * @param {string} uuid
      * @returns {Promise<void>} 
      */
-    const back = async (btn, uuid) => {
-        btn.disabled = true;
-        btn.innerHTML = util.loader.replace('me-1', 'me-0');
+    const back = async (button, uuid) => {
+        const btn = util.disableButton(button, util.loader.replace('me-1', 'me-0'), true);
         await waitLastRequest(objectPool.get(uuid));
+        btn.restore();
 
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', true);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', false);
