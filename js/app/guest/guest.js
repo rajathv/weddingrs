@@ -23,20 +23,24 @@ export const guest = (() => {
     const countDownDate = () => {
         const until = document.getElementById('count-down')?.getAttribute('data-time')?.replace(' ', 'T');
         if (!until) {
-            alert('invalid count down date.');
+            alert('Invalid countdown date.');
             return;
         }
 
         const count = (new Date(until)).getTime();
 
-        setInterval(() => {
+        const updateCountdown = () => {
             const distance = Math.abs(count - Date.now());
 
             document.getElementById('day').innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString();
             document.getElementById('hour').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString();
             document.getElementById('minute').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString();
             document.getElementById('second').innerText = Math.floor((distance % (1000 * 60)) / 1000).toString();
-        }, 1000);
+
+            util.timeOut(updateCountdown, 1000 - (Date.now() % 1000));
+        };
+
+        requestAnimationFrame(updateCountdown);
     };
 
     /**
@@ -70,18 +74,21 @@ export const guest = (() => {
     };
 
     /**
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const slide = () => {
+    const slide = async () => {
         let index = 0;
+        let lastTime = 0;
+        const interval = 6000;
         const slides = document.querySelectorAll('.slide-desktop');
 
-        slides.forEach((s, i) => {
+        for (const [i, s] of slides.entries()) {
             if (i === index) {
                 s.classList.add('slide-desktop-active');
-                util.changeOpacity(s, true);
+                await util.changeOpacity(s, true);
+                break;
             }
-        });
+        }
 
         const nextSlide = async () => {
             await util.changeOpacity(slides[index], false);
@@ -93,7 +100,16 @@ export const guest = (() => {
             await util.changeOpacity(slides[index], true);
         };
 
-        setInterval(nextSlide, 6000);
+        const loop = async (time) => {
+            if (time - lastTime >= interval) {
+                lastTime = time;
+                await nextSlide();
+            }
+
+            requestAnimationFrame(loop);
+        };
+
+        util.timeOut(loop, interval);
     };
 
     /**
