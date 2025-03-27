@@ -581,7 +581,6 @@ export const comment = (() => {
      */
     const reply = async (button) => {
         const id = button.getAttribute('data-uuid');
-        const isGif = button.getAttribute('data-is-gif') === 'true';
 
         if (document.getElementById(`inner-${id}`)) {
             return;
@@ -589,10 +588,8 @@ export const comment = (() => {
 
         changeActionButton(id, true);
 
-        if (isGif) {
-            await gif.remove(id);
-            gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
-        }
+        await gif.remove(id);
+        gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
 
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
     };
