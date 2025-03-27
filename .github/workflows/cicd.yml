@@ -51,7 +51,7 @@ jobs:
         fi
 
     - name: Install Netlify CLI
-      run: npm install && npm install netlify-cli@19.0.3 -g
+      run: npm install && npm install netlify-cli -g
 
     - name: Run Build
       run: npm run build
@@ -70,4 +70,4 @@ jobs:
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      run: npx netlify-cli deploy --prod --telemetry-disable --dir=. --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID
+      run: sudo npx netlify-cli deploy --prod --telemetry-disable --dir=. --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID
