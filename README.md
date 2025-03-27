@@ -19,8 +19,10 @@ Untuk kamu yang ingin melihat demo terlebih dahulu:
 - Jika tidak ingin menggunakan `komentar` bisa hapus `data-url` dan `data-key` pada body index.
 - Sesuaikan `data-url` pada body index dan dashboard sesuai url backend (jika deploy sendiri).
 - Sesuaikan juga `data-key` dengan access key pada dashboard.
-- Waktu deploy: `npm run build` dan folder dist akan terbuat.
+- Waktu deploy: `npm run build:public` dan folder public yang akan di deploy.
 - Self deployment backend bisa lihat dibawah ini atau ingin coba gratis selama 1 hari pada trial api.
+
+> Undangan ini hanya HTML, CSS, dan JavaScript seperti biasa. NPM digunakan untuk build agar file js dapat dieksekusi secara langsung (bukan tipe module lagi).
 
 > Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga mengetahuinya.
 
