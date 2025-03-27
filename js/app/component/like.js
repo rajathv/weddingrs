@@ -25,6 +25,10 @@ export const like = (() => {
 
         button.disabled = true;
 
+        if (navigator.vibrate) {
+            navigator.vibrate(100);
+        }
+
         if (likes.has(id)) {
             await request(HTTP_PATCH, '/api/comment/' + likes.get(id))
                 .token(session.getToken())
@@ -60,6 +64,14 @@ export const like = (() => {
     };
 
     /**
+     * @param {string} uuid
+     * @returns {HTMLElement|null}
+     */
+    const getButtonLike = (uuid) => {
+        return document.querySelector(`button[onclick="undangan.comment.like.love(this)"][data-uuid="${uuid}"]`);
+    };
+
+    /**
      * @param {HTMLElement} div
      * @returns {Promise<void>}
      */
@@ -76,15 +88,10 @@ export const like = (() => {
         const notLiked = !likes.has(uuid) && div.getAttribute('data-liked') !== 'true';
 
         if (isTapTap && notLiked) {
-            if (navigator.vibrate) {
-                navigator.vibrate(100);
-            }
-
             tapTapAnimation(div);
-            const likeButton = document.querySelector(`[onclick="undangan.comment.like.love(this)"][data-uuid="${uuid}"]`);
 
             div.setAttribute('data-liked', 'true');
-            await love(likeButton);
+            await love(getButtonLike(uuid));
             div.setAttribute('data-liked', 'false');
         }
 
@@ -102,5 +109,6 @@ export const like = (() => {
         init,
         love,
         tapTap,
+        getButtonLike,
     };
 })();

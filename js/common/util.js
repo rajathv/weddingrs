@@ -83,9 +83,9 @@ export const util = (() => {
         button.innerHTML = replace ? message : loader + message;
 
         return {
-            restore: () => {
+            restore: (disabled = false) => {
                 button.innerHTML = tmp;
-                button.disabled = false;
+                button.disabled = disabled;
             },
         };
     };

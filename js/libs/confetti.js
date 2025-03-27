@@ -33,7 +33,7 @@ export const openAnimation = (until = 15) => {
         return Math.random() * (max - min) + min;
     };
 
-    (function frame() {
+    const frame = () => {
         const timeLeft = animationEnd - Date.now();
 
         colors.forEach((color) => {
@@ -57,7 +57,9 @@ export const openAnimation = (until = 15) => {
         if (timeLeft > 0) {
             requestAnimationFrame(frame);
         }
-    })();
+    };
+
+    requestAnimationFrame(frame);
 };
 
 /**
@@ -75,7 +77,7 @@ export const tapTapAnimation = (div) => {
     const heart = heartShape();
     const colors = ['#FF69B4', '#FF1493'];
 
-    (function frame() {
+    const frame = () => {
         colors.forEach((color) => {
             window.confetti({
                 particleCount: 2,
@@ -100,5 +102,7 @@ export const tapTapAnimation = (div) => {
         if (Date.now() < end) {
             requestAnimationFrame(frame);
         }
-    }());
+    };
+
+    requestAnimationFrame(frame);
 };

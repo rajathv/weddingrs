@@ -184,7 +184,7 @@ export const admin = (() => {
             send(dto.statusResponse).
             then((res) => res.data.status, () => false);
 
-        btn.restore();
+        btn.restore(true);
 
         old.disabled = false;
         newest.disabled = false;
@@ -192,7 +192,6 @@ export const admin = (() => {
         if (result) {
             old.value = null;
             newest.value = null;
-            button.disabled = true;
             alert('Success change password');
         }
     };
@@ -221,11 +220,10 @@ export const admin = (() => {
             then((res) => res.data.status, () => false);
 
         name.disabled = false;
-        btn.restore();
+        btn.restore(true);
 
         if (result) {
             getAllRequest();
-            button.disabled = true;
             alert('Success change name');
         }
     };

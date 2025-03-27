@@ -285,7 +285,7 @@ export const gif = (() => {
 
         <div class="d-flex mb-3" id="gif-search-nav-${uuid}">
             <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1" onclick="undangan.comment.gif.back(this, '${uuid}')" data-offline-disabled="false"><i class="fa-solid fa-arrow-left"></i></button>
-            <input type="text" name="gif-search" id="gif-search-${uuid}" autocomplete="off" class="form-control shadow-sm rounded-4" placeholder="Cari GIF oleh Tenor" data-offline-disabled="false">
+            <input type="text" name="gif-search" id="gif-search-${uuid}" autocomplete="on" class="form-control shadow-sm rounded-4" placeholder="Cari GIF oleh Tenor" data-offline-disabled="false">
         </div>
 
         <div class="position-relative">
@@ -453,13 +453,13 @@ export const gif = (() => {
      * @returns {void}
      */
     const click = (uuid, id, urlBase64) => {
-        singleton(uuid).lists.classList.replace('d-flex', 'd-none');
-        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
-
         const res = document.getElementById(`gif-result-${uuid}`);
         res.setAttribute('data-id', id);
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
         res.insertAdjacentHTML('beforeend', `<img src="${urls.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
+
+        objectPool.get(uuid).lists.classList.replace('d-flex', 'd-none');
+        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
     };
 
     /**
@@ -467,13 +467,13 @@ export const gif = (() => {
      * @returns {void} 
      */
     const cancel = (uuid) => {
-        singleton(uuid).lists.classList.replace('d-none', 'd-flex');
-        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-none', 'd-flex');
-
         const res = document.getElementById(`gif-result-${uuid}`);
         res.removeAttribute('data-id');
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-flex', 'd-none');
         res.querySelector('img').remove();
+
+        objectPool.get(uuid).lists.classList.replace('d-none', 'd-flex');
+        document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-none', 'd-flex');
     };
 
     /**
@@ -514,6 +514,7 @@ export const gif = (() => {
      */
     const open = async (uuid) => {
         const ctx = singleton(uuid);
+
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 

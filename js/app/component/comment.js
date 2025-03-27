@@ -52,10 +52,19 @@ export const comment = (() => {
      * @param {boolean} disabled 
      * @returns {void}
      */
-    const changeButton = (id, disabled) => {
+    const changeActionButton = (id, disabled) => {
         document.querySelector(`[data-button-action="${id}"]`).childNodes.forEach((e) => {
             e.disabled = disabled;
         });
+    };
+
+    /**
+     * @param {string} id
+     * @returns {void}
+     */
+    const removeInnerForm = (id) => {
+        changeActionButton(id, false);
+        document.getElementById(`inner-${id}`).remove();
     };
 
     /**
@@ -228,9 +237,9 @@ export const comment = (() => {
             owns.set(id, button.getAttribute('data-own'));
         }
 
-        changeButton(id, true);
+        changeActionButton(id, true);
         const btn = util.disableButton(button);
-        const likes = document.querySelector(`[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`);
+        const likes = like.getButtonLike(id);
         likes.disabled = true;
 
         const status = await request(HTTP_DELETE, '/api/comment/' + owns.get(id))
@@ -291,8 +300,7 @@ export const comment = (() => {
         }
 
         if (id && !gifIsOpen && util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) {
-            changeButton(id, false);
-            document.getElementById(`inner-${id}`).remove();
+            removeInnerForm(id);
             return;
         }
 
@@ -340,8 +348,7 @@ export const comment = (() => {
             gifCancel.dispatchEvent(new Event('click'));
         }
 
-        changeButton(id, false);
-        document.getElementById(`inner-${id}`).remove();
+        removeInnerForm(id);
 
         if (!gifIsOpen) {
             const showButton = document.querySelector(`[onclick="undangan.comment.showMore(this, '${id}')"]`);
@@ -521,14 +528,12 @@ export const comment = (() => {
             showHide.set('hidden', showHide.get('hidden').concat([dto.commentShowMore(response.data.uuid, true)]));
             showHide.set('show', showHide.get('show').concat([id]));
 
-            changeButton(id, false);
-            document.getElementById(`inner-${id}`).remove();
+            removeInnerForm(id);
 
             response.data.is_admin = session.isAdmin();
             document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderInnerContent(response.data));
 
-            const containerDiv = document.getElementById(`button-${id}`);
-            const anchorTag = containerDiv.querySelector('a');
+            const anchorTag = document.getElementById(`button-${id}`).querySelector('a');
             const uuids = [response.data.uuid];
 
             if (anchorTag) {
@@ -539,8 +544,7 @@ export const comment = (() => {
                 anchorTag.remove();
             }
 
-            const query = `button[onclick="undangan.comment.like.love(this)"][data-uuid="${id}"]`;
-            containerDiv.querySelector(query).insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
+            like.getButtonLike(id).insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
         }
 
         addListenerLike(response.data);
@@ -548,9 +552,9 @@ export const comment = (() => {
 
     /**
      * @param {string} id
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const cancel = async (id) => {
+    const cancel = (id) => {
         const presence = document.getElementById(`form-inner-presence-${id}`);
         const isPresent = presence ? presence.value === '1' : false;
 
@@ -559,18 +563,15 @@ export const comment = (() => {
 
         if (gif.isOpen(id)) {
             if ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?')) {
-                await gif.remove(id);
-                changeButton(id, false);
-                document.getElementById(`inner-${id}`).remove();
+                gif.remove(id).then(() => removeInnerForm(id));
             }
-
-            return;
         }
 
-        const form = document.getElementById(`form-inner-${id}`);
-        if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
-            changeButton(id, false);
-            document.getElementById(`inner-${id}`).remove();
+        if (!gif.isOpen(id)) {
+            const form = document.getElementById(`form-inner-${id}`);
+            if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
+                removeInnerForm(id);
+            }
         }
     };
 
@@ -579,20 +580,21 @@ export const comment = (() => {
      * @returns {Promise<void>}
      */
     const reply = async (button) => {
-        const btn = util.disableButton(button);
         const id = button.getAttribute('data-uuid');
+        const isGif = button.getAttribute('data-is-gif') === 'true';
 
         if (document.getElementById(`inner-${id}`)) {
             return;
         }
 
-        await gif.remove(id);
+        changeActionButton(id, true);
 
-        btn.restore();
-        changeButton(id, true);
+        if (isGif) {
+            await gif.remove(id);
+            gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
+        }
 
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
-        gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
     };
 
     /**
@@ -606,7 +608,7 @@ export const comment = (() => {
             return;
         }
 
-        changeButton(id, true);
+        changeActionButton(id, true);
         const btn = util.disableButton(button);
 
         await request(HTTP_GET, '/api/comment/' + id)
@@ -640,8 +642,7 @@ export const comment = (() => {
                 return res;
             });
 
-        btn.restore();
-        button.disabled = true;
+        btn.restore(true);
     };
 
     /**
