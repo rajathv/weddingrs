@@ -51,10 +51,10 @@ jobs:
         fi
 
     - name: Install Netlify CLI
-      run: npm install netlify-cli -g --omit=dev
+      run: npm install && npm install netlify-cli -g
 
     - name: Run Build
-      run: npm install && npm run build
+      run: npm run build
 
     - name: Add netlify.toml File for Headers
       run: |
