@@ -254,14 +254,21 @@ export const gif = (() => {
 
                     ctx.next = data?.next;
                     load.until(data.results.length);
+
                     for (const el of data.results) {
-                        if (run) {
-                            ctx.gifs.push(el);
-                            await show(ctx, el);
-                            load.step();
+                        try {
+                            if (run) {
+                                ctx.gifs.push(el);
+                                await show(ctx, el);
+                                load.step();
+                            }
+                        } catch (err) {
+                            run = false;
+                            throw err;
                         }
                     }
                 } catch (err) {
+                    run = false;
                     if (err.name === 'AbortError') {
                         console.warn('Fetch abort:', err);
                     } else {

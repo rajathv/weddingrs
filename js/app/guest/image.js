@@ -118,7 +118,10 @@ export const image = (() => {
                 img.src = URL.createObjectURL(b);
                 uniqUrl.set(url, img.src);
             })
-            .catch(() => progress.invalid('image'));
+            .catch((err) => {
+                progress.invalid('image');
+                throw err;
+            });
     };
 
     /**
@@ -160,7 +163,11 @@ export const image = (() => {
         (async () => {
             for (const el of images) {
                 if (el.hasAttribute('data-src')) {
-                    await getByFetch(el);
+                    try {
+                        await getByFetch(el);
+                    } catch {
+                        break;
+                    }
                 } else {
                     getByDefault(el);
                 }
