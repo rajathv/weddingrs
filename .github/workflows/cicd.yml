@@ -51,7 +51,7 @@ jobs:
         fi
 
     - name: Install Netlify CLI
-      run: npm install && npm install netlify-cli -g
+      run: npm install && npm install netlify-cli@19.0.3 -g
 
     - name: Run Build
       run: npm run build
