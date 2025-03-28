@@ -54,7 +54,7 @@ export const gif = (() => {
     /**
      * @type {ReturnType<typeof storage>|null}
      */
-    let conf = null;
+    let config = null;
 
     /**
      * @param {string} url
@@ -141,6 +141,7 @@ export const gif = (() => {
                         <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
                     </figure>`);
                 });
+                break;
             }
             k++;
         }
@@ -211,9 +212,9 @@ export const gif = (() => {
         params = {
             media_filter: 'tinygif',
             client_key: 'undangan_app',
-            key: conf.get('tenor_key'),
-            country: conf.get('country'),
-            locale: conf.get('locale'),
+            key: config.get('tenor_key'),
+            country: config.get('country'),
+            locale: config.get('locale'),
             ...(params ?? {}),
         };
 
@@ -341,11 +342,21 @@ export const gif = (() => {
         load.until(ctx.gifs.length);
 
         for (const el of ctx.gifs) {
-            await show(ctx, el);
-            load.step();
+            try {
+                await show(ctx, el);
+                load.step();
+            } catch {
+                ctx.gifs = [];
+                break;
+            }
         }
 
         load.release();
+
+        // reset if error
+        if (ctx.gifs.length === 0) {
+            await bootUp(ctx);
+        }
     };
 
     /**
@@ -563,13 +574,13 @@ export const gif = (() => {
         urls = new Map();
         queue = new Map();
         objectPool = new Map();
-        conf = storage('config');
+        config = storage('config');
 
         const lang = document.documentElement.lang.toLowerCase();
-        conf.set('country', countryMapping[lang] ?? 'US');
-        conf.set('locale', `${lang}_${conf.get('country')}`);
+        config.set('country', countryMapping[lang] ?? 'US');
+        config.set('locale', `${lang}_${config.get('country')}`);
 
-        if (conf.get('tenor_key') === null) {
+        if (config.get('tenor_key') === null) {
             document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.remove();
         }
     };

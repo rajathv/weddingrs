@@ -55,13 +55,13 @@ export const image = (() => {
             c.getContext('2d').drawImage(i, 0, 0);
 
             const callback = (b) => {
-                c.remove();
-
                 if (b) {
                     res(b);
                 } else {
                     rej(new Error('Failed to convert image to WebP'));
                 }
+
+                c.remove();
             };
 
             c.onerror = rej;
