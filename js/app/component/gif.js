@@ -387,8 +387,6 @@ export const gif = (() => {
             return;
         }
 
-        await waitLastRequest(ctx);
-
         const isQuery = ctx.query && ctx.query.trim().length > 0;
         const params = { pos: ctx.next, limit: ctx.limit };
 
@@ -397,6 +395,7 @@ export const gif = (() => {
         }
 
         if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9) {
+            await waitLastRequest(ctx);
             render(ctx, isQuery ? '/search' : '/featured', params);
         }
     };
