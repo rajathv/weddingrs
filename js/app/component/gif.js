@@ -378,6 +378,10 @@ export const gif = (() => {
      * @returns {Promise<void>}
      */
     const infinite = async (ctx) => {
+        if (ctx.lists.getAttribute('data-continue') !== 'true') {
+            return;
+        }
+
         // Don't try to load more if there's no next page token
         if (!ctx.next || ctx.next.length === 0) {
             return;
@@ -392,9 +396,7 @@ export const gif = (() => {
             params.q = ctx.query;
         }
 
-        const scrollableHeight = (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9;
-
-        if (ctx.lists.scrollTop > scrollableHeight && ctx.lists.getAttribute('data-continue') === 'true') {
+        if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9) {
             render(ctx, isQuery ? '/search' : '/featured', params);
         }
     };
