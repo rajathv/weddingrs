@@ -141,7 +141,7 @@ export const gif = (() => {
                         <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
                     </figure>`);
                 });
-                break;
+                return;
             }
             k++;
         }
@@ -402,13 +402,13 @@ export const gif = (() => {
 
     /**
      * @param {object} ctx
-     * @param {HTMLInputElement} input
+     * @param {string|null} [q=null]
      * @returns {Promise<void>}
      */
-    const search = async (ctx, input) => {
+    const search = async (ctx, q = null) => {
         await waitLastRequest(ctx);
 
-        ctx.query = input.value;
+        ctx.query = q !== null ? q : ctx.query;
         if (!ctx.query || ctx.query.trim().length === 0) {
             ctx.query = null;
         }
@@ -459,7 +459,7 @@ export const gif = (() => {
 
             window.addEventListener('resize', () => deBootUp(ctx));
             ctx.lists.addEventListener('scroll', () => infinite(ctx));
-            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ctx, e.target));
+            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ctx, e.target.value));
         }
 
         return objectPool.get(uuid);
@@ -541,9 +541,7 @@ export const gif = (() => {
             queue.get(uuid)();
         }
 
-        await waitLastRequest(ctx);
-        await bootUp(ctx);
-        render(ctx, '/featured', { limit: ctx.limit });
+        await search(ctx);
     };
 
     /**
