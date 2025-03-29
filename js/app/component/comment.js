@@ -616,15 +616,14 @@ export const comment = (() => {
                     return res;
                 }
 
-                const isGif = res.data.gif_url !== null && res.data.gif_url !== undefined;
-                if (isGif) {
+                if (res.data.gif_url) {
                     await gif.remove(id);
                 }
 
                 const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
-                document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, isParent, isGif));
+                document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, isParent, !!res.data.gif_url));
 
-                if (isGif) {
+                if (res.data.gif_url) {
                     gif.onOpen(id, () => {
                         document.querySelector(`[for="gif-search-${id}"]`)?.remove();
                         document.querySelector(`[onclick="undangan.comment.gif.back(this, '${id}')"]`)?.remove();
