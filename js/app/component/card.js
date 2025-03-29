@@ -94,14 +94,13 @@ export const card = (() => {
      * @returns {string}
      */
     const renderAction = (c) => {
-        const isGif = c.gif_url !== null && c.gif_url !== undefined;
         let action = `<div class="d-flex justify-content-start align-items-center" data-button-action="${c.uuid}">`;
 
         if (config.get('can_reply') === true || config.get('can_reply') === undefined) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.reply(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Reply</button>`;
         }
 
-        if (owns.has(c.uuid) && (config.get('can_edit') === true || config.get('can_edit') === undefined) && !(isGif && config.get('tenor_key') === null)) {
+        if (owns.has(c.uuid) && (config.get('can_edit') === true || config.get('can_edit') === undefined) && !(!!c.gif_url && config.get('tenor_key') === null)) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Edit</button>`;
         }
 
@@ -198,7 +197,7 @@ export const card = (() => {
         </div>
         <hr class="my-1">`;
 
-        if (c.gif_url !== null && c.gif_url !== undefined) {
+        if (c.gif_url) {
             return head + `
             <div class="d-flex justify-content-center align-items-center my-2">
                 <img src="${await gif.cache(c.gif_url)}" id="img-gif-${c.uuid}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
@@ -210,7 +209,7 @@ export const card = (() => {
 
         return head + `
         <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" ${moreThanMaxLength ? `data-comment="${util.base64Encode(original)}"` : ''} id="content-${c.uuid}">${moreThanMaxLength ? (original.slice(0, maxCommentLength) + '...') : original}</p>
-        ${moreThanMaxLength ? `<p class="d-block mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem; display: block;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
+        ${moreThanMaxLength ? `<p class="d-block mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
     };
 
     /**
