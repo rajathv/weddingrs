@@ -80,7 +80,7 @@ export const gif = (() => {
                 }
 
                 console.warn('Retrying fetch:' + url);
-                return new Promise((res) => util.timeOut(() => res(fetchPut(c, retries - 1, delay + 1000)), delay));
+                return new Promise((res, rej) => util.timeOut(() => fetchPut(c, retries - 1, delay + 1000).then(res, rej), delay));
             });
 
         /**
@@ -253,19 +253,22 @@ export const gif = (() => {
                             throw new Error(j.error.message);
                         });
 
-                    ctx.next = data?.next;
-                    load.until(data.results.length);
+                    if (data.results.length > 0) {
 
-                    for (const el of data.results) {
-                        try {
-                            if (run) {
-                                ctx.gifs.push(el);
-                                await show(ctx, el);
-                                load.step();
+                        ctx.next = data?.next;
+                        load.until(data.results.length);
+
+                        for (const el of data.results) {
+                            try {
+                                if (run) {
+                                    ctx.gifs.push(el);
+                                    await show(ctx, el);
+                                    load.step();
+                                }
+                            } catch (err) {
+                                run = false;
+                                throw err;
                             }
-                        } catch (err) {
-                            run = false;
-                            throw err;
                         }
                     }
                 } catch (err) {
