@@ -53,6 +53,17 @@ export const dto = (() => {
     const getCommentsResponse = (data) => data.map(getCommentResponse);
 
     /**
+     * @param {{ count: number, lists: { uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }[] }} data
+     * @returns {{ count: number, lists: { uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }[] }}
+     */
+    const getCommentsResponseV2 = (data) => {
+        return {
+            count: data.count,
+            lists: getCommentsResponse(data.lists),
+        };
+    };
+
+    /**
      * @param {{status: boolean}} status
      * @returns {{status: boolean}}
      */
@@ -162,6 +173,7 @@ export const dto = (() => {
         likeCommentResponse,
         getCommentResponse,
         getCommentsResponse,
+        getCommentsResponseV2,
         commentShowMore,
         postCommentRequest,
         postSessionRequest,

@@ -109,7 +109,6 @@ export const pagination = (() => {
 
             button.innerHTML = 'Next' + button.innerHTML;
             await process();
-            page.innerText = String(parseInt(page.innerText) + 1);
         };
 
         const prev = async () => {
@@ -117,7 +116,6 @@ export const pagination = (() => {
 
             button.innerHTML = button.innerHTML + 'Prev';
             await process();
-            page.innerText = String(parseInt(page.innerText) - 1);
         };
 
         return {
@@ -136,7 +134,6 @@ export const pagination = (() => {
 
         pageNow = 0;
         resultData = 0;
-        page.innerText = 1;
 
         disabledNext();
         disabledPrevious();
@@ -162,6 +159,14 @@ export const pagination = (() => {
 
         enableNext();
         enablePagination();
+    };
+
+    /**
+     * @param {number} len 
+     * @returns {void}
+     */
+    const setTotal = (len) => {
+        page.innerText = `${(pageNow + perPage) / perPage} / ${Math.ceil(Number(len) / perPage)}`;
     };
 
     /**
@@ -207,7 +212,7 @@ export const pagination = (() => {
                 </button>
             </li>
             <li class="page-item disabled">
-                <span class="page-link text-theme-auto" id="page">1</span>
+                <span class="page-link text-theme-auto" id="page"></span>
             </li>
             <li class="page-item" id="next">
                 <button class="page-link rounded-end-4" onclick="undangan.comment.pagination.next(this)" data-offline-disabled="false">
@@ -230,6 +235,7 @@ export const pagination = (() => {
         reset,
         setResultData,
         getResultData,
+        setTotal,
         previous,
         next,
     };

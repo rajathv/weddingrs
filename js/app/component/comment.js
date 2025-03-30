@@ -151,9 +151,9 @@ export const comment = (() => {
             comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
         }
 
-        return request(HTTP_GET, `/api/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
+        return request(HTTP_GET, `/api/v2/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
             .token(session.getToken())
-            .send(dto.getCommentsResponse)
+            .send(dto.getCommentsResponseV2)
             .then(async (res) => {
                 comments.setAttribute('data-loading', 'false');
 
@@ -161,27 +161,28 @@ export const comment = (() => {
                     await gif.remove(u);
                 }
 
-                if (res.data.length === 0) {
+                if (res.data.lists.length === 0) {
                     comments.innerHTML = onNullComment();
                     return res;
                 }
 
-                lastRender = traverse(res.data);
-                showHide.set('hidden', traverse(res.data, showHide.get('hidden')));
+                lastRender = traverse(res.data.lists);
+                showHide.set('hidden', traverse(res.data.lists, showHide.get('hidden')));
 
                 let data = '';
-                for (const i of res.data) {
+                for (const i of res.data.lists) {
                     data += await card.renderContent(i);
                 }
                 comments.innerHTML = data;
 
-                res.data.forEach(fetchTracker);
-                res.data.forEach(addListenerLike);
+                res.data.lists.forEach(fetchTracker);
+                res.data.lists.forEach(addListenerLike);
 
                 return res;
             })
             .then((res) => {
-                pagination.setResultData(res.data.length);
+                pagination.setTotal(res.data.count);
+                pagination.setResultData(res.data.lists.length);
                 comments.dispatchEvent(new Event('comment.result'));
                 return res;
             });
