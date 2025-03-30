@@ -318,7 +318,23 @@ export const gif = (() => {
      * @param {object} ctx
      * @returns {Promise<void>}
      */
+    const waitLastRequest = async (ctx) => {
+        ctx.reqs.forEach((f) => f());
+        ctx.reqs = [];
+
+        if (ctx.last) {
+            await ctx.last;
+            ctx.last = null;
+        }
+    };
+
+    /**
+     * @param {object} ctx
+     * @returns {Promise<void>}
+     */
     const bootUp = async (ctx) => {
+        await waitLastRequest(ctx);
+
         let last = 0;
         for (const [k, v] of Object.entries(breakPoint)) {
             last = v;
@@ -364,20 +380,6 @@ export const gif = (() => {
      * @param {object} ctx
      * @returns {Promise<void>}
      */
-    const waitLastRequest = async (ctx) => {
-        ctx.reqs.forEach((f) => f());
-        ctx.reqs = [];
-
-        if (ctx.last) {
-            await ctx.last;
-            ctx.last = null;
-        }
-    };
-
-    /**
-     * @param {object} ctx
-     * @returns {Promise<void>}
-     */
     const infinite = async (ctx) => {
         if (ctx.lists.getAttribute('data-continue') !== 'true') {
             return;
@@ -407,8 +409,6 @@ export const gif = (() => {
      * @returns {Promise<void>}
      */
     const search = async (ctx, q = null) => {
-        await waitLastRequest(ctx);
-
         ctx.query = q !== null ? q : ctx.query;
         if (!ctx.query || ctx.query.trim().length === 0) {
             ctx.query = null;
