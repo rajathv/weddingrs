@@ -4,7 +4,7 @@ export const pagination = (() => {
 
     let perPage = 10;
     let pageNow = 0;
-    let resultData = 0;
+    let totalData = 0;
 
     /**
      * @type {HTMLElement|null}
@@ -50,11 +50,6 @@ export const pagination = (() => {
     const getNext = () => pageNow;
 
     /**
-     * @returns {number}
-     */
-    const getResultData = () => resultData;
-
-    /**
      * @returns {void}
      */
     const disabledPrevious = () => !liPrev.classList.contains('disabled') ? liPrev.classList.add('disabled') : null;
@@ -88,9 +83,10 @@ export const pagination = (() => {
      * @returns {object}
      */
     const buttonAction = (button) => {
-        button.disabled = true;
-        const tmp = button.innerHTML;
-        button.innerHTML = util.loader.replace('ms-0 me-1', 'mx-1');
+        disabledNext();
+        disabledPrevious();
+
+        const btn = util.disableButton(button, util.loader.replace('ms-0 me-1', 'mx-1'), true);
 
         const process = async () => {
             const result = new Promise((res) => comment.addEventListener('comment.result', res, { once: true }));
@@ -98,24 +94,22 @@ export const pagination = (() => {
 
             await result;
 
-            button.disabled = false;
-            button.innerHTML = tmp;
-
+            btn.restore();
             comment.scrollIntoView({ behavior: 'smooth' });
         };
 
-        const next = async () => {
+        const next = () => {
             pageNow += perPage;
 
             button.innerHTML = 'Next' + button.innerHTML;
-            await process();
+            process();
         };
 
-        const prev = async () => {
+        const prev = () => {
             pageNow -= perPage;
 
             button.innerHTML = button.innerHTML + 'Prev';
-            await process();
+            process();
         };
 
         return {
@@ -133,7 +127,6 @@ export const pagination = (() => {
         }
 
         pageNow = 0;
-        resultData = 0;
 
         disabledNext();
         disabledPrevious();
@@ -145,14 +138,18 @@ export const pagination = (() => {
      * @param {number} len 
      * @returns {void}
      */
-    const setResultData = (len) => {
-        resultData = len;
+    const setTotal = (len) => {
+        totalData = Number(len);
+        const current = (pageNow + perPage) / perPage;
+        const total = Math.ceil(totalData / perPage);
+
+        page.innerText = `${current} / ${total}`;
 
         if (pageNow > 0) {
             enablePrevious();
         }
 
-        if (resultData < perPage) {
+        if (current === total) {
             disabledNext();
             return;
         }
@@ -162,42 +159,32 @@ export const pagination = (() => {
     };
 
     /**
-     * @param {number} len 
      * @returns {void}
      */
-    const setTotal = (len) => {
-        page.innerText = `${(pageNow + perPage) / perPage} / ${Math.ceil(Number(len) / perPage)}`;
+    const setTotalIncrement = () => {
+        totalData += 1;
+        setTotal(totalData);
+    };
+
+    /**
+     * @returns {void}
+     */
+    const setTotalDecrement = () => {
+        totalData -= 1;
+        setTotal(totalData);
     };
 
     /**
      * @param {HTMLButtonElement} button 
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const previous = async (button) => {
-        disabledPrevious();
-
-        if (pageNow < 0) {
-            return;
-        }
-
-        disabledNext();
-        await buttonAction(button).prev();
-    };
+    const previous = (button) => buttonAction(button).prev();
 
     /**
      * @param {HTMLButtonElement} button 
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const next = async (button) => {
-        disabledNext();
-
-        if (resultData < perPage) {
-            return;
-        }
-
-        disabledPrevious();
-        await buttonAction(button).next();
-    };
+    const next = (button) => buttonAction(button).next();
 
     /**
      * @returns {void}
@@ -233,9 +220,9 @@ export const pagination = (() => {
         getPer,
         getNext,
         reset,
-        setResultData,
-        getResultData,
         setTotal,
+        setTotalDecrement,
+        setTotalIncrement,
         previous,
         next,
     };

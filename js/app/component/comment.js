@@ -182,7 +182,6 @@ export const comment = (() => {
             })
             .then((res) => {
                 pagination.setTotal(res.data.count);
-                pagination.setResultData(res.data.lists.length);
                 comments.dispatchEvent(new Event('comment.result'));
                 return res;
             });
@@ -264,7 +263,12 @@ export const comment = (() => {
         });
 
         owns.unset(id);
-        document.getElementById(id).remove();
+        const cardComment = document.getElementById(id);
+        if (cardComment.hasAttribute('data-parent')) {
+            pagination.setTotalDecrement();
+        }
+
+        cardComment.remove();
 
         if (comments.children.length === 0) {
             comments.innerHTML = onNullComment();
@@ -513,8 +517,8 @@ export const comment = (() => {
                 return;
             }
 
-            pagination.setResultData(comments.children.length);
-            if (pagination.getResultData() === pagination.getPer()) {
+            pagination.setTotalIncrement();
+            if (comments.children.length === pagination.getPer()) {
                 comments.lastElementChild.remove();
             }
 
