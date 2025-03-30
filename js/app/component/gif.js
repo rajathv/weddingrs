@@ -160,23 +160,21 @@ export const gif = (() => {
         let total = 0;
         let loaded = 0;
 
-        info.innerText = `${loaded}/${total}`;
-
         if (!list.classList.contains('d-none')) {
             load.classList.replace('d-none', 'd-flex');
         }
 
+        info.innerText = `${loaded}/${total}`;
         list.setAttribute('data-continue', 'false');
         list.classList.replace('overflow-y-scroll', 'overflow-y-hidden');
 
         const release = () => {
-            info.innerText = `${loaded}/${total}`;
-            prog.style.width = '0%';
-
             if (!list.classList.contains('d-none')) {
                 load.classList.replace('d-flex', 'd-none');
             }
 
+            prog.style.width = '0%';
+            info.innerText = `${loaded}/${total}`;
             list.setAttribute('data-continue', 'true');
             list.classList.replace('overflow-y-hidden', 'overflow-y-scroll');
         };
@@ -459,9 +457,10 @@ export const gif = (() => {
             const ctx = objectPool.get(uuid);
             const deBootUp = util.debounce(bootUp, 750);
             const deSearch = util.debounce(search, 750);
+            const deScroll = util.debounce(infinite, 250);
 
             window.addEventListener('resize', () => deBootUp(ctx));
-            ctx.lists.addEventListener('scroll', () => infinite(ctx));
+            ctx.lists.addEventListener('scroll', () => deScroll(ctx));
             document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ctx, e.target.value));
         }
 

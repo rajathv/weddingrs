@@ -155,15 +155,13 @@ export const comment = (() => {
             .token(session.getToken())
             .send(dto.getCommentsResponse)
             .then(async (res) => {
-                const commentLength = res.data.length;
                 comments.setAttribute('data-loading', 'false');
 
                 for (const u of lastRender.map((i) => i.uuid)) {
                     await gif.remove(u);
                 }
 
-                if (commentLength === 0) {
-                    pagination.setResultData(commentLength);
+                if (res.data.length === 0) {
                     comments.innerHTML = onNullComment();
                     return res;
                 }
@@ -180,9 +178,11 @@ export const comment = (() => {
                 res.data.forEach(fetchTracker);
                 res.data.forEach(addListenerLike);
 
-                pagination.setResultData(commentLength);
+                return res;
+            })
+            .then((res) => {
+                pagination.setResultData(res.data.length);
                 comments.dispatchEvent(new Event('comment.result'));
-
                 return res;
             });
     };
