@@ -563,6 +563,18 @@ export const gif = (() => {
 
     /**
      * @param {string} uuid 
+     * @returns {void}
+     */
+    const removeGifSearch = (uuid) => document.querySelector(`[for="gif-search-${uuid}"]`)?.remove();
+
+    /**
+     * @param {string} uuid 
+     * @returns {void}
+     */
+    const removeButtonBack = (uuid) => document.querySelector(`[onclick="undangan.comment.gif.back(this, '${uuid}')"]`)?.remove();
+
+    /**
+     * @param {string} uuid 
      * @param {function} callback
      * @returns {void}
      */
@@ -598,5 +610,7 @@ export const gif = (() => {
         isOpen,
         onOpen,
         getResultId,
+        removeGifSearch,
+        removeButtonBack,
     };
 })();

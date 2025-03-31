@@ -36,7 +36,7 @@ export const comment = (() => {
     let comments = null;
 
     /**
-     * @type {object[]}
+     * @type {string[]}
      */
     let lastRender = [];
 
@@ -78,6 +78,56 @@ export const comment = (() => {
 
         const bodyLike = document.getElementById(`body-content-${c.uuid}`);
         bodyLike.addEventListener('touchend', () => like.tapTap(bodyLike));
+    };
+
+    /**
+     * @param {HTMLButtonElement} button 
+     * @returns {void}
+     */
+    const showOrHide = (button) => {
+        const ids = button.getAttribute('data-uuids').split(',');
+        const isShow = button.getAttribute('data-show') === 'true';
+        const uuid = button.getAttribute('data-uuid');
+
+        if (isShow) {
+            button.setAttribute('data-show', 'false');
+            button.innerText = `Show replies (${ids.length})`;
+
+            showHide.set('show', showHide.get('show').filter((i) => i !== uuid));
+        } else {
+            button.setAttribute('data-show', 'true');
+            button.innerText = 'Hide replies';
+
+            showHide.set('show', showHide.get('show').concat([uuid]));
+        }
+
+        for (const id of ids) {
+            showHide.set('hidden', showHide.get('hidden').map((i) => {
+                if (i.uuid === id) {
+                    i.show = !isShow;
+                }
+
+                return i;
+            }));
+
+            const cls = document.getElementById(id).classList;
+            isShow ? cls.add('d-none') : cls.remove('d-none');
+        }
+    };
+
+    /**
+     * @param {HTMLAnchorElement} anchor 
+     * @param {string} uuid 
+     * @returns {void}
+     */
+    const showMore = (anchor, uuid) => {
+        const content = document.getElementById(`content-${uuid}`);
+        const original = util.base64Decode(content.getAttribute('data-comment'));
+        const isCollapsed = anchor.getAttribute('data-show') === 'false';
+
+        content.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
+        anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
+        anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
 
     /**
@@ -157,7 +207,7 @@ export const comment = (() => {
             .then(async (res) => {
                 comments.setAttribute('data-loading', 'false');
 
-                for (const u of lastRender.map((i) => i.uuid)) {
+                for (const u of lastRender) {
                     await gif.remove(u);
                 }
 
@@ -166,7 +216,7 @@ export const comment = (() => {
                     return res;
                 }
 
-                lastRender = traverse(res.data.lists);
+                lastRender = traverse(res.data.lists).map((i) => i.uuid);
                 showHide.set('hidden', traverse(res.data.lists, showHide.get('hidden')));
 
                 let data = '';
@@ -185,41 +235,6 @@ export const comment = (() => {
                 comments.dispatchEvent(new Event('comment.result'));
                 return res;
             });
-    };
-
-    /**
-     * @param {HTMLButtonElement} button 
-     * @returns {void}
-     */
-    const showOrHide = (button) => {
-        const ids = button.getAttribute('data-uuids').split(',');
-        const isShow = button.getAttribute('data-show') === 'true';
-        const uuid = button.getAttribute('data-uuid');
-
-        if (isShow) {
-            button.setAttribute('data-show', 'false');
-            button.innerText = `Show replies (${ids.length})`;
-
-            showHide.set('show', showHide.get('show').filter((i) => i !== uuid));
-        } else {
-            button.setAttribute('data-show', 'true');
-            button.innerText = 'Hide replies';
-
-            showHide.set('show', showHide.get('show').concat([uuid]));
-        }
-
-        for (const id of ids) {
-            showHide.set('hidden', showHide.get('hidden').map((i) => {
-                if (i.uuid === id) {
-                    i.show = !isShow;
-                }
-
-                return i;
-            }));
-
-            const cls = document.getElementById(id).classList;
-            isShow ? cls.add('d-none') : cls.remove('d-none');
-        }
     };
 
     /**
@@ -313,7 +328,7 @@ export const comment = (() => {
             form.disabled = true;
         }
 
-        const cancel = document.querySelector(`[onclick="undangan.comment.cancel('${id}')"]`);
+        const cancel = document.querySelector(`[onclick="undangan.comment.cancel(this, '${id}')"]`);
         if (cancel) {
             cancel.disabled = true;
         }
@@ -380,14 +395,11 @@ export const comment = (() => {
             return;
         }
 
-        if (isPresent) {
-            badge.classList.remove('fa-circle-xmark', 'text-danger');
-            badge.classList.add('fa-circle-check', 'text-success');
-            return;
-        }
+        badge.classList.toggle('fa-circle-xmark', !isPresent);
+        badge.classList.toggle('text-danger', !isPresent);
 
-        badge.classList.remove('fa-circle-check', 'text-success');
-        badge.classList.add('fa-circle-xmark', 'text-danger');
+        badge.classList.toggle('fa-circle-check', isPresent);
+        badge.classList.toggle('text-success', isPresent);
     };
 
     /**
@@ -451,7 +463,7 @@ export const comment = (() => {
             form.disabled = true;
         }
 
-        const cancel = document.querySelector(`[onclick="undangan.comment.cancel('${id}')"]`);
+        const cancel = document.querySelector(`[onclick="undangan.comment.cancel(this, '${id}')"]`);
         if (cancel) {
             cancel.disabled = true;
         }
@@ -556,27 +568,28 @@ export const comment = (() => {
     };
 
     /**
+     * @param {HTMLButtonElement} button
      * @param {string} id
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const cancel = (id) => {
+    const cancel = async (button, id) => {
         const presence = document.getElementById(`form-inner-presence-${id}`);
         const isPresent = presence ? presence.value === '1' : false;
 
         const badge = document.getElementById(`badge-${id}`);
-        const isChecklist = badge && owns.has(id) ? badge.classList.contains('text-success') : false;
+        const isChecklist = badge && owns.has(id) && presence ? badge.classList.contains('text-success') : false;
 
-        if (gif.isOpen(id)) {
-            if ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?')) {
-                gif.remove(id).then(() => removeInnerForm(id));
-            }
+        util.disableButton(button);
+
+        if (gif.isOpen(id) && ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?'))) {
+            await gif.remove(id);
+            removeInnerForm(id);
+            return;
         }
 
-        if (!gif.isOpen(id)) {
-            const form = document.getElementById(`form-inner-${id}`);
-            if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
-                removeInnerForm(id);
-            }
+        const form = document.getElementById(`form-inner-${id}`);
+        if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
+            removeInnerForm(id);
         }
     };
 
@@ -592,9 +605,11 @@ export const comment = (() => {
         }
 
         changeActionButton(id, true);
+        const btn = util.disableButton(button);
 
         await gif.remove(id);
-        gif.onOpen(id, () => document.querySelector(`[for="gif-search-${id}"]`)?.remove());
+        gif.onOpen(id, () => gif.removeGifSearch(id));
+        btn.restore(true);
 
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
     };
@@ -630,8 +645,8 @@ export const comment = (() => {
 
                 if (res.data.gif_url) {
                     gif.onOpen(id, () => {
-                        document.querySelector(`[for="gif-search-${id}"]`)?.remove();
-                        document.querySelector(`[onclick="undangan.comment.gif.back(this, '${id}')"]`)?.remove();
+                        gif.removeGifSearch(id);
+                        gif.removeButtonBack(id);
                     });
 
                     return gif.open(id);
@@ -644,21 +659,6 @@ export const comment = (() => {
             });
 
         btn.restore(true);
-    };
-
-    /**
-     * @param {HTMLAnchorElement} anchor 
-     * @param {string} uuid 
-     * @returns {void}
-     */
-    const showMore = (anchor, uuid) => {
-        const content = document.getElementById(`content-${uuid}`);
-        const original = util.base64Decode(content.getAttribute('data-comment'));
-        const isCollapsed = anchor.getAttribute('data-show') === 'false';
-
-        content.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
-        anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
-        anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
 
     /**

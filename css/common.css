@@ -22,12 +22,6 @@ svg>path {
     transition: color 350ms ease;
 }
 
-.fixed-bottom {
-    right: unset;
-    left: unset;
-    width: inherit;
-}
-
 html[data-bs-theme="dark"] .navbar {
     background-color: rgba(var(--bs-dark-rgb), 0.8) !important;
     backdrop-filter: blur(0.625rem);
