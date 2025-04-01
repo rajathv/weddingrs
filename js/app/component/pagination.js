@@ -135,7 +135,7 @@ export const pagination = (() => {
     const setTotal = (len) => {
         totalData = Number(len);
 
-        if (totalData === 0 || (totalData === perPage && pageNow === 0)) {
+        if (totalData === 0 || (totalData <= perPage && pageNow === 0)) {
             paginate.classList.add('d-none');
             return;
         }
