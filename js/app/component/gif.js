@@ -135,9 +135,9 @@ export const gif = (() => {
                 await cache(url).then((uri) => {
                     el.insertAdjacentHTML('beforeend', `
                     <figure class="gif-figure m-0 position-relative">
-                        <div onclick="undangan.comment.gif.click('${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
+                        <button onclick="undangan.comment.gif.click('${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
                             <i class="fa-solid fa-circle-check"></i>
-                        </div>
+                        </button>
                         <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
                     </figure>`);
                 });
