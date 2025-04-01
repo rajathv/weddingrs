@@ -223,6 +223,11 @@ export const comment = (() => {
                 for (const i of res.data.lists) {
                     data += await card.renderContent(i);
                 }
+
+                if (res.data.lists.length < pagination.getPer()) {
+                    data += onNullComment();
+                }
+
                 comments.innerHTML = data;
 
                 res.data.lists.forEach(fetchTracker);
@@ -278,12 +283,7 @@ export const comment = (() => {
         });
 
         owns.unset(id);
-        const cardComment = document.getElementById(id);
-        if (cardComment.hasAttribute('data-parent')) {
-            pagination.setTotalDecrement();
-        }
-
-        cardComment.remove();
+        document.getElementById(id).remove();
 
         if (comments.children.length === 0) {
             comments.innerHTML = onNullComment();
@@ -529,7 +529,7 @@ export const comment = (() => {
                 return;
             }
 
-            pagination.setTotalIncrement();
+            pagination.setTotal(pagination.geTotal() + 1);
             if (comments.children.length === pagination.getPer()) {
                 comments.lastElementChild.remove();
             }

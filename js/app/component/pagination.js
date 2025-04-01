@@ -50,6 +50,11 @@ export const pagination = (() => {
     const getNext = () => pageNow;
 
     /**
+     * @returns {number}
+     */
+    const geTotal = () => totalData;
+
+    /**
      * @returns {void}
      */
     const disabledPrevious = () => !liPrev.classList.contains('disabled') ? liPrev.classList.add('disabled') : null;
@@ -68,15 +73,6 @@ export const pagination = (() => {
      * @returns {void}
      */
     const enableNext = () => liNext.classList.contains('disabled') ? liNext.classList.remove('disabled') : null;
-
-    /**
-     * @returns {void}
-     */
-    const enablePagination = () => {
-        if (paginate.classList.contains('d-none')) {
-            paginate.classList.remove('d-none');
-        }
-    };
 
     /**
      * @param {HTMLButtonElement} button 
@@ -100,14 +96,12 @@ export const pagination = (() => {
 
         const next = () => {
             pageNow += perPage;
-
             button.innerHTML = 'Next' + button.innerHTML;
             process();
         };
 
         const prev = () => {
             pageNow -= perPage;
-
             button.innerHTML = button.innerHTML + 'Prev';
             process();
         };
@@ -140,6 +134,12 @@ export const pagination = (() => {
      */
     const setTotal = (len) => {
         totalData = Number(len);
+
+        if (totalData === 0 || (totalData === perPage && pageNow === 0)) {
+            paginate.classList.add('d-none');
+            return;
+        }
+
         const current = (pageNow + perPage) / perPage;
         const total = Math.ceil(totalData / perPage);
 
@@ -149,42 +149,17 @@ export const pagination = (() => {
             enablePrevious();
         }
 
-        if (current === total) {
+        if (current >= total) {
             disabledNext();
             return;
         }
 
         enableNext();
-        enablePagination();
+
+        if (paginate.classList.contains('d-none')) {
+            paginate.classList.remove('d-none');
+        }
     };
-
-    /**
-     * @returns {void}
-     */
-    const setTotalIncrement = () => {
-        totalData += 1;
-        setTotal(totalData);
-    };
-
-    /**
-     * @returns {void}
-     */
-    const setTotalDecrement = () => {
-        totalData -= 1;
-        setTotal(totalData);
-    };
-
-    /**
-     * @param {HTMLButtonElement} button 
-     * @returns {void}
-     */
-    const previous = (button) => buttonAction(button).prev();
-
-    /**
-     * @param {HTMLButtonElement} button 
-     * @returns {void}
-     */
-    const next = (button) => buttonAction(button).next();
 
     /**
      * @returns {void}
@@ -221,9 +196,8 @@ export const pagination = (() => {
         getNext,
         reset,
         setTotal,
-        setTotalDecrement,
-        setTotalIncrement,
-        previous,
-        next,
+        geTotal,
+        previous: (btn) => buttonAction(btn).prev(),
+        next: (btn) => buttonAction(btn).next(),
     };
 })();
