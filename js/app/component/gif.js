@@ -308,9 +308,9 @@ export const gif = (() => {
         </div>
 
         <figure class="d-flex m-0 position-relative" id="gif-result-${uuid}">
-            <div onclick="undangan.comment.gif.cancel('${uuid}')" id="gif-cancel-${uuid}" class="d-none position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-2 m-1 rounded-circle border shadow-sm z-1" style="cursor: pointer;">
+            <button onclick="undangan.comment.gif.cancel('${uuid}')" id="gif-cancel-${uuid}" class="btn d-none position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-2 m-1 rounded-circle border shadow-sm z-1">
                 <i class="fa-solid fa-circle-xmark"></i>
-            </div>
+            </button>
         </figure>`;
     };
 
@@ -581,6 +581,20 @@ export const gif = (() => {
     const onOpen = (uuid, callback) => queue.set(uuid, callback);
 
     /**
+     * @param {string|null} [uuid=null] 
+     * @returns {{ show: function(): void, hide: function(): void, click: function(): void }}
+     */
+    const buttonCancel = (uuid = null) => {
+        const btnCancel = document.getElementById(`gif-cancel-${uuid ? uuid : gifDefault}`);
+
+        return {
+            show: () => btnCancel.classList.replace('d-none', 'd-flex'),
+            hide: () => btnCancel.classList.replace('d-flex', 'd-none'),
+            click: () => btnCancel.dispatchEvent(new Event('click')),
+        };
+    };
+
+    /**
      * @returns {void}
      */
     const init = () => {
@@ -610,6 +624,7 @@ export const gif = (() => {
         isOpen,
         onOpen,
         getResultId,
+        buttonCancel,
         removeGifSearch,
         removeButtonBack,
     };

@@ -44,7 +44,7 @@ export const comment = (() => {
      * @returns {string}
      */
     const onNullComment = () => {
-        return `<div class="text-center p-4 my-2 bg-theme-auto rounded-4 shadow"><p class="fw-bold p-0 m-0" style="font-size: 0.95rem;">Yuk bagikan undangan ini biar banyak komentarnya</p></div>`;
+        return `<div class="text-center p-4 my-2 bg-theme-auto rounded-4 shadow"><p class="fw-bold p-0 m-0" style="font-size: 0.95rem;">📢 Yuk, share undangan ini biar makin rame komentarnya! 🎉</p></div>`;
     };
 
     /**
@@ -307,17 +307,18 @@ export const comment = (() => {
         let isChecklist = false;
         const badge = document.getElementById(`badge-${id}`);
         if (badge) {
-            isChecklist = badge.classList.contains('text-success');
+            isChecklist = badge.getAttribute('data-is-presence') === 'true';
         }
 
         const gifIsOpen = gif.isOpen(id);
         const gifId = gif.getResultId(id);
-        const gifCancel = document.getElementById(`gif-cancel-${id}`);
-        const form = document.getElementById(`form-inner-${id}`);
+        const gifCancel = gif.buttonCancel(id);
 
         if (gifIsOpen && gifId) {
-            gifCancel.classList.replace('d-flex', 'd-none');
+            gifCancel.hide();
         }
+
+        const form = document.getElementById(`form-inner-${id}`);
 
         if (id && !gifIsOpen && util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) {
             removeInnerForm(id);
@@ -337,7 +338,7 @@ export const comment = (() => {
 
         const status = await request(HTTP_PUT, '/api/comment/' + owns.get(id))
             .token(session.getToken())
-            .body(dto.updateCommentRequest(presence ? isPresent : null, gif.isOpen(id) ? null : form.value, gifId))
+            .body(dto.updateCommentRequest(presence ? isPresent : null, gifIsOpen ? null : form.value, gifId))
             .send(dto.statusResponse)
             .then((res) => res.data.status, () => false);
 
@@ -356,7 +357,7 @@ export const comment = (() => {
         btn.restore();
 
         if (gifIsOpen && gifId) {
-            gifCancel.classList.replace('d-none', 'd-flex');
+            gifCancel.show();
         }
 
         if (!status) {
@@ -365,7 +366,7 @@ export const comment = (() => {
 
         if (gifIsOpen && gifId) {
             document.getElementById(`img-gif-${id}`).src = document.getElementById(`gif-result-${id}`)?.querySelector('img').src;
-            gifCancel.dispatchEvent(new Event('click'));
+            gifCancel.click();
         }
 
         removeInnerForm(id);
@@ -432,9 +433,9 @@ export const comment = (() => {
             return;
         }
 
-        const gifIsOpen = gif.isOpen(id ? id : 'default');
-        const gifId = gif.getResultId(id ? id : 'default');
-        const gifCancel = document.getElementById(`gif-cancel-${id ? id : 'default'}`);
+        const gifIsOpen = gif.isOpen(id ? id : gif.default);
+        const gifId = gif.getResultId(id ? id : gif.default);
+        const gifCancel = gif.buttonCancel(id);
 
         if (gifIsOpen && !gifId) {
             alert('Gif cannot be empty.');
@@ -442,7 +443,7 @@ export const comment = (() => {
         }
 
         if (gifIsOpen && gifId) {
-            gifCancel.classList.replace('d-flex', 'd-none');
+            gifCancel.hide();
         }
 
         const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
@@ -482,7 +483,7 @@ export const comment = (() => {
 
         const response = await request(HTTP_POST, '/api/comment')
             .token(session.getToken())
-            .body(dto.postCommentRequest(id, nameValue, isPresence, gif.isOpen(id) ? null : form.value, gifId))
+            .body(dto.postCommentRequest(id, nameValue, isPresence, gifIsOpen ? null : form.value, gifId))
             .send(dto.getCommentResponse)
             .then((res) => res, () => null);
 
@@ -503,7 +504,7 @@ export const comment = (() => {
         }
 
         if (gifIsOpen && gifId) {
-            gifCancel.classList.replace('d-none', 'd-flex');
+            gifCancel.show();
         }
 
         btn.restore();
@@ -519,7 +520,7 @@ export const comment = (() => {
         }
 
         if (gifIsOpen && gifId) {
-            gifCancel.dispatchEvent(new Event('click'));
+            gifCancel.click();
         }
 
         if (!id) {
@@ -577,7 +578,7 @@ export const comment = (() => {
         const isPresent = presence ? presence.value === '1' : false;
 
         const badge = document.getElementById(`badge-${id}`);
-        const isChecklist = badge && owns.has(id) && presence ? badge.classList.contains('text-success') : false;
+        const isChecklist = badge && owns.has(id) && presence ? badge.getAttribute('data-is-presence') === 'true' : false;
 
         util.disableButton(button);
 

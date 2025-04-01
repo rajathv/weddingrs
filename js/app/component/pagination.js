@@ -121,7 +121,6 @@ export const pagination = (() => {
         }
 
         pageNow = 0;
-
         disableNext();
         disablePrevious();
 
