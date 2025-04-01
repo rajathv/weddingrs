@@ -57,7 +57,7 @@ export const pagination = (() => {
     /**
      * @returns {void}
      */
-    const disabledPrevious = () => !liPrev.classList.contains('disabled') ? liPrev.classList.add('disabled') : null;
+    const disablePrevious = () => !liPrev.classList.contains('disabled') ? liPrev.classList.add('disabled') : null;
 
     /**
      * @returns {void}
@@ -67,7 +67,7 @@ export const pagination = (() => {
     /**
      * @returns {void}
      */
-    const disabledNext = () => !liNext.classList.contains('disabled') ? liNext.classList.add('disabled') : null;
+    const disableNext = () => !liNext.classList.contains('disabled') ? liNext.classList.add('disabled') : null;
 
     /**
      * @returns {void}
@@ -79,8 +79,8 @@ export const pagination = (() => {
      * @returns {object}
      */
     const buttonAction = (button) => {
-        disabledNext();
-        disabledPrevious();
+        disableNext();
+        disablePrevious();
 
         const btn = util.disableButton(button, util.loader.replace('ms-0 me-1', 'mx-1'), true);
 
@@ -122,8 +122,8 @@ export const pagination = (() => {
 
         pageNow = 0;
 
-        disabledNext();
-        disabledPrevious();
+        disableNext();
+        disablePrevious();
 
         return true;
     };
@@ -140,7 +140,7 @@ export const pagination = (() => {
             return;
         }
 
-        const current = (pageNow + perPage) / perPage;
+        const current = (pageNow / perPage) + 1;
         const total = Math.ceil(totalData / perPage);
 
         page.innerText = `${current} / ${total}`;
@@ -150,7 +150,7 @@ export const pagination = (() => {
         }
 
         if (current >= total) {
-            disabledNext();
+            disableNext();
             return;
         }
 
