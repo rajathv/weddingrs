@@ -10,7 +10,7 @@
 ## 🚀 Demo
 Untuk kamu yang ingin melihat demo terlebih dahulu:
 
-[https://ulems.my.id](https://ulems.my.id/?to=Teman%20teman%20semua)
+[https://ulems.my.id/?to=Teman teman semua](https://ulems.my.id/?to=Teman%20teman%20semua)
 
 ## 📦 Documentation
 
@@ -19,10 +19,11 @@ Untuk kamu yang ingin melihat demo terlebih dahulu:
 - Jika tidak ingin menggunakan `komentar` bisa hapus `data-url` dan `data-key` pada body index.
 - Sesuaikan `data-url` pada body index dan dashboard sesuai url backend (jika deploy sendiri).
 - Sesuaikan juga `data-key` dengan access key pada dashboard.
+- Jika mau menggunakan gif, dapatkan tenor key di [developers.google.com/tenor](https://developers.google.com/tenor/guides/quickstart)
 - Waktu deploy: `npm run build:public` dan folder public yang akan di deploy.
-- Self deployment backend bisa lihat dibawah ini atau ingin coba gratis selama 1 hari pada trial api.
+- Self deployment backend bisa lihat dibawah atau ingin coba gratis pada trial api.
 
-> Undangan ini hanya HTML, CSS, dan JavaScript seperti biasa. NPM digunakan untuk build agar file js dapat dieksekusi secara langsung (bukan tipe module lagi).
+> Undangan ini hanya HTML, CSS, dan JavaScript seperti biasa. NPM digunakan untuk build file js agar dieksekusi secara langsung (bukan tipe module lagi).
 
 > Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga mengetahuinya.
 
