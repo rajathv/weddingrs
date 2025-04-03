@@ -55,7 +55,7 @@ export const lang = (() => {
          * @returns {string|undefined}
          */
         get() {
-            const tmp = mapping.get(country);
+            const tmp = mapping.get(language);
             mapping.clear();
             return tmp;
         },
