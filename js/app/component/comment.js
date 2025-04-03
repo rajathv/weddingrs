@@ -342,7 +342,7 @@ export const comment = (() => {
 
         const btn = util.disableButton(button);
 
-        const status = await request(HTTP_PUT, '/api/comment/' + owns.get(id))
+        const status = await request(HTTP_PUT, `/api/comment/${owns.get(id)}?lang=${lang.getLanguage()}`)
             .token(session.getToken())
             .body(dto.updateCommentRequest(presence ? isPresent : null, gifIsOpen ? null : form.value, gifId))
             .send(dto.statusResponse)
