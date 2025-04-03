@@ -45,7 +45,7 @@ export const lang = (() => {
         /**
          * @param {string} l 
          * @param {string} val 
-         * @returns {ReturnType<typeof lang>}
+         * @returns {this}
          */
         on(l, val) {
             mapping.set(l, val);

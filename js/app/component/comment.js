@@ -45,7 +45,12 @@ export const comment = (() => {
      * @returns {string}
      */
     const onNullComment = () => {
-        return `<div class="text-center p-4 my-2 bg-theme-auto rounded-4 shadow"><p class="fw-bold p-0 m-0" style="font-size: 0.95rem;">📢 Yuk, share undangan ini biar makin rame komentarnya! 🎉</p></div>`;
+        const desc = lang
+            .on('id', '📢 Yuk, share undangan ini biar makin rame komentarnya! 🎉')
+            .on('en', '📢 Let\'s share this invitation to get more comments! 🎉')
+            .get();
+
+        return `<div class="text-center p-4 my-2 bg-theme-auto rounded-4 shadow"><p class="fw-bold p-0 m-0" style="font-size: 0.95rem;">${desc}</p></div>`;
     };
 
     /**
