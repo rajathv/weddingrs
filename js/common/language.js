@@ -32,6 +32,11 @@ export const lang = (() => {
     let locale = null;
 
     /**
+     * @type {string|null}
+     */
+    let language = null;
+
+    /**
      * @type {Map<string, string>|null}
      */
     let mapping = null;
@@ -67,6 +72,12 @@ export const lang = (() => {
             return locale;
         },
         /**
+         * @returns {string|null}
+         */
+        getLanguage() {
+            return language;
+        },
+        /**
          * @param {string} l 
          * @returns {void}
          */
@@ -78,7 +89,8 @@ export const lang = (() => {
             }
 
             country = isFound ? countryMapping[l] : 'US';
-            locale = `${isFound ? l : 'en'}_${country}`;
+            language = isFound ? l : 'en';
+            locale = `${language}_${country}`;
         },
         /**
          * @returns {void}

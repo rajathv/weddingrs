@@ -202,7 +202,7 @@ export const comment = (() => {
             comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
         }
 
-        return request(HTTP_GET, `/api/v2/comment?per=${pagination.getPer()}&next=${pagination.getNext()}&country=${lang.getCountry()}`)
+        return request(HTTP_GET, `/api/v2/comment?per=${pagination.getPer()}&next=${pagination.getNext()}&lang=${lang.getLanguage()}`)
             .token(session.getToken())
             .send(dto.getCommentsResponseV2)
             .then(async (res) => {
@@ -482,7 +482,7 @@ export const comment = (() => {
             }
         }
 
-        const response = await request(HTTP_POST, `/api/comment?country=${lang.getCountry()}`)
+        const response = await request(HTTP_POST, `/api/comment?lang=${lang.getLanguage()}`)
             .token(session.getToken())
             .body(dto.postCommentRequest(id, nameValue, isPresence, gifIsOpen ? null : form.value, gifId))
             .send(dto.getCommentResponse)
