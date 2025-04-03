@@ -4,9 +4,10 @@ import { like } from './like.js';
 import { util } from '../../common/util.js';
 import { pagination } from './pagination.js';
 import { dto } from '../../connection/dto.js';
+import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
-import { request, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_PUT, HTTP_STATUS_OK, HTTP_STATUS_CREATED } from '../../connection/request.js';
+import { request, defaultJSON, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_PUT, HTTP_STATUS_OK, HTTP_STATUS_CREATED } from '../../connection/request.js';
 
 export const comment = (() => {
 
@@ -158,7 +159,7 @@ export const comment = (() => {
         };
 
         request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
-            .default()
+            .default(defaultJSON)
             .then((res) => res.json())
             .then((res) => {
                 let result = res.cityName + ' - ' + res.regionName;
@@ -201,7 +202,7 @@ export const comment = (() => {
             comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
         }
 
-        return request(HTTP_GET, `/api/v2/comment?per=${pagination.getPer()}&next=${pagination.getNext()}`)
+        return request(HTTP_GET, `/api/v2/comment?per=${pagination.getPer()}&next=${pagination.getNext()}&country=${lang.getCountry()}`)
             .token(session.getToken())
             .send(dto.getCommentsResponseV2)
             .then(async (res) => {
@@ -481,7 +482,7 @@ export const comment = (() => {
             }
         }
 
-        const response = await request(HTTP_POST, '/api/comment')
+        const response = await request(HTTP_POST, `/api/comment?country=${lang.getCountry()}`)
             .token(session.getToken())
             .body(dto.postCommentRequest(id, nameValue, isPresence, gifIsOpen ? null : form.value, gifId))
             .send(dto.getCommentResponse)

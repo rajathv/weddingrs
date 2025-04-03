@@ -274,8 +274,8 @@ export const card = (() => {
         <p class="my-1 mx-0 p-0" style="font-size: 0.95rem;"><i class="fa-solid fa-pen me-2"></i>Edit</p>
         ${!is_parent ? '' : `
         <select class="form-select shadow-sm mb-2 rounded-4" id="form-inner-presence-${id}" data-offline-disabled="false">
-            <option value="1" ${presence ? 'selected' : ''}>Datang</option>
-            <option value="2" ${presence ? '' : 'selected'}>Berhalangan</option>
+            <option value="1" ${presence ? 'selected' : ''}>&#9989; Datang</option>
+            <option value="2" ${presence ? '' : 'selected'}>&#10060; Berhalangan</option>
         </select>`}
         ${!is_gif ? `<textarea class="form-control shadow-sm rounded-4 mb-2" id="form-inner-${id}" minlength="1" maxlength="1000" placeholder="Type update comment" rows="3" data-offline-disabled="false"></textarea>    
         ` : `${config.get('tenor_key') === null ? '' : `<div class="d-none mb-2" id="gif-form-${id}"></div>`}`}

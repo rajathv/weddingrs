@@ -10,6 +10,11 @@ export const HTTP_STATUS_OK = 200;
 export const HTTP_STATUS_CREATED = 201;
 export const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 
+export const defaultJSON = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+};
+
 export const request = (method, path) => {
 
     const ac = new AbortController();
@@ -18,15 +23,11 @@ export const request = (method, path) => {
     const req = {
         signal: ac.signal,
         method: String(method).toUpperCase(),
-        headers: new Headers({
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }),
+        headers: new Headers(defaultJSON),
     };
 
     window.addEventListener('offline', () => ac.abort());
     window.addEventListener('popstate', () => ac.abort());
-    window.addEventListener('beforeunload', () => ac.abort());
 
     if (url && url.slice(-1) === '/') {
         url = url.slice(0, -1);
@@ -68,10 +69,31 @@ export const request = (method, path) => {
                 });
         },
         /**
+         * @param {Promise<void>} cancel
+         * @returns {ReturnType<typeof request>}
+         */
+        withCancel(cancel) {
+            (async () => {
+                await cancel;
+                ac.abort();
+            })();
+
+            return this;
+        },
+        /**
+         * @param {object|null} header 
+         * @returns {Promise<Response>}
+         */
+        default(header = null) {
+            req.headers = new Headers(header ?? {});
+            return fetch(path, req);
+        },
+        /**
          * @returns {Promise<boolean>}
          */
         download() {
-            return fetch(url + path, req)
+            path = url + path;
+            return this.default()
                 .then((res) => {
                     if (res.status !== HTTP_STATUS_OK) {
                         return false;
@@ -109,26 +131,6 @@ export const request = (method, path) => {
                     alert(err);
                     throw new Error(err);
                 });
-        },
-        /**
-         * @param {Promise<void>} cancel
-         * @returns {ReturnType<typeof request>}
-         */
-        withCancel(cancel) {
-            (async () => {
-                await cancel;
-                ac.abort();
-            })();
-
-            return this;
-        },
-        /**
-         * @param {object|null} header 
-         * @returns {Promise<Response>}
-         */
-        default(header = null) {
-            req.headers = new Headers(header ?? {});
-            return fetch(path, req);
         },
         /**
          * @param {string} token

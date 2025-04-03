@@ -1,6 +1,7 @@
 import { util } from '../../common/util.js';
+import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
-import { request, HTTP_GET } from '../../connection/request.js';
+import { request, defaultJSON, HTTP_GET } from '../../connection/request.js';
 
 export const gif = (() => {
 
@@ -13,27 +14,6 @@ export const gif = (() => {
         256: 3,
         512: 4,
         768: 5,
-    };
-
-    const countryMapping = {
-        'id': 'ID',
-        'en': 'US',
-        'fr': 'FR',
-        'de': 'DE',
-        'es': 'ES',
-        'zh': 'CN',
-        'ja': 'JP',
-        'ko': 'KR',
-        'ar': 'SA',
-        'ru': 'RU',
-        'it': 'IT',
-        'nl': 'NL',
-        'pt': 'PT',
-        'tr': 'TR',
-        'th': 'TH',
-        'vi': 'VN',
-        'ms': 'MY',
-        'hi': 'IN',
     };
 
     /**
@@ -211,8 +191,8 @@ export const gif = (() => {
             media_filter: 'tinygif',
             client_key: 'undangan_app',
             key: config.get('tenor_key'),
-            country: config.get('country'),
-            locale: config.get('locale'),
+            country: lang.getCountry(),
+            locale: lang.getLocale(),
             ...(params ?? {}),
         };
 
@@ -241,7 +221,7 @@ export const gif = (() => {
                 try {
                     const data = await request(HTTP_GET, url)
                         .withCancel(reqCancel)
-                        .default()
+                        .default(defaultJSON)
                         .then((r) => r.json())
                         .then((j) => {
                             if (!j.error) {
@@ -294,7 +274,7 @@ export const gif = (() => {
 
         <div class="d-flex mb-3" id="gif-search-nav-${uuid}">
             <button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1" onclick="undangan.comment.gif.back(this, '${uuid}')" data-offline-disabled="false"><i class="fa-solid fa-arrow-left"></i></button>
-            <input type="text" name="gif-search" id="gif-search-${uuid}" autocomplete="on" class="form-control shadow-sm rounded-4" placeholder="Cari GIF oleh Tenor" data-offline-disabled="false">
+            <input type="text" name="gif-search" id="gif-search-${uuid}" autocomplete="on" class="form-control shadow-sm rounded-4" placeholder="Search for a GIF on Tenor" data-offline-disabled="false">
         </div>
 
         <div class="position-relative">
@@ -602,10 +582,6 @@ export const gif = (() => {
         queue = new Map();
         objectPool = new Map();
         config = storage('config');
-
-        const lang = document.documentElement.lang.toLowerCase();
-        config.set('country', countryMapping[lang] ?? 'US');
-        config.set('locale', `${lang}_${config.get('country')}`);
 
         if (config.get('tenor_key') === null) {
             document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.remove();

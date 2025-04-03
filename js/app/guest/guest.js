@@ -4,6 +4,7 @@ import { progress } from './progress.js';
 import { util } from '../../common/util.js';
 import { bs } from '../../libs/bootstrap.js';
 import { theme } from '../../common/theme.js';
+import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
 import { offline } from '../../common/offline.js';
@@ -227,6 +228,7 @@ export const guest = (() => {
      * @returns {void}
      */
     const domLoaded = () => {
+        lang.init();
         offline.init();
         progress.init();
         information = storage('information');

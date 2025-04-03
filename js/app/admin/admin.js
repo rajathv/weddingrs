@@ -3,6 +3,7 @@ import { navbar } from './navbar.js';
 import { util } from '../../common/util.js';
 import { dto } from '../../connection/dto.js';
 import { theme } from '../../common/theme.js';
+import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
 import { offline } from '../../common/offline.js';
@@ -277,6 +278,9 @@ export const admin = (() => {
      * @returns {void}
      */
     const domLoaded = () => {
+        lang.init();
+        lang.setDefault('en');
+
         offline.init();
         theme.spyTop();
 
