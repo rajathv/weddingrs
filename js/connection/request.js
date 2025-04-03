@@ -92,8 +92,8 @@ export const request = (method, path) => {
          * @returns {Promise<boolean>}
          */
         download() {
-            path = url + path;
-            return this.default()
+            Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
+            return fetch(url + path, req)
                 .then((res) => {
                     if (res.status !== HTTP_STATUS_OK) {
                         return false;
