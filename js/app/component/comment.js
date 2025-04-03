@@ -320,6 +320,11 @@ export const comment = (() => {
         const gifId = gif.getResultId(id);
         const gifCancel = gif.buttonCancel(id);
 
+        if (gifIsOpen && !gifId) {
+            alert('Gif cannot be empty.');
+            return;
+        }
+
         if (gifIsOpen && gifId) {
             gifCancel.hide();
         }
@@ -328,6 +333,11 @@ export const comment = (() => {
 
         if (id && !gifIsOpen && util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) {
             removeInnerForm(id);
+            return;
+        }
+
+        if (!gifIsOpen && form.value?.trim().length === 0) {
+            alert('Comments cannot be empty.');
             return;
         }
 
@@ -453,7 +463,7 @@ export const comment = (() => {
         }
 
         const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
-        if (!gifIsOpen && form.value.length === 0) {
+        if (!gifIsOpen && form.value?.trim().length === 0) {
             alert('Comments cannot be empty.');
             return;
         }
