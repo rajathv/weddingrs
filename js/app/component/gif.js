@@ -269,6 +269,8 @@ export const gif = (() => {
      * @returns {string}
      */
     const template = (uuid) => {
+        uuid = util.escapeHtml(uuid);
+
         return `
         <label for="gif-search-${uuid}" class="form-label my-1"><i class="fa-solid fa-photo-film me-2"></i>Gif</label>
 
