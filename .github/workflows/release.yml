@@ -25,16 +25,9 @@ jobs:
       - name: Build project
         run: npm run build
       
-      - name: Create zip archive
-        run: |
-          zip -r dist.zip dist/
-          echo "Created distribution zip file"
-      
       - name: Upload build folder to release assets
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist.zip
-            dist/**
+          files: dist/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

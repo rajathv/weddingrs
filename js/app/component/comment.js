@@ -160,7 +160,7 @@ export const comment = (() => {
          * @returns {void}
          */
         const setResult = (uuid, ip, result) => {
-            document.getElementById(`ip-${uuid}`).innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`;
+            document.getElementById(`ip-${uuid}`).appendChild(document.createRange().createContextualFragment(`<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`));
         };
 
         request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
@@ -202,6 +202,13 @@ export const comment = (() => {
      * @returns {Promise<ReturnType<typeof dto.getCommentsResponse>>}
      */
     const show = () => {
+
+        // remove all event listener.
+        for (const u of lastRender) {
+            const bodyLike = document.getElementById(`body-content-${u}`);
+            bodyLike.removeEventListener('touchend', () => like.tapTap(bodyLike));
+        }
+
         if (comments.getAttribute('data-loading') === 'false') {
             comments.setAttribute('data-loading', 'true');
             comments.innerHTML = card.renderLoading().repeat(pagination.getPer());
@@ -234,7 +241,11 @@ export const comment = (() => {
                     data += onNullComment();
                 }
 
-                comments.innerHTML = data;
+                while (comments.hasChildNodes()) {
+                    comments.removeChild(comments.lastChild);
+                }
+
+                comments.appendChild(document.createRange().createContextualFragment(data));
 
                 res.data.lists.forEach(fetchTracker);
                 res.data.lists.forEach(addListenerLike);
@@ -578,10 +589,14 @@ export const comment = (() => {
                 anchorTag.remove();
             }
 
-            like.getButtonLike(id).insertAdjacentHTML('beforebegin', card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
+            const readMoreElement = document.createRange().createContextualFragment(card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
+
+            const buttonLike = like.getButtonLike(id);
+            buttonLike.parentNode.insertBefore(readMoreElement, buttonLike);
         }
 
         addListenerLike(response.data);
+        lastRender.push(response.data.uuid);
     };
 
     /**

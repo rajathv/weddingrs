@@ -420,7 +420,7 @@ export const gif = (() => {
     const singleton = (uuid) => {
         if (!objectPool.has(uuid)) {
 
-            document.getElementById(`gif-form-${uuid}`).innerHTML = template(uuid);
+            document.getElementById(`gif-form-${uuid}`).appendChild(document.createRange().createContextualFragment(template(uuid)));
             objectPool.set(uuid, {
                 uuid: uuid,
                 last: null,

@@ -18,8 +18,8 @@ export const admin = (() => {
     const getAllRequest = () => {
         return auth.getDetailUser().then((res) => {
 
-            document.getElementById('dashboard-name').innerHTML = `${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`;
-            document.getElementById('dashboard-email').innerHTML = res.data.email;
+            document.getElementById('dashboard-name').appendChild(document.createRange().createContextualFragment(`${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`));
+            document.getElementById('dashboard-email').textContent = res.data.email;
             document.getElementById('dashboard-accesskey').value = res.data.access_key;
             document.getElementById('button-copy-accesskey').setAttribute('data-copy', res.data.access_key);
 
@@ -39,10 +39,10 @@ export const admin = (() => {
      */
     const getStatsComment = () => {
         request(HTTP_GET, '/api/stats').token(session.getToken()).send().then((res) => {
-            document.getElementById('count-comment').innerHTML = String(res.data.comments).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            document.getElementById('count-like').innerHTML = String(res.data.likes).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            document.getElementById('count-present').innerHTML = String(res.data.present).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            document.getElementById('count-absent').innerHTML = String(res.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('count-comment').textContent = String(res.data.comments).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('count-like').textContent = String(res.data.likes).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('count-present').textContent = String(res.data.present).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('count-absent').textContent = String(res.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         });
     };
 

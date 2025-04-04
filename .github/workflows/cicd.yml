@@ -8,6 +8,8 @@ on:
 jobs:
   analyze-code:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
     - name: Checkout code
@@ -33,6 +35,8 @@ jobs:
   deploy:
     needs: analyze-code
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout Code

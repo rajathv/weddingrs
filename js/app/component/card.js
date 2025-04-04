@@ -242,7 +242,7 @@ export const card = (() => {
         const inner = document.createElement('div');
         inner.classList.add('my-2');
         inner.id = `inner-${id}`;
-        inner.innerHTML = `
+        const template = `
         <p class="my-1 mx-0 p-0" style="font-size: 0.95rem;"><i class="fa-solid fa-reply me-2"></i>Reply</p>
         <div class="d-block mb-2" id="comment-form-${id}">
             <div class="position-relative">
@@ -256,6 +256,7 @@ export const card = (() => {
             <button style="font-size: 0.8rem;" onclick="undangan.comment.send(this)" data-uuid="${id}" class="btn btn-sm btn-outline-auto rounded-4 py-0" data-offline-disabled="false">Send</button>
         </div>`;
 
+        inner.appendChild(document.createRange().createContextualFragment(template));
         return inner;
     };
 
@@ -270,7 +271,7 @@ export const card = (() => {
         const inner = document.createElement('div');
         inner.classList.add('my-2');
         inner.id = `inner-${id}`;
-        inner.innerHTML = `
+        const template = `
         <p class="my-1 mx-0 p-0" style="font-size: 0.95rem;"><i class="fa-solid fa-pen me-2"></i>Edit</p>
         ${!is_parent ? '' : `
         <select class="form-select shadow-sm mb-2 rounded-4" id="form-inner-presence-${id}" data-offline-disabled="false">
@@ -284,6 +285,7 @@ export const card = (() => {
             <button style="font-size: 0.8rem;" onclick="undangan.comment.update(this)" data-uuid="${id}" class="btn btn-sm btn-outline-auto rounded-4 py-0" data-offline-disabled="false">Update</button>
         </div>`;
 
+        inner.appendChild(document.createRange().createContextualFragment(template));
         return inner;
     };
 
