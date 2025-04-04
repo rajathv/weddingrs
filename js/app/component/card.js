@@ -260,8 +260,7 @@ export const card = (() => {
             <button style="font-size: 0.8rem;" onclick="undangan.comment.send(this)" data-uuid="${id}" class="btn btn-sm btn-outline-auto rounded-4 py-0" data-offline-disabled="false">Send</button>
         </div>`;
 
-        inner.appendChild(document.createRange().createContextualFragment(template));
-        return inner;
+        return util.safeInnerHTML(inner, template);
     };
 
     /**
@@ -291,8 +290,7 @@ export const card = (() => {
             <button style="font-size: 0.8rem;" onclick="undangan.comment.update(this)" data-uuid="${id}" class="btn btn-sm btn-outline-auto rounded-4 py-0" data-offline-disabled="false">Update</button>
         </div>`;
 
-        inner.appendChild(document.createRange().createContextualFragment(template));
-        return inner;
+        return util.safeInnerHTML(inner, template);
     };
 
     /**

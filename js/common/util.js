@@ -16,6 +16,16 @@ export const util = (() => {
     };
 
     /**
+     * @param {HTMLElement} el
+     * @param {string} html
+     * @returns {HTMLElement}
+     */
+    const safeInnerHTML = (el, html) => {
+        el.replaceChildren(document.createRange().createContextualFragment(html));
+        return el;
+    };
+
+    /**
      * @param {HTMLElement} el 
      * @param {boolean} isUp 
      * @param {number} step
@@ -80,7 +90,7 @@ export const util = (() => {
         button.disabled = true;
 
         const tmp = button.innerHTML;
-        button.innerHTML = replace ? message : loader + message;
+        safeInnerHTML(button, replace ? message : loader + message);
 
         return {
             restore: (disabled = false) => {
@@ -99,7 +109,7 @@ export const util = (() => {
 
         const label = document.querySelector(`label[for="${checkbox.id}"]`);
         const tmp = label.innerHTML;
-        label.innerHTML = loader + tmp;
+        safeInnerHTML(label, loader + tmp);
 
         return {
             restore: () => {
@@ -134,7 +144,7 @@ export const util = (() => {
         }
 
         const tmp = button.innerHTML;
-        button.innerHTML = message ? message : '<i class="fa-solid fa-check"></i>';
+        safeInnerHTML(button, message ? message : '<i class="fa-solid fa-check"></i>');
 
         timeOut(() => {
             button.disabled = false;
@@ -212,6 +222,7 @@ export const util = (() => {
         base64Decode,
         disableButton,
         disableCheckbox,
+        safeInnerHTML,
         parseUserAgent,
         changeOpacity,
     };

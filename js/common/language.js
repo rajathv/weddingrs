@@ -97,7 +97,7 @@ export const lang = (() => {
          */
         init() {
             mapping = new Map();
-            this.setDefault(navigator.language);
+            this.setDefault(navigator.language.split('-').shift());
         },
     };
 })();

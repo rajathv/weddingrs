@@ -18,7 +18,7 @@ export const admin = (() => {
     const getAllRequest = () => {
         return auth.getDetailUser().then((res) => {
 
-            document.getElementById('dashboard-name').replaceChildren(document.createRange().createContextualFragment(`${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`));
+            util.safeInnerHTML(document.getElementById('dashboard-name'), `${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`);
             document.getElementById('dashboard-email').textContent = res.data.email;
             document.getElementById('dashboard-accesskey').value = res.data.access_key;
             document.getElementById('button-copy-accesskey').setAttribute('data-copy', res.data.access_key);

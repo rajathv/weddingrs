@@ -131,7 +131,7 @@ export const comment = (() => {
         const original = util.base64Decode(content.getAttribute('data-comment'));
         const isCollapsed = anchor.getAttribute('data-show') === 'false';
 
-        content.innerHTML = isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...';
+        util.safeInnerHTML(content, isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...');
         anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
         anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
@@ -160,7 +160,7 @@ export const comment = (() => {
          * @returns {void}
          */
         const setResult = (uuid, ip, result) => {
-            document.getElementById(`ip-${uuid}`).replaceChildren(document.createRange().createContextualFragment(`<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`));
+            util.safeInnerHTML(document.getElementById(`ip-${util.escapeHtml(uuid)}`), `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`);
         };
 
         request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
@@ -241,7 +241,7 @@ export const comment = (() => {
                     data += onNullComment();
                 }
 
-                comments.replaceChildren(document.createRange().createContextualFragment(data));
+                util.safeInnerHTML(comments, data);
 
                 res.data.lists.forEach(fetchTracker);
                 res.data.lists.forEach(addListenerLike);
@@ -400,11 +400,11 @@ export const comment = (() => {
             const content = document.getElementById(`content-${id}`);
 
             if (original.length > card.maxCommentLength) {
-                content.innerHTML = showButton?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original;
+                util.safeInnerHTML(content, showButton?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original);
                 content.setAttribute('data-comment', util.base64Encode(original));
                 showButton?.classList.replace('d-none', 'd-block');
             } else {
-                content.innerHTML = original;
+                util.safeInnerHTML(content, original);
                 content.removeAttribute('data-comment');
                 showButton?.classList.replace('d-block', 'd-none');
             }
