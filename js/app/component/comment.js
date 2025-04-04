@@ -160,7 +160,7 @@ export const comment = (() => {
          * @returns {void}
          */
         const setResult = (uuid, ip, result) => {
-            document.getElementById(`ip-${uuid}`).appendChild(document.createRange().createContextualFragment(`<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`));
+            document.getElementById(`ip-${uuid}`).replaceChildren(document.createRange().createContextualFragment(`<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`));
         };
 
         request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
@@ -241,11 +241,7 @@ export const comment = (() => {
                     data += onNullComment();
                 }
 
-                while (comments.hasChildNodes()) {
-                    comments.removeChild(comments.lastChild);
-                }
-
-                comments.appendChild(document.createRange().createContextualFragment(data));
+                comments.replaceChildren(document.createRange().createContextualFragment(data));
 
                 res.data.lists.forEach(fetchTracker);
                 res.data.lists.forEach(addListenerLike);
