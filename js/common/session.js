@@ -1,3 +1,4 @@
+import { util } from './util.js';
 import { storage } from './storage.js';
 import { dto } from '../connection/dto.js';
 import { request, HTTP_POST, HTTP_GET, HTTP_STATUS_OK } from '../connection/request.js';
@@ -80,7 +81,7 @@ export const session = (() => {
         }
 
         try {
-            return JSON.parse(window.atob(getToken().split('.')[1]));
+            return JSON.parse(util.base64Decode(getToken().split('.')[1]));
         } catch {
             return null;
         }
