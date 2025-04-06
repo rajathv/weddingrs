@@ -138,15 +138,17 @@ export const comment = (() => {
 
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const fetchTracker = (c) => {
+    const fetchTracker = async (c) => {
         if (!session.isAdmin()) {
             return;
         }
 
         if (c.comments) {
-            c.comments.forEach(fetchTracker);
+            for (const v of c.comments) {
+                await fetchTracker(v);
+            }
         }
 
         if (c.ip === undefined || c.user_agent === undefined || c.is_admin || tracker.has(c.ip)) {
@@ -163,7 +165,7 @@ export const comment = (() => {
             util.safeInnerHTML(document.getElementById(`ip-${util.escapeHtml(uuid)}`), `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`);
         };
 
-        request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
+        await request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
             .default(defaultJSON)
             .then((res) => res.json())
             .then((res) => {
@@ -242,15 +244,20 @@ export const comment = (() => {
                 }
 
                 util.safeInnerHTML(comments, data);
-
-                res.data.lists.forEach(fetchTracker);
                 res.data.lists.forEach(addListenerLike);
 
                 return res;
             })
-            .then((res) => {
+            .then(async (res) => {
                 pagination.setTotal(res.data.count);
                 comments.dispatchEvent(new Event('comment.result'));
+
+                if (res.data.lists.length > 0) {
+                    for (const v of res.data.lists) {
+                        await fetchTracker(v);
+                    }
+                }
+
                 return res;
             });
     };
