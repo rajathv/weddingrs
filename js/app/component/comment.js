@@ -151,7 +151,7 @@ export const comment = (() => {
             }
         }
 
-        if (c.ip === undefined || c.user_agent === undefined || c.is_admin || tracker.has(c.ip)) {
+        if (c.ip === undefined || c.user_agent === undefined || c.is_admin) {
             return;
         }
 
@@ -164,6 +164,11 @@ export const comment = (() => {
         const setResult = (uuid, ip, result) => {
             util.safeInnerHTML(document.getElementById(`ip-${util.escapeHtml(uuid)}`), `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`);
         };
+
+        if (tracker.has(c.ip)) {
+            setResult(c.uuid, c.ip, tracker.get(c.ip));
+            return;
+        }
 
         await request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
             .default(defaultJSON)
