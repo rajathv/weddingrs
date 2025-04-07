@@ -74,19 +74,6 @@ export const comment = (() => {
     };
 
     /**
-     * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @returns {void}
-     */
-    const addListenerLike = (c) => {
-        if (c.comments) {
-            c.comments.forEach(addListenerLike);
-        }
-
-        const bodyLike = document.getElementById(`body-content-${c.uuid}`);
-        bodyLike.addEventListener('touchend', () => like.tapTap(bodyLike));
-    };
-
-    /**
      * @param {HTMLButtonElement} button 
      * @returns {void}
      */
@@ -212,8 +199,7 @@ export const comment = (() => {
 
         // remove all event listener.
         for (const u of lastRender) {
-            const bodyLike = document.getElementById(`body-content-${u}`);
-            bodyLike.removeEventListener('touchend', () => like.tapTap(bodyLike));
+            like.removeListener(u);
         }
 
         if (comments.getAttribute('data-loading') === 'false') {
@@ -249,7 +235,10 @@ export const comment = (() => {
                 }
 
                 util.safeInnerHTML(comments, data);
-                res.data.lists.forEach(addListenerLike);
+
+                for (const u of lastRender) {
+                    like.addListener(u);
+                }
 
                 return res;
             })
@@ -604,7 +593,7 @@ export const comment = (() => {
             buttonLike.parentNode.insertBefore(readMoreElement, buttonLike);
         }
 
-        addListenerLike(response.data);
+        like.addListener(response.data.uuid);
         lastRender.push(response.data.uuid);
     };
 

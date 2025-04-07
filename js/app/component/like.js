@@ -12,6 +12,11 @@ export const like = (() => {
     let likes = null;
 
     /**
+     * @type {Map<string, AbortController>|null}
+     */
+    let listeners = null;
+
+    /**
      * @param {HTMLButtonElement} button
      * @returns {Promise<void>}
      */
@@ -99,9 +104,35 @@ export const like = (() => {
     };
 
     /**
+     * @param {string} uuid
+     * @returns {void}
+     */
+    const addListener = (uuid) => {
+        const ac = new AbortController();
+
+        const bodyLike = document.getElementById(`body-content-${uuid}`);
+        bodyLike.addEventListener('touchend', () => tapTap(bodyLike), { signal: ac.signal });
+
+        listeners.set(uuid, ac);
+    };
+
+    /**
+     * @param {string} uuid
+     * @returns {void}
+     */
+    const removeListener = (uuid) => {
+        const ac = listeners.get(uuid);
+        if (ac) {
+            ac.abort();
+            listeners.delete(uuid);
+        }
+    };
+
+    /**
      * @returns {void}
      */
     const init = () => {
+        listeners = new Map();
         likes = storage('likes');
     };
 
@@ -110,5 +141,7 @@ export const like = (() => {
         love,
         tapTap,
         getButtonLike,
+        addListener,
+        removeListener,
     };
 })();
