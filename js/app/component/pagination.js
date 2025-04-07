@@ -84,14 +84,11 @@ export const pagination = (() => {
 
         const btn = util.disableButton(button, util.loader.replace('ms-0 me-1', 'mx-1'), true);
 
-        const process = async () => {
-            const result = new Promise((res) => comment.addEventListener('comment.result', res, { once: true }));
+        const process = () => {
+            comment.addEventListener('comment.done', () => btn.restore(), { once: true });
+            comment.addEventListener('comment.result', () => comment.scrollIntoView(), { once: true });
+
             comment.dispatchEvent(new Event('comment.show'));
-
-            await result;
-
-            btn.restore();
-            comment.scrollIntoView({ behavior: 'smooth' });
         };
 
         const next = () => {

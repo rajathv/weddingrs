@@ -254,7 +254,6 @@ export const comment = (() => {
                 return res;
             })
             .then(async (res) => {
-                pagination.setTotal(res.data.count);
                 comments.dispatchEvent(new Event('comment.result'));
 
                 if (res.data.lists.length > 0) {
@@ -263,6 +262,8 @@ export const comment = (() => {
                     }
                 }
 
+                pagination.setTotal(res.data.count);
+                comments.dispatchEvent(new Event('comment.done'));
                 return res;
             });
     };
@@ -457,7 +458,7 @@ export const comment = (() => {
 
             if (id) {
                 // scroll to form.
-                document.getElementById('comment').scrollIntoView({ behavior: 'smooth' });
+                name.scrollIntoView({ block: 'center' });
             }
             return;
         }
@@ -561,7 +562,7 @@ export const comment = (() => {
         if (!id) {
             if (pagination.reset()) {
                 await show();
-                comments.scrollIntoView({ behavior: 'smooth' });
+                comments.scrollIntoView();
                 return;
             }
 
@@ -574,7 +575,7 @@ export const comment = (() => {
             const newComment = await card.renderContent(response.data);
 
             comments.insertAdjacentHTML('afterbegin', newComment);
-            comments.scrollIntoView({ behavior: 'smooth' });
+            comments.scrollIntoView();
         }
 
         if (id) {
