@@ -223,9 +223,10 @@ export const comment = (() => {
                 lastRender = traverse(res.data.lists).map((i) => i.uuid);
                 showHide.set('hidden', traverse(res.data.lists, showHide.get('hidden')));
 
+                await gif.prepareCache();
                 const cardResults = await Promise.all(res.data.lists.map((i) => card.renderContent(i)));
-                let data = cardResults.join('');
 
+                let data = cardResults.join('');
                 if (res.data.lists.length < pagination.getPer()) {
                     data += onNullComment();
                 }
@@ -555,6 +556,7 @@ export const comment = (() => {
             }
 
             response.data.is_admin = session.isAdmin();
+            await gif.prepareCache();
             const newComment = await card.renderContent(response.data);
 
             comments.insertAdjacentHTML('afterbegin', newComment);

@@ -80,12 +80,18 @@ export const gif = (() => {
     };
 
     /**
+     * @returns {Promise<void>}
+     */
+    const prepareCache = async () => {
+        await c.open();
+    };
+
+    /**
      * @param {string} url
      * @returns {Promise<string>}
      */
     const get = async (url) => {
         if (!urls.has(url)) {
-            await c.open();
             const b = await c.get(url);
             urls.set(url, URL.createObjectURL(b));
         }
@@ -561,5 +567,6 @@ export const gif = (() => {
         buttonCancel,
         removeGifSearch,
         removeButtonBack,
+        prepareCache,
     };
 })();

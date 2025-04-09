@@ -51,9 +51,12 @@ export const progress = (() => {
      * @returns {void}
      */
     const invalid = (type) => {
+        if (valid) {
+            bar.style.backgroundColor = 'red';
+            info.innerText = `Error loading ${type} ${showInformation()}`;
+        }
+
         valid = false;
-        bar.style.backgroundColor = 'red';
-        info.innerText = `Error loading ${type} ${showInformation()}`;
     };
 
     /**

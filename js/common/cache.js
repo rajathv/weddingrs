@@ -101,36 +101,32 @@ export const cache = (cacheName) => {
         }
 
         return new Promise((resolve) => {
-            (async () => {
-                await open();
+            open().then(() => items.forEach(async (v, k) => {
+                try {
+                    const b = await get(k, cancelReq);
 
-                items.forEach(async (v, k) => {
-                    try {
-                        const b = await get(k, cancelReq);
-
-                        v.forEach(([cb, _]) => {
-                            if (cb) {
-                                cb(b);
-                            }
-                        });
-
-                        fnEachComplete.forEach((fn) => fn(k));
-                    } catch (err) {
-                        v.forEach(([_, cb]) => {
-                            if (cb) {
-                                cb(err);
-                            }
-                        });
-                    } finally {
-                        count--;
-                        if (count === 0) {
-                            fnEachComplete = [];
-                            items.clear();
-                            resolve();
+                    v.forEach(([cb, _]) => {
+                        if (cb) {
+                            cb(b);
                         }
+                    });
+
+                    fnEachComplete.forEach((fn) => fn(k));
+                } catch (err) {
+                    v.forEach(([_, cb]) => {
+                        if (cb) {
+                            cb(err);
+                        }
+                    });
+                } finally {
+                    count--;
+                    if (count === 0) {
+                        fnEachComplete = [];
+                        items.clear();
+                        resolve();
                     }
-                });
-            })();
+                }
+            }));
         });
     };
 
