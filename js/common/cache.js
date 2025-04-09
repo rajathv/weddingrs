@@ -124,7 +124,7 @@ export const cache = (cacheName) => {
                     } finally {
                         count--;
                         if (count === 0) {
-                            fnEachComplete = null;
+                            fnEachComplete = [];
                             items.clear();
                             resolve();
                         }
