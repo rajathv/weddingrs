@@ -133,9 +133,7 @@ export const comment = (() => {
         }
 
         if (c.comments) {
-            for (const v of c.comments) {
-                await fetchTracker(v);
-            }
+            await Promise.all(c.comments.map((v) => fetchTracker(v)));
         }
 
         if (c.ip === undefined || c.user_agent === undefined || c.is_admin) {
@@ -244,9 +242,7 @@ export const comment = (() => {
                 comments.dispatchEvent(new Event('comment.result'));
 
                 if (res.data.lists.length > 0) {
-                    for (const v of res.data.lists) {
-                        await fetchTracker(v);
-                    }
+                    await Promise.all(res.data.lists.map((v) => fetchTracker(v)));
                 }
 
                 pagination.setTotal(res.data.count);

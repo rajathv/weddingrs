@@ -8,9 +8,9 @@ export const cache = (cacheName) => {
     const items = new Map();
 
     /**
-     * @type {function|null}
+     * @type {function[]}
      */
-    let fnEachComplete = null;
+    let fnEachComplete = [];
 
     /**
      * @type {Caches|null}
@@ -32,8 +32,8 @@ export const cache = (cacheName) => {
     /**
      * @returns {Promise<void>}
      */
-    const manualOpen = async () => {
-        if (!cacheObject) {
+    const open = async () => {
+        if (!cacheObject && window.isSecureContext) {
             cacheObject = await window.caches.open(cacheName);
         }
     };
@@ -43,9 +43,9 @@ export const cache = (cacheName) => {
      * @param {Promise<void>|null} [cancelReq=null]
      * @returns {Promise<Blob>}
      */
-    const getSingle = async (url, cancelReq = null) => {
+    const get = async (url, cancelReq = null) => {
 
-        await manualOpen();
+        await open();
 
         /**
          * @returns {Promise<Blob>}
@@ -55,6 +55,10 @@ export const cache = (cacheName) => {
             .withTimeout()
             .default()
             .then((r) => r.blob().then((b) => {
+                if (!window.isSecureContext) {
+                    return b;
+                }
+
                 const headers = new Headers();
                 const expiresDate = new Date(Date.now() + ttl);
 
@@ -65,7 +69,11 @@ export const cache = (cacheName) => {
                 return cacheObject.put(url, new Response(b, { headers })).then(() => b);
             }));
 
-        const result = await cacheObject.match(url).then((res) => {
+        if (!window.isSecureContext) {
+            return fetchPut();
+        }
+
+        return cacheObject.match(url).then((res) => {
             if (!res) {
                 return fetchPut();
             }
@@ -79,8 +87,6 @@ export const cache = (cacheName) => {
 
             return res.blob();
         });
-
-        return result;
     };
 
     /**
@@ -90,13 +96,17 @@ export const cache = (cacheName) => {
     const run = (cancelReq = null) => {
         let count = items.size;
 
+        if (!window.isSecureContext) {
+            console.warn('Cache is not supported in insecure context');
+        }
+
         return new Promise((resolve) => {
             (async () => {
-                await manualOpen();
+                await open();
 
                 items.forEach(async (v, k) => {
                     try {
-                        const b = await getSingle(k, cancelReq);
+                        const b = await get(k, cancelReq);
 
                         v.forEach(([cb, _]) => {
                             if (cb) {
@@ -104,9 +114,7 @@ export const cache = (cacheName) => {
                             }
                         });
 
-                        if (fnEachComplete) {
-                            fnEachComplete();
-                        }
+                        fnEachComplete.forEach((fn) => fn(k));
                     } catch (err) {
                         v.forEach(([_, cb]) => {
                             if (cb) {
@@ -116,9 +124,9 @@ export const cache = (cacheName) => {
                     } finally {
                         count--;
                         if (count === 0) {
-                            resolve();
-                            items.clear();
                             fnEachComplete = null;
+                            items.clear();
+                            resolve();
                         }
                     }
                 });
@@ -139,15 +147,15 @@ export const cache = (cacheName) => {
      * @returns {void}
      */
     const onEachComplete = (fn) => {
-        fnEachComplete = fn;
+        fnEachComplete.push(fn);
     };
 
     return {
         setTtl,
         run,
         add,
-        getSingle,
-        manualOpen,
+        get,
+        open,
         onEachComplete,
     };
 };

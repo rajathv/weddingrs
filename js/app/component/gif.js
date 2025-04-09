@@ -85,8 +85,8 @@ export const gif = (() => {
      */
     const get = async (url) => {
         if (!urls.has(url)) {
-            await c.manualOpen();
-            const b = await c.getSingle(url);
+            await c.open();
+            const b = await c.get(url);
             urls.set(url, URL.createObjectURL(b));
         }
 
