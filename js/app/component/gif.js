@@ -1,4 +1,5 @@
 import { util } from '../../common/util.js';
+import { cache } from '../../common/cache.js';
 import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
 import { request, defaultJSON, HTTP_GET } from '../../connection/request.js';
@@ -22,6 +23,11 @@ export const gif = (() => {
     let urls = null;
 
     /**
+     * @type {ReturnType<typeof cache>|null}
+     */
+    let c = null;
+
+    /**
      * @type {Map<string, object>|null}
      */
     let objectPool = null;
@@ -37,68 +43,11 @@ export const gif = (() => {
     let config = null;
 
     /**
-     * @param {string} url
-     * @returns {Promise<string>}
-     */
-    const cache = async (url) => {
-        if (urls.has(url)) {
-            return urls.get(url);
-        }
-
-        /**
-        * @param {Cache} c 
-        * @param {number} retries
-        * @param {number} delay
-        * @returns {Promise<Blob>}
-        */
-        const fetchPut = (c, retries = 3, delay = 1000) => request(HTTP_GET, url)
-            .default()
-            .then((r) => r.blob().then((b) => c.put(url, new Response(b, { headers: new Headers(r.headers) })).then(() => b)))
-            .catch((err) => {
-                if (retries <= 0) {
-                    throw err;
-                }
-
-                console.warn('Retrying fetch:' + url);
-                return new Promise((res, rej) => util.timeOut(() => fetchPut(c, retries - 1, delay + 1000).then(res, rej), delay));
-            });
-
-        /**
-        * @param {Cache} c 
-        * @returns {Promise<Blob>}
-        */
-        const imageCache = (c) => c.match(url).then((res) => {
-            if (!res) {
-                return fetchPut(c);
-            }
-
-            const expiresHeader = res.headers.get('expires');
-            const expiresTime = expiresHeader ? (new Date(expiresHeader)).getTime() : 0;
-
-            if (Date.now() > expiresTime) {
-                return c.delete(url).then((s) => s ? fetchPut(c) : res.blob());
-            }
-
-            return res.blob();
-        });
-
-        const res = await caches.open(cacheName)
-            .then((c) => imageCache(c))
-            .then((b) => URL.createObjectURL(b))
-            .then((uri) => {
-                urls.set(url, uri);
-                return uri;
-            });
-
-        return res;
-    };
-
-    /**
      * @param {object} ctx
      * @param {object} data
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const show = async (ctx, data) => {
+    const show = (ctx, data) => {
         const { id, media_formats: { tinygif: { url } }, content_description: description } = data;
 
         if (ctx.pointer === -1) {
@@ -112,7 +61,10 @@ export const gif = (() => {
         let k = 0;
         for (const el of ctx.lists.childNodes) {
             if (k === ctx.pointer) {
-                await cache(url).then((uri) => {
+                c.add(url, (b) => {
+                    const uri = URL.createObjectURL(b);
+                    urls.set(url, uri);
+
                     el.insertAdjacentHTML('beforeend', `
                     <figure class="gif-figure m-0 position-relative">
                         <button onclick="undangan.comment.gif.click('${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
@@ -203,22 +155,15 @@ export const gif = (() => {
 
         const url = `https://tenor.googleapis.com/v2${path}?${param}`;
 
-        const reqCancel = new Promise((r) => {
-            ctx.reqs.push(r);
-        });
-
         ctx.last = new Promise((res) => {
-            let run = true;
-
-            (async () => {
-                await reqCancel;
-                run = false;
-            })();
-
             (async () => {
                 const load = loading(ctx);
 
                 try {
+                    const reqCancel = new Promise((r) => {
+                        ctx.reqs.push(r);
+                    });
+
                     const data = await request(HTTP_GET, url)
                         .withCancel(reqCancel)
                         .default(defaultJSON)
@@ -235,22 +180,16 @@ export const gif = (() => {
 
                         ctx.next = data?.next;
                         load.until(data.results.length);
+                        c.onEachComplete(() => load.step());
 
                         for (const el of data.results) {
-                            try {
-                                if (run) {
-                                    ctx.gifs.push(el);
-                                    await show(ctx, el);
-                                    load.step();
-                                }
-                            } catch (err) {
-                                run = false;
-                                throw err;
-                            }
+                            ctx.gifs.push(el);
+                            show(ctx, el);
                         }
+
+                        await c.run(reqCancel);
                     }
                 } catch (err) {
-                    run = false;
                     if (err.name === 'AbortError') {
                         console.warn('Fetch abort:', err);
                     } else {
@@ -339,15 +278,16 @@ export const gif = (() => {
 
         const load = loading(ctx);
         load.until(ctx.gifs.length);
+        c.onEachComplete(() => load.step());
 
         for (const el of ctx.gifs) {
-            try {
-                await show(ctx, el);
-                load.step();
-            } catch {
-                ctx.gifs = [];
-                break;
-            }
+            show(ctx, el);
+        }
+
+        try {
+            await c.run();
+        } catch {
+            ctx.gifs = [];
         }
 
         load.release();
@@ -583,6 +523,8 @@ export const gif = (() => {
         urls = new Map();
         queue = new Map();
         objectPool = new Map();
+
+        c = cache(cacheName);
         config = storage('config');
 
         if (config.get('tenor_key') === null) {
@@ -591,9 +533,9 @@ export const gif = (() => {
     };
 
     return {
+        cacheName: cacheName,
         default: gifDefault,
         init,
-        cache,
         back,
         open,
         cancel,
