@@ -33,7 +33,9 @@ export const cache = (cacheName) => {
      * @returns {Promise<void>}
      */
     const manualOpen = async () => {
-        cacheObject = await window.caches.open(cacheName);
+        if (!cacheObject) {
+            cacheObject = await window.caches.open(cacheName);
+        }
     };
 
     /**
@@ -42,9 +44,8 @@ export const cache = (cacheName) => {
      * @returns {Promise<Blob>}
      */
     const getSingle = async (url, cancelReq = null) => {
-        if (!cacheObject) {
-            await manualOpen();
-        }
+
+        await manualOpen();
 
         /**
          * @returns {Promise<Blob>}

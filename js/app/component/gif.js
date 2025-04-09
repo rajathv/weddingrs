@@ -80,6 +80,20 @@ export const gif = (() => {
     };
 
     /**
+     * @param {string} url
+     * @returns {Promise<string>}
+     */
+    const get = async (url) => {
+        if (!urls.has(url)) {
+            await c.manualOpen();
+            const b = await c.getSingle(url);
+            urls.set(url, URL.createObjectURL(b));
+        }
+
+        return urls.get(url);
+    };
+
+    /**
      * @param {object} ctx 
      * @returns {object}
      */
@@ -533,9 +547,9 @@ export const gif = (() => {
     };
 
     return {
-        cacheName: cacheName,
         default: gifDefault,
         init,
+        get,
         back,
         open,
         cancel,

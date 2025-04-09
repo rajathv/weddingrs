@@ -1,3 +1,4 @@
+import { gif } from './gif.js';
 import { util } from '../../common/util.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
@@ -188,10 +189,9 @@ export const card = (() => {
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
      * @param {boolean} is_parent
-     * @param {ReturnType<typeof cache>} gif_cache
      * @returns {Promise<string>}
      */
-    const renderBody = async (c, is_parent, gif_cache) => {
+    const renderBody = async (c, is_parent) => {
         const head = `
         <div class="d-flex justify-content-between align-items-center">
             <p class="text-theme-auto text-truncate m-0 p-0" style="font-size: 0.95rem;">${renderTitle(c, is_parent)}</p>
@@ -200,11 +200,9 @@ export const card = (() => {
         <hr class="my-1">`;
 
         if (c.gif_url) {
-            const url = await gif_cache.getSingle(c.gif_url).then((b) => URL.createObjectURL(b));
-
             return head + `
             <div class="d-flex justify-content-center align-items-center my-2">
-                <img src="${url}" id="img-gif-${c.uuid}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
+                <img src="${await gif.get(c.gif_url)}" id="img-gif-${c.uuid}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">
             </div>`;
         }
 
@@ -219,12 +217,11 @@ export const card = (() => {
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
      * @param {boolean} is_parent
-     * @param {ReturnType<typeof cache>} gif_cache
      * @returns {Promise<string>}
      */
-    const renderContent = async (c, is_parent, gif_cache) => {
-        const body = await renderBody(c, is_parent, gif_cache);
-        const resData = await Promise.all(c.comments.map((comment) => renderContent(comment, false, gif_cache)));
+    const renderContent = async (c, is_parent) => {
+        const body = await renderBody(c, is_parent);
+        const resData = await Promise.all(c.comments.map((comment) => renderContent(comment, false)));
 
         return `
         <div ${renderHeader(c, is_parent)} id="${c.uuid}" style="overflow-wrap: break-word !important;">
@@ -310,8 +307,8 @@ export const card = (() => {
         renderReply,
         renderLoading,
         renderReadMore,
-        renderInnerContent: (c, gif_cache) => renderContent(c, false, gif_cache),
-        renderContent: (c, gif_cache) => renderContent(c, true, gif_cache),
+        renderInnerContent: (c) => renderContent(c, false),
+        renderContent: (c) => renderContent(c, true),
         convertMarkdownToHTML,
         maxCommentLength,
     };

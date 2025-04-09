@@ -4,7 +4,6 @@ import { like } from './like.js';
 import { util } from '../../common/util.js';
 import { pagination } from './pagination.js';
 import { dto } from '../../connection/dto.js';
-import { cache } from '../../common/cache.js';
 import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
@@ -226,10 +225,7 @@ export const comment = (() => {
                 lastRender = traverse(res.data.lists).map((i) => i.uuid);
                 showHide.set('hidden', traverse(res.data.lists, showHide.get('hidden')));
 
-                const c = cache(gif.cacheName);
-                await c.manualOpen();
-
-                const cardResults = await Promise.all(res.data.lists.map((i) => card.renderContent(i, c)));
+                const cardResults = await Promise.all(res.data.lists.map((i) => card.renderContent(i)));
                 let data = cardResults.join('');
 
                 if (res.data.lists.length < pagination.getPer()) {
@@ -576,8 +572,7 @@ export const comment = (() => {
             removeInnerForm(id);
 
             response.data.is_admin = session.isAdmin();
-            const c = cache(gif.cacheName);
-            document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderInnerContent(response.data, c));
+            document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderInnerContent(response.data));
 
             const anchorTag = document.getElementById(`button-${id}`).querySelector('a');
             const uuids = [response.data.uuid];
