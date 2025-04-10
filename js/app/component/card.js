@@ -216,12 +216,12 @@ export const card = (() => {
 
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @param {boolean} isParent
+     * @param {boolean} [isParent=false]
      * @returns {Promise<string>}
      */
-    const renderContent = async (c, isParent) => {
+    const renderContent = async (c, isParent = false) => {
         const body = await renderBody(c, isParent);
-        const resData = await Promise.all(c.comments.map((comment) => renderContent(comment, false)));
+        const resData = await Promise.all(c.comments.map((cmt) => renderContent(cmt)));
 
         return `
         <div ${renderHeader(c, isParent)} id="${c.uuid}" style="overflow-wrap: break-word !important;">
@@ -230,6 +230,24 @@ export const card = (() => {
             ${renderButton(c)}
             <div id="reply-content-${c.uuid}">${resData.join('')}</div>
         </div>`;
+    };
+
+    /**
+     * @param {ReturnType<typeof dto.getCommentResponse>[]} cs
+     * @returns {Promise<string>}
+     */
+    const renderContentMany = (cs) => {
+        return gif.prepareCache()
+            .then(() => Promise.all(cs.map((i) => renderContent(i, true))))
+            .then((r) => r.join(''));
+    };
+
+    /**
+     * @param {ReturnType<typeof dto.getCommentResponse>} cs
+     * @returns {Promise<string>}
+     */
+    const renderContentSingle = (cs) => {
+        return gif.prepareCache().then(() => renderContent(cs));
     };
 
     /**
@@ -307,8 +325,8 @@ export const card = (() => {
         renderReply,
         renderLoading,
         renderReadMore,
-        renderInnerContent: (c) => renderContent(c, false),
-        renderContent: (c) => renderContent(c, true),
+        renderContentMany,
+        renderContentSingle,
         convertMarkdownToHTML,
         maxCommentLength,
     };

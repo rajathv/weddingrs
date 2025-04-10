@@ -223,10 +223,7 @@ export const comment = (() => {
                 lastRender = traverse(res.data.lists).map((i) => i.uuid);
                 showHide.set('hidden', traverse(res.data.lists, showHide.get('hidden')));
 
-                await gif.prepareCache();
-                const cardResults = await Promise.all(res.data.lists.map((i) => card.renderContent(i)));
-
-                let data = cardResults.join('');
+                let data = await card.renderContentMany(res.data.lists);
                 if (res.data.lists.length < pagination.getPer()) {
                     data += onNullComment();
                 }
@@ -556,8 +553,7 @@ export const comment = (() => {
             }
 
             response.data.is_admin = session.isAdmin();
-            await gif.prepareCache();
-            const newComment = await card.renderContent(response.data);
+            const newComment = await card.renderContentMany([response.data]);
 
             comments.insertAdjacentHTML('afterbegin', newComment);
             comments.scrollIntoView();
@@ -570,7 +566,7 @@ export const comment = (() => {
             removeInnerForm(id);
 
             response.data.is_admin = session.isAdmin();
-            document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderInnerContent(response.data));
+            document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderContentSingle(response.data));
 
             const anchorTag = document.getElementById(`button-${id}`).querySelector('a');
             const uuids = [response.data.uuid];
