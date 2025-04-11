@@ -19,20 +19,19 @@ export const defaultJSON = {
 export const request = (method, path) => {
 
     const ac = new AbortController();
-
-    let url = document.body.getAttribute('data-url');
     const req = {
         signal: ac.signal,
         method: String(method).toUpperCase(),
         headers: new Headers(defaultJSON),
     };
 
+    window.addEventListener('offline', () => ac.abort());
+    window.addEventListener('popstate', () => ac.abort());
+
     let reqRetry = 0;
     let reqDelay = 1000;
     let reqAttempts = 0;
-
-    window.addEventListener('offline', () => ac.abort());
-    window.addEventListener('popstate', () => ac.abort());
+    let url = document.body.getAttribute('data-url');
 
     if (url && url.slice(-1) === '/') {
         url = url.slice(0, -1);
@@ -89,7 +88,7 @@ export const request = (method, path) => {
          * @returns {ReturnType<typeof request>}
          */
         withCancel(cancel) {
-            if (cancel === null) {
+            if (cancel === null || cancel === undefined) {
                 return this;
             }
 
@@ -113,31 +112,32 @@ export const request = (method, path) => {
 
             /**
              * @returns {Promise<Response>}
-             * @throws {Error}
-             * @throws {AbortError}
              */
-            const attempt = () => {
-                return fetch(path, req).then((res) => {
+            const attempt = async () => {
+                try {
+                    const res = await fetch(path, req);
                     if (!res.ok) {
                         throw new Error(`HTTP error! Status: ${res.status}`);
                     }
 
                     return res;
-                }).catch((error) => {
+                } catch (error) {
                     if (error.name === 'AbortError') {
                         throw error;
                     }
 
-                    reqAttempts++;
                     reqDelay *= 2;
+                    reqAttempts++;
 
                     if (reqAttempts >= reqRetry) {
                         throw new Error(`Max retries reached: ${error}`);
                     }
 
-                    console.warn('Retrying fetch: ' + path);
-                    return new Promise((res, rej) => util.timeOut(() => attempt().then(res, rej), reqDelay));
-                });
+                    console.warn(`Retrying fetch (${reqAttempts}/${reqRetry}): ${path}`);
+
+                    await new Promise((resolve) => util.timeOut(resolve, reqDelay));
+                    return attempt();
+                }
             };
 
             return attempt();

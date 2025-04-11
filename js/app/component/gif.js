@@ -35,7 +35,7 @@ export const gif = (() => {
     /**
      * @type {Map<string, function>|null}
      */
-    let queue = null;
+    let eventListeners = null;
 
     /**
      * @type {ReturnType<typeof storage>|null}
@@ -92,8 +92,7 @@ export const gif = (() => {
      */
     const get = async (url) => {
         if (!urls.has(url)) {
-            const b = await c.get(url);
-            urls.set(url, URL.createObjectURL(b));
+            urls.set(url, URL.createObjectURL(await c.get(url)));
         }
 
         return urls.get(url);
@@ -200,7 +199,7 @@ export const gif = (() => {
 
                         ctx.next = data?.next;
                         load.until(data.results.length);
-                        c.onEachComplete(() => load.step());
+                        c.onEachComplete(load.step);
 
                         for (const el of data.results) {
                             ctx.gifs.push(el);
@@ -261,7 +260,7 @@ export const gif = (() => {
      */
     const waitLastRequest = async (ctx) => {
         ctx.reqs.forEach((f) => f());
-        ctx.reqs = [];
+        ctx.reqs.length = 0;
 
         if (ctx.last) {
             await ctx.last;
@@ -304,20 +303,20 @@ export const gif = (() => {
 
         const load = loading(ctx);
         load.until(ctx.gifs.length);
-        c.onEachComplete(() => load.step());
-
-        for (const el of ctx.gifs) {
-            show(ctx, el);
-        }
+        c.onEachComplete(load.step);
 
         try {
+            ctx.gifs.forEach((el) => show(ctx, el));
             await c.run();
         } catch {
-            ctx.gifs = [];
+            ctx.gifs.length = 0;
         }
 
         if (prevCol !== ctx.col) {
-            ctx.lists.scroll({ top: ctx.lists.scrollHeight });
+            ctx.lists.scroll({
+                top: ctx.lists.scrollHeight,
+                behavior: 'instant',
+            });
         }
 
         load.release();
@@ -349,7 +348,7 @@ export const gif = (() => {
             params.q = ctx.query;
         }
 
-        if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9) {
+        if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.95) {
             await bootUp(ctx);
             render(ctx, isQuery ? '/search' : '/featured', params);
         }
@@ -368,8 +367,8 @@ export const gif = (() => {
 
         ctx.col = null;
         ctx.next = null;
-        ctx.gifs = [];
         ctx.pointer = -1;
+        ctx.gifs.length = 0;
 
         await bootUp(ctx);
         render(ctx, ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit });
@@ -456,13 +455,13 @@ export const gif = (() => {
         if (uuid) {
             if (objectPool.has(uuid)) {
                 await waitLastRequest(objectPool.get(uuid));
+                eventListeners.delete(uuid);
                 objectPool.delete(uuid);
-                queue.delete(uuid);
             }
         } else {
             await Promise.all(Array.from(objectPool.keys()).map((k) => waitLastRequest(objectPool.get(k))));
+            eventListeners.clear();
             objectPool.clear();
-            queue.clear();
         }
     };
 
@@ -484,17 +483,17 @@ export const gif = (() => {
      * @param {string} uuid
      * @returns {Promise<void>} 
      */
-    const open = async (uuid) => {
+    const open = (uuid) => {
         const ctx = singleton(uuid);
 
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
-        if (queue.has(uuid)) {
-            queue.get(uuid)();
+        if (eventListeners.has(uuid)) {
+            eventListeners.get(uuid)();
         }
 
-        await search(ctx);
+        return search(ctx);
     };
 
     /**
@@ -529,7 +528,7 @@ export const gif = (() => {
      * @param {function} callback
      * @returns {void}
      */
-    const onOpen = (uuid, callback) => queue.set(uuid, callback);
+    const onOpen = (uuid, callback) => eventListeners.set(uuid, callback);
 
     /**
      * @param {string|null} [uuid=null] 
@@ -550,8 +549,8 @@ export const gif = (() => {
      */
     const init = () => {
         urls = new Map();
-        queue = new Map();
         objectPool = new Map();
+        eventListeners = new Map();
 
         c = cache(cacheName);
         config = storage('config');

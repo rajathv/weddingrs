@@ -10,10 +10,10 @@ export const cache = (cacheName) => {
     /**
      * @type {function[]}
      */
-    let fnEachComplete = [];
+    const fnEachComplete = [];
 
     /**
-     * @type {Caches|null}
+     * @type {caches|null}
      */
     let cacheObject = null;
 
@@ -93,40 +93,39 @@ export const cache = (cacheName) => {
      * @param {Promise<void>|null} cancelReq
      * @returns {Promise<void>}
      */
-    const run = (cancelReq = null) => {
+    const run = async (cancelReq = null) => {
         let count = items.size;
 
+        await open();
         if (!window.isSecureContext) {
             console.warn('Cache is not supported in insecure context');
         }
 
         return new Promise((resolve) => {
-            open().then(() => items.forEach(async (v, k) => {
+            items.forEach(async (v, k) => {
                 try {
                     const b = await get(k, cancelReq);
-
-                    v.forEach(([cb, _]) => {
-                        if (cb) {
-                            cb(b);
-                        }
-                    });
+                    for (const cb of v) {
+                        await cb[0](b);
+                    }
 
                     fnEachComplete.forEach((fn) => fn(k));
                 } catch (err) {
-                    v.forEach(([_, cb]) => {
-                        if (cb) {
-                            cb(err);
+                    for (const cb of v) {
+                        const f = cb[1];
+                        if (f) {
+                            await f(err);
                         }
-                    });
+                    }
                 } finally {
                     count--;
                     if (count === 0) {
-                        fnEachComplete = [];
+                        fnEachComplete.length = 0;
                         items.clear();
                         resolve();
                     }
                 }
-            }));
+            });
         });
     };
 
