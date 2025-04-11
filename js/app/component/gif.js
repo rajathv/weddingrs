@@ -176,14 +176,14 @@ export const gif = (() => {
         const url = `https://tenor.googleapis.com/v2${path}?${param}`;
 
         ctx.last = new Promise((res) => {
+            const load = loading(ctx);
+
+            const reqCancel = new Promise((r) => {
+                ctx.reqs.push(r);
+            });
+
             (async () => {
-                const load = loading(ctx);
-
                 try {
-                    const reqCancel = new Promise((r) => {
-                        ctx.reqs.push(r);
-                    });
-
                     const data = await request(HTTP_GET, url)
                         .withCancel(reqCancel)
                         .default(defaultJSON)
@@ -276,6 +276,8 @@ export const gif = (() => {
     const bootUp = async (ctx) => {
         await waitLastRequest(ctx);
 
+        const prevCol = ctx.col ?? 0;
+
         let last = 0;
         for (const [k, v] of Object.entries(breakPoint)) {
             last = v;
@@ -286,6 +288,10 @@ export const gif = (() => {
 
         if (ctx.col === null) {
             ctx.col = last;
+        }
+
+        if (prevCol === ctx.col) {
+            return;
         }
 
         ctx.pointer = -1;
@@ -308,6 +314,10 @@ export const gif = (() => {
             await c.run();
         } catch {
             ctx.gifs = [];
+        }
+
+        if (prevCol !== ctx.col) {
+            ctx.lists.scroll({ top: ctx.lists.scrollHeight });
         }
 
         load.release();
@@ -340,7 +350,7 @@ export const gif = (() => {
         }
 
         if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.9) {
-            await waitLastRequest(ctx);
+            await bootUp(ctx);
             render(ctx, isQuery ? '/search' : '/featured', params);
         }
     };
@@ -356,6 +366,7 @@ export const gif = (() => {
             ctx.query = null;
         }
 
+        ctx.col = null;
         ctx.next = null;
         ctx.gifs = [];
         ctx.pointer = -1;
@@ -397,11 +408,9 @@ export const gif = (() => {
             });
 
             const ctx = objectPool.get(uuid);
-            const deBootUp = util.debounce(bootUp, 750);
             const deSearch = util.debounce(search, 750);
             const deScroll = util.debounce(infinite, 250);
 
-            window.addEventListener('resize', () => deBootUp(ctx));
             ctx.lists.addEventListener('scroll', () => deScroll(ctx));
             document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ctx, e.target.value));
         }
