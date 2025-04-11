@@ -107,3 +107,8 @@ html[data-bs-theme="dark"] .bg-white-black {
 .slide-desktop-active {
     transform: scale(1.15);
 }
+
+.no-gap-y {
+    margin-top: -0.75rem !important;
+    margin-bottom: -0.75rem !important;
+}
