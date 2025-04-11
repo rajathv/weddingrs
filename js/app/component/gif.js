@@ -348,7 +348,7 @@ export const gif = (() => {
             params.q = ctx.query;
         }
 
-        if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.95) {
+        if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.8) {
             await bootUp(ctx);
             render(ctx, isQuery ? '/search' : '/featured', params);
         }
