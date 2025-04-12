@@ -404,19 +404,20 @@ export const gif = (() => {
     };
 
     /**
-     * @param {HTMLButtonElement} btn
+     * @param {HTMLButtonElement} button
      * @param {string} uuid
      * @param {string} id
      * @param {string} urlBase64
      * @returns {Promise<void>}
      */
-    const click = async (btn, uuid, id, urlBase64) => {
-        btn.disabled = true;
+    const click = async (button, uuid, id, urlBase64) => {
+        const btn = util.disableButton(button, util.loader.replace('me-1', 'me-0'), true);
 
         const res = document.getElementById(`gif-result-${uuid}`);
         res.setAttribute('data-id', id);
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
         res.insertAdjacentHTML('beforeend', `<img src="${await c.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
+        btn.restore();
 
         objectPool.get(uuid).lists.classList.replace('d-flex', 'd-none');
         document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
