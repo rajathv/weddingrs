@@ -39,46 +39,49 @@ export const gif = (() => {
 
     /**
      * @param {string} uuid
-     * @param {object} data
+     * @param {object[]} lists
      * @param {object} load
-     * @returns {object|null}
+     * @returns {object|null[]}
      */
-    const show = (uuid, data, load) => {
+    const show = (uuid, lists, load) => {
         const ctx = objectPool.get(uuid);
-        const { id, media_formats: { tinygif: { url } }, content_description: description } = data;
 
-        if (ctx.pointer === -1) {
-            ctx.pointer = 0;
-        } else if (ctx.pointer === (ctx.col - 1)) {
-            ctx.pointer = 0;
-        } else {
-            ctx.pointer++;
-        }
+        return lists.map((data) => {
+            const { id, media_formats: { tinygif: { url } }, content_description: description } = data;
 
-        let k = 0;
-        for (const el of ctx.lists.childNodes) {
-            if (k === ctx.pointer) {
-                const res = (uri) => {
-                    el.insertAdjacentHTML('beforeend', `
-                    <figure class="gif-figure m-0 position-relative">
-                        <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </button>
-                        <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
-                    </figure>`);
-
-                    load.step();
-                };
-
-                return {
-                    url: url,
-                    res: res,
-                };
+            if (ctx.pointer === -1) {
+                ctx.pointer = 0;
+            } else if (ctx.pointer === (ctx.col - 1)) {
+                ctx.pointer = 0;
+            } else {
+                ctx.pointer++;
             }
-            k++;
-        }
 
-        return null;
+            let k = 0;
+            for (const el of ctx.lists.childNodes) {
+                if (k === ctx.pointer) {
+                    const res = (uri) => {
+                        el.insertAdjacentHTML('beforeend', `
+                        <figure class="gif-figure m-0 position-relative">
+                            <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </button>
+                            <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
+                        </figure>`);
+
+                        load.step();
+                    };
+
+                    return {
+                        url: url,
+                        res: res,
+                    };
+                }
+                k++;
+            }
+
+            return null;
+        });
     };
 
     /**
@@ -200,7 +203,7 @@ export const gif = (() => {
                         load.until(data.results.length);
                         ctx.gifs.push(...data.results);
 
-                        await c.run(data.results.map((el) => show(uuid, el, load)), reqCancel);
+                        await c.run(show(uuid, data.results, load), reqCancel);
                     }
                 } catch (err) {
                     if (err.name === 'AbortError') {
@@ -302,7 +305,7 @@ export const gif = (() => {
         load.until(ctx.gifs.length);
 
         try {
-            await c.run(ctx.gifs.map((el) => show(uuid, el, load)));
+            await c.run(show(uuid, ctx.gifs, load));
         } catch {
             ctx.gifs.length = 0;
         }
@@ -452,6 +455,7 @@ export const gif = (() => {
 
             objectPool.set(uuid, {
                 uuid: uuid,
+                lists: lists,
                 last: null,
                 limit: null,
                 query: null,
@@ -460,7 +464,6 @@ export const gif = (() => {
                 pointer: -1,
                 gifs: [],
                 reqs: [],
-                lists: lists,
             });
 
             const deScroll = util.debounce(scroll, 150);

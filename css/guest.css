@@ -108,7 +108,6 @@ html[data-bs-theme="dark"] .bg-white-black {
     transform: scale(1.15);
 }
 
-.no-gap-y {
-    margin-top: -0.75rem !important;
+.no-gap-bottom {
     margin-bottom: -0.75rem !important;
 }
