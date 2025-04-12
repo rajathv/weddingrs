@@ -77,7 +77,7 @@ export const request = (method, path) => {
          * @param {number} [delay=1000]
          * @returns {ReturnType<typeof request>}
          */
-        withTimeout(maxRetries = 3, delay = 1000) {
+        withRetry(maxRetries = 3, delay = 1000) {
             reqRetry = maxRetries;
             reqDelay = delay;
 

@@ -34,12 +34,8 @@ export const image = (() => {
             progress.invalid('image');
         };
 
-        const onSuccess = (b) => {
-            if (b.size > 0) {
-                img.src = URL.createObjectURL(b);
-            } else {
-                onError();
-            }
+        const onSuccess = (url) => {
+            img.src = url;
         };
 
         c.add(el.getAttribute('data-src'), onSuccess, onError);

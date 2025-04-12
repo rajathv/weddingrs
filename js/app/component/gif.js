@@ -18,11 +18,6 @@ export const gif = (() => {
     };
 
     /**
-     * @type {Map<string, string>|null}
-     */
-    let urls = null;
-
-    /**
      * @type {ReturnType<typeof cache>|null}
      */
     let c = null;
@@ -61,10 +56,7 @@ export const gif = (() => {
         let k = 0;
         for (const el of ctx.lists.childNodes) {
             if (k === ctx.pointer) {
-                c.add(url, (b) => {
-                    const uri = URL.createObjectURL(b);
-                    urls.set(url, uri);
-
+                c.add(url, (uri) => {
                     el.insertAdjacentHTML('beforeend', `
                     <figure class="gif-figure m-0 position-relative">
                         <button onclick="undangan.comment.gif.click('${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
@@ -90,13 +82,7 @@ export const gif = (() => {
      * @param {string} url
      * @returns {Promise<string>}
      */
-    const get = async (url) => {
-        if (!urls.has(url)) {
-            urls.set(url, URL.createObjectURL(await c.get(url)));
-        }
-
-        return urls.get(url);
-    };
+    const get = (url) => c.get(url);
 
     /**
      * @param {object} ctx 
@@ -427,7 +413,7 @@ export const gif = (() => {
         const res = document.getElementById(`gif-result-${uuid}`);
         res.setAttribute('data-id', id);
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
-        res.insertAdjacentHTML('beforeend', `<img src="${urls.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
+        res.insertAdjacentHTML('beforeend', `<img src="${c.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
 
         objectPool.get(uuid).lists.classList.replace('d-flex', 'd-none');
         document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
@@ -548,7 +534,6 @@ export const gif = (() => {
      * @returns {void}
      */
     const init = () => {
-        urls = new Map();
         objectPool = new Map();
         eventListeners = new Map();
 

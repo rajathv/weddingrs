@@ -3,9 +3,14 @@ import { request, HTTP_GET } from '../connection/request.js';
 export const cache = (cacheName) => {
 
     /**
-     * @type {Map<string, function[][]>|null}
+     * @type {Map<string, function[][]>}
      */
     const items = new Map();
+
+    /**
+     * @type {Map<string, string>}
+     */
+    const objectUrls = new Map();
 
     /**
      * @type {function[]}
@@ -20,16 +25,6 @@ export const cache = (cacheName) => {
     let ttl = 1000 * 60 * 60 * 6;
 
     /**
-     * @param {string} url 
-     * @param {function} res
-     * @param {function} [rej=null]
-     * @returns {void}
-     */
-    const add = (url, res, rej = null) => {
-        items.set(url, [...(items.get(url) ?? []), [res, rej]]);
-    };
-
-    /**
      * @returns {Promise<void>}
      */
     const open = async () => {
@@ -41,9 +36,12 @@ export const cache = (cacheName) => {
     /**
      * @param {string} url
      * @param {Promise<void>|null} [cancelReq=null]
-     * @returns {Promise<Blob>}
+     * @returns {Promise<string>}
      */
     const get = async (url, cancelReq = null) => {
+        if (objectUrls.has(url)) {
+            return objectUrls.get(url);
+        }
 
         await open();
 
@@ -52,7 +50,7 @@ export const cache = (cacheName) => {
          */
         const fetchPut = () => request(HTTP_GET, url)
             .withCancel(cancelReq)
-            .withTimeout()
+            .withRetry()
             .default()
             .then((r) => r.blob().then((b) => {
                 if (!window.isSecureContext) {
@@ -66,11 +64,20 @@ export const cache = (cacheName) => {
                 headers.set('Expires', expiresDate.toUTCString());
                 headers.set('Content-Type', r.headers.get('Content-Type'));
 
-                return cacheObject.put(url, new Response(b, { headers })).then(() => b);
+                return cacheObject.put(url, new Response(b, { headers })).then(() => b.slice());
             }));
 
+        /**
+         * @param {Blob} b 
+         * @returns {string}
+         */
+        const blobToUrl = (b) => {
+            objectUrls.set(url, URL.createObjectURL(b));
+            return objectUrls.get(url);
+        };
+
         if (!window.isSecureContext) {
-            return fetchPut();
+            return fetchPut().then((b) => blobToUrl(b));
         }
 
         return cacheObject.match(url).then((res) => {
@@ -86,7 +93,7 @@ export const cache = (cacheName) => {
             }
 
             return res.blob();
-        });
+        }).then((b) => blobToUrl(b));
     };
 
     /**
@@ -104,19 +111,15 @@ export const cache = (cacheName) => {
         return new Promise((resolve) => {
             items.forEach(async (v, k) => {
                 try {
-                    const b = await get(k, cancelReq);
-                    for (const cb of v) {
-                        await cb[0](b);
-                    }
-
+                    const s = await get(k, cancelReq);
+                    v.forEach((cb) => cb[0](s));
                     fnEachComplete.forEach((fn) => fn(k));
                 } catch (err) {
-                    for (const cb of v) {
-                        const f = cb[1];
-                        if (f) {
-                            await f(err);
+                    v.forEach((cb) => {
+                        if (cb[1]) {
+                            cb[1](err);
                         }
-                    }
+                    });
                 } finally {
                     count--;
                     if (count === 0) {
@@ -129,28 +132,34 @@ export const cache = (cacheName) => {
         });
     };
 
-    /**
-     * @param {number} v
-     * @returns {void} 
-     */
-    const setTtl = (v) => {
-        ttl = Number(v);
-    };
-
-    /**
-     * @param {function} fn 
-     * @returns {void}
-     */
-    const onEachComplete = (fn) => {
-        fnEachComplete.push(fn);
-    };
-
     return {
-        setTtl,
         run,
-        add,
         get,
         open,
-        onEachComplete,
+        /**
+         * @param {string} url 
+         * @param {function} res
+         * @param {function} [rej=null]
+         * @returns {this}
+         */
+        add(url, res, rej = null) {
+            items.set(url, [...(items.get(url) ?? []), [res, rej]]);
+        },
+        /**
+         * @param {number} v
+         * @returns {this} 
+         */
+        setTtl(v) {
+            ttl = Number(v);
+            return this;
+        },
+        /**
+         * @param {function} fn 
+         * @returns {this}
+         */
+        onEachComplete(fn) {
+            fnEachComplete.push(fn);
+            return this;
+        },
     };
 };

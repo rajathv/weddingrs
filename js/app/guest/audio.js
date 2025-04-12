@@ -63,9 +63,7 @@ export const audio = (() => {
         });
 
         try {
-            const url = await cache('audio')
-                .get(music.getAttribute('data-url'))
-                .then((b) => URL.createObjectURL(b));
+            const url = await cache('audio').get(music.getAttribute('data-url'));
 
             audioEl = new Audio(url);
             audioEl.volume = 1;
