@@ -59,7 +59,7 @@ export const gif = (() => {
                 c.add(url, (uri) => {
                     el.insertAdjacentHTML('beforeend', `
                     <figure class="gif-figure m-0 position-relative">
-                        <button onclick="undangan.comment.gif.click('${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
+                        <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
                             <i class="fa-solid fa-circle-check"></i>
                         </button>
                         <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
@@ -404,16 +404,19 @@ export const gif = (() => {
     };
 
     /**
+     * @param {HTMLButtonElement} btn
      * @param {string} uuid
      * @param {string} id
      * @param {string} urlBase64
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const click = (uuid, id, urlBase64) => {
+    const click = async (btn, uuid, id, urlBase64) => {
+        btn.disabled = true;
+
         const res = document.getElementById(`gif-result-${uuid}`);
         res.setAttribute('data-id', id);
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
-        res.insertAdjacentHTML('beforeend', `<img src="${c.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
+        res.insertAdjacentHTML('beforeend', `<img src="${await c.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
 
         objectPool.get(uuid).lists.classList.replace('d-flex', 'd-none');
         document.getElementById(`gif-search-nav-${uuid}`).classList.replace('d-flex', 'd-none');
