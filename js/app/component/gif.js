@@ -176,47 +176,39 @@ export const gif = (() => {
         const url = `https://tenor.googleapis.com/v2${path}?${param}`;
 
         const ctx = objectPool.get(uuid);
-        ctx.last = new Promise((res) => {
-            const load = loading(uuid);
 
-            const reqCancel = new Promise((r) => {
-                ctx.reqs.push(r);
-            });
-
-            (async () => {
-                try {
-                    const data = await request(HTTP_GET, url)
-                        .withCancel(reqCancel)
-                        .default(defaultJSON)
-                        .then((r) => r.json())
-                        .then((j) => {
-                            if (!j.error) {
-                                return j;
-                            }
-
-                            throw new Error(j.error.message);
-                        });
-
-                    if (data.results.length > 0) {
-
-                        ctx.next = data?.next;
-                        load.until(data.results.length);
-                        ctx.gifs.push(...data.results);
-
-                        await c.run(show(uuid, data.results, load), reqCancel);
-                    }
-                } catch (err) {
-                    if (err.name === 'AbortError') {
-                        console.warn('Fetch abort:', err);
-                    } else {
-                        alert(err);
-                    }
-                } finally {
-                    load.release();
-                    res();
-                }
-            })();
+        const load = loading(uuid);
+        const reqCancel = new Promise((r) => {
+            ctx.reqs.push(r);
         });
+
+        ctx.last = request(HTTP_GET, url)
+            .withCancel(reqCancel)
+            .default(defaultJSON)
+            .then((r) => r.json())
+            .then((j) => {
+                if (j.error) {
+                    throw new Error(j.error.message);
+                }
+
+                if (j.results.length === 0) {
+                    return j;
+                }
+
+                ctx.next = j?.next;
+                load.until(j.results.length);
+                ctx.gifs.push(...j.results);
+
+                return c.run(show(uuid, j.results, load), reqCancel);
+            })
+            .catch((err) => {
+                if (err.name === 'AbortError') {
+                    console.warn('Fetch abort:', err);
+                } else {
+                    alert(err);
+                }
+            })
+            .finally(() => load.release());
     };
 
     /**

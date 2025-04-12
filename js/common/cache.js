@@ -8,6 +8,11 @@ export const cache = (cacheName) => {
     const objectUrls = new Map();
 
     /**
+     * @type {Map<string, Promise<string>>}
+     */
+    const inFlightRequests = new Map();
+
+    /**
      * @type {caches|null}
      */
     let cacheObject = null;
@@ -28,62 +33,76 @@ export const cache = (cacheName) => {
      * @param {Promise<void>|null} [cancelReq=null]
      * @returns {Promise<string>}
      */
-    const get = async (url, cancelReq = null) => {
+    const get = (url, cancelReq = null) => {
         if (objectUrls.has(url)) {
-            return objectUrls.get(url);
+            return Promise.resolve(objectUrls.get(url));
         }
 
-        await open();
+        if (inFlightRequests.has(url)) {
+            return inFlightRequests.get(url);
+        }
 
-        /**
-         * @returns {Promise<Blob>}
-         */
-        const fetchPut = () => request(HTTP_GET, url)
-            .withCancel(cancelReq)
-            .withRetry()
-            .default()
-            .then((r) => r.blob().then((b) => {
-                if (!window.isSecureContext) {
-                    return b;
+        const inflightPromise = (async () => {
+            await open();
+
+            /**
+             * @returns {Promise<Blob>}
+             */
+            const fetchPut = () => request(HTTP_GET, url)
+                .withCancel(cancelReq)
+                .withRetry()
+                .default()
+                .then((r) => r.blob().then((b) => {
+                    if (!window.isSecureContext) {
+                        return b;
+                    }
+
+                    const headers = new Headers();
+                    const expiresDate = new Date(Date.now() + ttl);
+
+                    headers.set('Content-Length', String(b.size));
+                    headers.set('Expires', expiresDate.toUTCString());
+                    headers.set('Content-Type', r.headers.get('Content-Type'));
+
+                    return cacheObject.put(url, new Response(b, { headers })).then(() => b.slice());
+                }));
+
+            /**
+             * @param {Blob} b 
+             * @returns {string}
+             */
+            const blobToUrl = (b) => {
+                objectUrls.set(url, URL.createObjectURL(b));
+                return objectUrls.get(url);
+            };
+
+            if (!window.isSecureContext) {
+                return fetchPut().then((b) => blobToUrl(b));
+            }
+
+            return cacheObject.match(url).then((res) => {
+                if (!res) {
+                    return fetchPut();
                 }
 
-                const headers = new Headers();
-                const expiresDate = new Date(Date.now() + ttl);
+                const expiresHeader = res.headers.get('Expires');
+                const expiresTime = expiresHeader ? (new Date(expiresHeader)).getTime() : 0;
 
-                headers.set('Content-Length', String(b.size));
-                headers.set('Expires', expiresDate.toUTCString());
-                headers.set('Content-Type', r.headers.get('Content-Type'));
+                if (Date.now() > expiresTime) {
+                    return cacheObject.delete(url).then((s) => s ? fetchPut() : res.blob());
+                }
 
-                return cacheObject.put(url, new Response(b, { headers })).then(() => b.slice());
-            }));
+                return res.blob();
+            }).then((b) => blobToUrl(b));
+        })();
 
-        /**
-         * @param {Blob} b 
-         * @returns {string}
-         */
-        const blobToUrl = (b) => {
-            objectUrls.set(url, URL.createObjectURL(b));
-            return objectUrls.get(url);
-        };
+        inFlightRequests.set(url, inflightPromise);
 
-        if (!window.isSecureContext) {
-            return fetchPut().then((b) => blobToUrl(b));
-        }
+        inflightPromise.finally(() => {
+            inFlightRequests.delete(url);
+        });
 
-        return cacheObject.match(url).then((res) => {
-            if (!res) {
-                return fetchPut();
-            }
-
-            const expiresHeader = res.headers.get('Expires');
-            const expiresTime = expiresHeader ? (new Date(expiresHeader)).getTime() : 0;
-
-            if (Date.now() > expiresTime) {
-                return cacheObject.delete(url).then((s) => s ? fetchPut() : res.blob());
-            }
-
-            return res.blob();
-        }).then((b) => blobToUrl(b));
+        return inflightPromise;
     };
 
     /**
@@ -103,27 +122,16 @@ export const cache = (cacheName) => {
             uniq.set(val.url, [...(uniq.get(val.url) ?? []), [val.res, val?.rej]]);
         });
 
-        let count = uniq.size;
-
-        return new Promise((resolve) => {
-            uniq.forEach(async (v, k) => {
-                try {
-                    const s = await get(k, cancelReq);
-                    v.forEach((cb) => cb[0](s));
-                } catch (err) {
-                    v.forEach((cb) => {
-                        if (cb[1]) {
-                            cb[1](err);
-                        }
-                    });
-                } finally {
-                    count--;
-                    if (count === 0) {
-                        resolve();
-                    }
-                }
-            });
-        });
+        return Promise.allSettled(Array.from(uniq).map(([k, v]) => get(k, cancelReq)
+            .then((s) => {
+                v.forEach((cb) => cb[0]?.(s));
+                return s;
+            })
+            .catch((r) => {
+                v.forEach((cb) => cb[1]?.(r));
+                return r;
+            })
+        ));
     };
 
     return {
