@@ -38,11 +38,13 @@ export const gif = (() => {
     let config = null;
 
     /**
-     * @param {object} ctx
+     * @param {string} uuid
      * @param {object} data
-     * @returns {void}
+     * @param {object} load
+     * @returns {object|null}
      */
-    const show = (ctx, data) => {
+    const show = (uuid, data, load) => {
+        const ctx = objectPool.get(uuid);
         const { id, media_formats: { tinygif: { url } }, content_description: description } = data;
 
         if (ctx.pointer === -1) {
@@ -56,7 +58,7 @@ export const gif = (() => {
         let k = 0;
         for (const el of ctx.lists.childNodes) {
             if (k === ctx.pointer) {
-                c.add(url, (uri) => {
+                const res = (uri) => {
                     el.insertAdjacentHTML('beforeend', `
                     <figure class="gif-figure m-0 position-relative">
                         <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
@@ -64,11 +66,19 @@ export const gif = (() => {
                         </button>
                         <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
                     </figure>`);
-                });
-                return;
+
+                    load.step();
+                };
+
+                return {
+                    url: url,
+                    res: res,
+                };
             }
             k++;
         }
+
+        return null;
     };
 
     /**
@@ -85,10 +95,12 @@ export const gif = (() => {
     const get = (url) => c.get(url);
 
     /**
-     * @param {object} ctx 
+     * @param {string} uuid
      * @returns {object}
      */
-    const loading = (ctx) => {
+    const loading = (uuid) => {
+        const ctx = objectPool.get(uuid);
+
         const list = ctx.lists;
         const load = document.getElementById(`gif-loading-${ctx.uuid}`);
         const prog = document.getElementById(`progress-bar-${ctx.uuid}`);
@@ -138,12 +150,12 @@ export const gif = (() => {
     };
 
     /**
-     * @param {object} ctx
+     * @param {string} uuid
      * @param {string} path 
      * @param {object} params
      * @returns {void}
      */
-    const render = (ctx, path, params) => {
+    const render = (uuid, path, params) => {
         params = {
             media_filter: 'tinygif',
             client_key: 'undangan_app',
@@ -160,8 +172,9 @@ export const gif = (() => {
 
         const url = `https://tenor.googleapis.com/v2${path}?${param}`;
 
+        const ctx = objectPool.get(uuid);
         ctx.last = new Promise((res) => {
-            const load = loading(ctx);
+            const load = loading(uuid);
 
             const reqCancel = new Promise((r) => {
                 ctx.reqs.push(r);
@@ -185,14 +198,9 @@ export const gif = (() => {
 
                         ctx.next = data?.next;
                         load.until(data.results.length);
-                        c.onEachComplete(load.step);
+                        ctx.gifs.push(...data.results);
 
-                        for (const el of data.results) {
-                            ctx.gifs.push(el);
-                            show(ctx, el);
-                        }
-
-                        await c.run(reqCancel);
+                        await c.run(data.results.map((el) => show(uuid, el, load)), reqCancel);
                     }
                 } catch (err) {
                     if (err.name === 'AbortError') {
@@ -241,10 +249,12 @@ export const gif = (() => {
     };
 
     /**
-     * @param {object} ctx
+     * @param {string} uuid
      * @returns {Promise<void>}
      */
-    const waitLastRequest = async (ctx) => {
+    const waitLastRequest = async (uuid) => {
+        const ctx = objectPool.get(uuid);
+
         ctx.reqs.forEach((f) => f());
         ctx.reqs.length = 0;
 
@@ -255,12 +265,13 @@ export const gif = (() => {
     };
 
     /**
-     * @param {object} ctx
+     * @param {string} uuid
      * @returns {Promise<void>}
      */
-    const bootUp = async (ctx) => {
-        await waitLastRequest(ctx);
+    const bootUp = async (uuid) => {
+        await waitLastRequest(uuid);
 
+        const ctx = objectPool.get(uuid);
         const prevCol = ctx.col ?? 0;
 
         let last = 0;
@@ -287,13 +298,11 @@ export const gif = (() => {
             return;
         }
 
-        const load = loading(ctx);
+        const load = loading(uuid);
         load.until(ctx.gifs.length);
-        c.onEachComplete(load.step);
 
         try {
-            ctx.gifs.forEach((el) => show(ctx, el));
-            await c.run();
+            await c.run(ctx.gifs.map((el) => show(uuid, el, load)));
         } catch {
             ctx.gifs.length = 0;
         }
@@ -309,15 +318,17 @@ export const gif = (() => {
 
         // reset if error
         if (ctx.gifs.length === 0) {
-            await bootUp(ctx);
+            await bootUp(uuid);
         }
     };
 
     /**
-     * @param {object} ctx
+     * @param {string} uuid
      * @returns {Promise<void>}
      */
-    const infinite = async (ctx) => {
+    const scroll = async (uuid) => {
+        const ctx = objectPool.get(uuid);
+
         if (ctx.lists.getAttribute('data-continue') !== 'true') {
             return;
         }
@@ -335,17 +346,19 @@ export const gif = (() => {
         }
 
         if (ctx.lists.scrollTop > (ctx.lists.scrollHeight - ctx.lists.clientHeight) * 0.8) {
-            await bootUp(ctx);
-            render(ctx, isQuery ? '/search' : '/featured', params);
+            await bootUp(uuid);
+            render(uuid, isQuery ? '/search' : '/featured', params);
         }
     };
 
     /**
-     * @param {object} ctx
+     * @param {string} uuid
      * @param {string|null} [q=null]
      * @returns {Promise<void>}
      */
-    const search = async (ctx, q = null) => {
+    const search = async (uuid, q = null) => {
+        const ctx = objectPool.get(uuid);
+
         ctx.query = q !== null ? q : ctx.query;
         if (!ctx.query || ctx.query.trim().length === 0) {
             ctx.query = null;
@@ -356,51 +369,8 @@ export const gif = (() => {
         ctx.pointer = -1;
         ctx.gifs.length = 0;
 
-        await bootUp(ctx);
-        render(ctx, ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit });
-    };
-
-    /**
-     * @param {string} uuid
-     * @returns {{
-     *   uuid: string, 
-     *   last: Promise<void>|null,
-     *   limit: number|null,
-     *   query: string|null, 
-     *   next: string|null, 
-     *   col: number|null, 
-     *   pointer: number, 
-     *   gifs: object[],
-     *   reqs: function[],
-     *   lists: HTMLElement, 
-     * }}
-     */
-    const singleton = (uuid) => {
-        if (!objectPool.has(uuid)) {
-
-            util.safeInnerHTML(document.getElementById(`gif-form-${uuid}`), template(uuid));
-            objectPool.set(uuid, {
-                uuid: uuid,
-                last: null,
-                limit: null,
-                query: null,
-                next: null,
-                col: null,
-                pointer: -1,
-                gifs: [],
-                reqs: [],
-                lists: document.getElementById(`gif-lists-${uuid}`),
-            });
-
-            const ctx = objectPool.get(uuid);
-            const deSearch = util.debounce(search, 750);
-            const deScroll = util.debounce(infinite, 250);
-
-            ctx.lists.addEventListener('scroll', () => deScroll(ctx));
-            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(ctx, e.target.value));
-        }
-
-        return objectPool.get(uuid);
+        await bootUp(uuid);
+        render(uuid, ctx.query === null ? '/featured' : '/search', { q: ctx.query, limit: ctx.limit });
     };
 
     /**
@@ -417,6 +387,7 @@ export const gif = (() => {
         res.setAttribute('data-id', id);
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
         res.insertAdjacentHTML('beforeend', `<img src="${await c.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
+
         btn.restore();
 
         objectPool.get(uuid).lists.classList.replace('d-flex', 'd-none');
@@ -444,12 +415,12 @@ export const gif = (() => {
     const remove = async (uuid = null) => {
         if (uuid) {
             if (objectPool.has(uuid)) {
-                await waitLastRequest(objectPool.get(uuid));
+                await waitLastRequest(uuid);
                 eventListeners.delete(uuid);
                 objectPool.delete(uuid);
             }
         } else {
-            await Promise.all(Array.from(objectPool.keys()).map((k) => waitLastRequest(objectPool.get(k))));
+            await Promise.all(Array.from(objectPool.keys()).map((k) => waitLastRequest(k)));
             eventListeners.clear();
             objectPool.clear();
         }
@@ -462,7 +433,7 @@ export const gif = (() => {
      */
     const back = async (button, uuid) => {
         const btn = util.disableButton(button, util.loader.replace('me-1', 'me-0'), true);
-        await waitLastRequest(objectPool.get(uuid));
+        await waitLastRequest(uuid);
         btn.restore();
 
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', true);
@@ -474,7 +445,30 @@ export const gif = (() => {
      * @returns {Promise<void>} 
      */
     const open = (uuid) => {
-        const ctx = singleton(uuid);
+        if (!objectPool.has(uuid)) {
+
+            util.safeInnerHTML(document.getElementById(`gif-form-${uuid}`), template(uuid));
+            const lists = document.getElementById(`gif-lists-${uuid}`);
+
+            objectPool.set(uuid, {
+                uuid: uuid,
+                last: null,
+                limit: null,
+                query: null,
+                next: null,
+                col: null,
+                pointer: -1,
+                gifs: [],
+                reqs: [],
+                lists: lists,
+            });
+
+            const deScroll = util.debounce(scroll, 150);
+            lists.addEventListener('scroll', () => deScroll(uuid));
+
+            const deSearch = util.debounce(search, 850);
+            document.getElementById(`gif-search-${uuid}`).addEventListener('input', (e) => deSearch(uuid, e.target.value));
+        }
 
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
@@ -483,7 +477,7 @@ export const gif = (() => {
             eventListeners.get(uuid)();
         }
 
-        return search(ctx);
+        return search(uuid);
     };
 
     /**

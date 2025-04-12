@@ -11,9 +11,9 @@ export const image = (() => {
     let hasSrc = false;
 
     /**
-     * @type {ReturnType<typeof cache>|null}
+     * @type {object[]}
      */
-    let c = null;
+    const urlCache = [];
 
     /**
      * @param {HTMLImageElement} el 
@@ -38,7 +38,11 @@ export const image = (() => {
             img.src = url;
         };
 
-        c.add(el.getAttribute('data-src'), onSuccess, onError);
+        urlCache.push({
+            url: el.getAttribute('data-src'),
+            res: onSuccess,
+            rej: onError,
+        });
     };
 
     /**
@@ -74,7 +78,7 @@ export const image = (() => {
         }
 
         if (hasSrc) {
-            c.run();
+            cache('images').run(urlCache);
         }
     };
 
@@ -82,7 +86,6 @@ export const image = (() => {
      * @returns {object}
      */
     const init = () => {
-        c = cache('images');
         images = document.querySelectorAll('img');
 
         images.forEach(progress.add);

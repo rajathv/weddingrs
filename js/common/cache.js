@@ -3,19 +3,9 @@ import { request, HTTP_GET } from '../connection/request.js';
 export const cache = (cacheName) => {
 
     /**
-     * @type {Map<string, function[][]>}
-     */
-    const items = new Map();
-
-    /**
      * @type {Map<string, string>}
      */
     const objectUrls = new Map();
-
-    /**
-     * @type {function[]}
-     */
-    const fnEachComplete = [];
 
     /**
      * @type {caches|null}
@@ -97,23 +87,29 @@ export const cache = (cacheName) => {
     };
 
     /**
+     * @param {object[]} items
      * @param {Promise<void>|null} cancelReq
      * @returns {Promise<void>}
      */
-    const run = async (cancelReq = null) => {
-        let count = items.size;
-
+    const run = async (items, cancelReq = null) => {
         await open();
+        const uniq = new Map();
+
         if (!window.isSecureContext) {
             console.warn('Cache is not supported in insecure context');
         }
 
+        items.filter((val) => val !== null).forEach((val) => {
+            uniq.set(val.url, [...(uniq.get(val.url) ?? []), [val.res, val?.rej]]);
+        });
+
+        let count = uniq.size;
+
         return new Promise((resolve) => {
-            items.forEach(async (v, k) => {
+            uniq.forEach(async (v, k) => {
                 try {
                     const s = await get(k, cancelReq);
                     v.forEach((cb) => cb[0](s));
-                    fnEachComplete.forEach((fn) => fn(k));
                 } catch (err) {
                     v.forEach((cb) => {
                         if (cb[1]) {
@@ -123,8 +119,6 @@ export const cache = (cacheName) => {
                 } finally {
                     count--;
                     if (count === 0) {
-                        fnEachComplete.length = 0;
-                        items.clear();
                         resolve();
                     }
                 }
@@ -137,28 +131,11 @@ export const cache = (cacheName) => {
         get,
         open,
         /**
-         * @param {string} url 
-         * @param {function} res
-         * @param {function} [rej=null]
-         * @returns {this}
-         */
-        add(url, res, rej = null) {
-            items.set(url, [...(items.get(url) ?? []), [res, rej]]);
-        },
-        /**
          * @param {number} v
          * @returns {this} 
          */
         setTtl(v) {
             ttl = Number(v);
-            return this;
-        },
-        /**
-         * @param {function} fn 
-         * @returns {this}
-         */
-        onEachComplete(fn) {
-            fnEachComplete.push(fn);
             return this;
         },
     };
