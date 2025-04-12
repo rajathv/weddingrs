@@ -42,8 +42,7 @@ export const cache = (cacheName) => {
             return inFlightRequests.get(url);
         }
 
-        const inflightPromise = (async () => {
-            await open();
+        const inflightPromise = open().then(() => {
 
             /**
              * @returns {Promise<Blob>}
@@ -94,14 +93,11 @@ export const cache = (cacheName) => {
 
                 return res.blob();
             }).then((b) => blobToUrl(b));
-        })();
-
-        inFlightRequests.set(url, inflightPromise);
-
-        inflightPromise.finally(() => {
+        }).finally(() => {
             inFlightRequests.delete(url);
         });
 
+        inFlightRequests.set(url, inflightPromise);
         return inflightPromise;
     };
 
