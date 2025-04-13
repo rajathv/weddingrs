@@ -17,31 +17,33 @@ export const image = (() => {
 
     /**
      * @param {HTMLImageElement} el 
-     * @returns {void}
+     * @param {string} src 
+     * @returns {Promise<void>}
      */
-    const getByFetch = (el) => {
+    const appendImage = (el, src) => new Promise((res) => {
         const img = new Image();
 
         img.onload = () => {
             el.src = img.src;
             el.width = img.width;
             el.height = img.height;
-            img.remove();
             progress.complete('image');
+            img.remove();
+            res();
         };
 
-        const onError = () => {
-            progress.invalid('image');
-        };
+        img.src = src;
+    });
 
-        const onSuccess = (url) => {
-            img.src = url;
-        };
-
+    /**
+     * @param {HTMLImageElement} el 
+     * @returns {void}
+     */
+    const getByFetch = (el) => {
         urlCache.push({
             url: el.getAttribute('data-src'),
-            res: onSuccess,
-            rej: onError,
+            res: (url) => appendImage(el, url),
+            rej: () => progress.invalid('image'),
         });
     };
 
@@ -70,16 +72,27 @@ export const image = (() => {
     const hasDataSrc = () => hasSrc;
 
     /**
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    const load = () => {
-        for (const el of images) {
+    const load = async () => {
+        const arrImages = Array.from(images);
+
+        arrImages.filter((el) => el.getAttribute('data-fetch-img') !== 'high').forEach((el) => {
             el.hasAttribute('data-src') ? getByFetch(el) : getByDefault(el);
+        });
+
+        if (!hasSrc) {
+            return;
         }
 
-        if (hasSrc) {
-            cache('images').run(urlCache);
-        }
+        const c = cache('images');
+        await c.open();
+        await Promise.all(arrImages.filter((el) => el.getAttribute('data-fetch-img') === 'high').map((el) => {
+            return c.get(el.getAttribute('data-src'))
+                .then((i) => appendImage(el, i))
+                .then(() => el.classList.remove('opacity-0'));
+        }));
+        await c.run(urlCache);
     };
 
     /**
