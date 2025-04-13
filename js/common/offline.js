@@ -99,13 +99,17 @@ export const offline = (() => {
         window.addEventListener('online', onOnline);
         window.addEventListener('offline', onOffline);
 
-        alert = document.getElementById('offline-mode');
+        alert = document.createElement('div');
+        alert.classList.add('fixed-top', 'pe-none');
+        alert.style.cssText = 'opacity: 0; z-index: 1057;';
         alert.innerHTML = `
         <div class="d-flex justify-content-center mx-auto">
             <div class="d-flex justify-content-center align-items-center rounded-pill my-2 bg-danger shadow">
                 <small class="text-center py-1 px-2 mx-1 mt-1 mb-0 text-white" style="font-size: 0.8rem;"></small>
             </div>
         </div>`;
+
+        document.body.insertBefore(alert, document.body.lastChild);
     };
 
     return {
