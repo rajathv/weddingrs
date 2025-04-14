@@ -87,9 +87,7 @@ export const gif = (() => {
     /**
      * @returns {Promise<void>}
      */
-    const prepareCache = async () => {
-        await c.open();
-    };
+    const prepareCache = () => c.open();
 
     /**
      * @param {string} url
@@ -173,15 +171,13 @@ export const gif = (() => {
             .map((k) => `${k}=${encodeURIComponent(params[k])}`)
             .join('&');
 
-        const url = `https://tenor.googleapis.com/v2${path}?${param}`;
-
-        const ctx = objectPool.get(uuid);
-
         const load = loading(uuid);
+        const ctx = objectPool.get(uuid);
         const reqCancel = new Promise((r) => {
             ctx.reqs.push(r);
         });
 
+        const url = `https://tenor.googleapis.com/v2${path}?${param}`;
         ctx.last = request(HTTP_GET, url)
             .withCancel(reqCancel)
             .default(defaultJSON)

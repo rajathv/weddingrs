@@ -55,7 +55,7 @@ export const session = (() => {
      * @returns {Promise<ReturnType<typeof dto.baseResponse<object>>}
      */
     const guest = () => {
-        return request(HTTP_GET, '/api/config')
+        return request(HTTP_GET, '/api/v2/config')
             .token(getToken())
             .send()
             .then((res) => {

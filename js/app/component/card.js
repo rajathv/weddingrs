@@ -8,11 +8,6 @@ export const card = (() => {
     /**
      * @type {ReturnType<typeof storage>|null}
      */
-    let user = null;
-
-    /**
-     * @type {ReturnType<typeof storage>|null}
-     */
     let owns = null;
 
     /**
@@ -176,7 +171,7 @@ export const card = (() => {
      */
     const renderTitle = (c, isParent) => {
         if (c.is_admin) {
-            return `<strong class="me-1">${util.escapeHtml(user.get('name') ?? config.get('name'))}</strong><i class="fa-solid fa-certificate text-primary"></i>`;
+            return `<strong class="me-1">${util.escapeHtml(c.name)}</strong><i class="fa-solid fa-certificate text-primary"></i>`;
         }
 
         if (isParent) {
@@ -311,7 +306,6 @@ export const card = (() => {
      * @returns {void}
      */
     const init = () => {
-        user = storage('user');
         owns = storage('owns');
         likes = storage('likes');
         config = storage('config');
