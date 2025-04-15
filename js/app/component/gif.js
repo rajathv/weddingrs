@@ -2,7 +2,7 @@ import { util } from '../../common/util.js';
 import { cache } from '../../common/cache.js';
 import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
-import { request, defaultJSON, HTTP_GET } from '../../connection/request.js';
+import { request, defaultJSON, ERROR_ABORT, HTTP_GET } from '../../connection/request.js';
 
 export const gif = (() => {
 
@@ -57,30 +57,27 @@ export const gif = (() => {
                 ctx.pointer++;
             }
 
-            let k = 0;
-            for (const el of ctx.lists.childNodes) {
-                if (k === ctx.pointer) {
-                    const res = (uri) => {
-                        el.insertAdjacentHTML('beforeend', `
-                        <figure class="gif-figure m-0 position-relative">
-                            <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </button>
-                            <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
-                        </figure>`);
-
-                        load.step();
-                    };
-
-                    return {
-                        url: url,
-                        res: res,
-                    };
-                }
-                k++;
+            const el = ctx.lists.childNodes[ctx.pointer] ?? null;
+            if (!el) {
+                return null;
             }
 
-            return null;
+            const res = (uri) => {
+                el.insertAdjacentHTML('beforeend', `
+                <figure class="gif-figure m-0 position-relative">
+                    <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </button>
+                    <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
+                </figure>`);
+
+                load.step();
+            };
+
+            return {
+                url: url,
+                res: res,
+            };
         });
     };
 
@@ -177,8 +174,7 @@ export const gif = (() => {
             ctx.reqs.push(r);
         });
 
-        const url = `https://tenor.googleapis.com/v2${path}?${param}`;
-        ctx.last = request(HTTP_GET, url)
+        ctx.last = request(HTTP_GET, `https://tenor.googleapis.com/v2${path}?${param}`)
             .withCancel(reqCancel)
             .default(defaultJSON)
             .then((r) => r.json())
@@ -198,7 +194,7 @@ export const gif = (() => {
                 return c.run(show(uuid, j.results, load), reqCancel);
             })
             .catch((err) => {
-                if (err.name === 'AbortError') {
+                if (err.name === ERROR_ABORT) {
                     console.warn('Fetch abort:', err);
                 } else {
                     alert(err);

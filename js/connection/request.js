@@ -11,6 +11,8 @@ export const HTTP_STATUS_OK = 200;
 export const HTTP_STATUS_CREATED = 201;
 export const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 
+export const ERROR_ABORT = 'AbortError';
+
 export const defaultJSON = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
@@ -63,7 +65,7 @@ export const request = (method, path) => {
                     });
                 })
                 .catch((err) => {
-                    if (err.name === 'AbortError') {
+                    if (err.name === ERROR_ABORT) {
                         console.warn('Fetch abort:', err);
                         return err;
                     }
@@ -116,13 +118,13 @@ export const request = (method, path) => {
             const attempt = async () => {
                 try {
                     const res = await fetch(path, req);
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! Status: ${res.status}`);
+                    if (res.ok) {
+                        return res;
                     }
 
-                    return res;
+                    throw new Error(`HTTP error! Status: ${res.status}`);
                 } catch (error) {
-                    if (error.name === 'AbortError') {
+                    if (error.name === ERROR_ABORT) {
                         throw error;
                     }
 
@@ -177,7 +179,7 @@ export const request = (method, path) => {
                     });
                 })
                 .catch((err) => {
-                    if (err.name === 'AbortError') {
+                    if (err.name === ERROR_ABORT) {
                         console.warn('Fetch abort:', err);
                         return err;
                     }

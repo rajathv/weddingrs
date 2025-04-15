@@ -1,5 +1,5 @@
-import { cache } from '../../common/cache.js';
 import { progress } from './progress.js';
+import { cache } from '../../common/cache.js';
 
 export const image = (() => {
 
