@@ -30,6 +30,7 @@ export const request = (method, path) => {
     window.addEventListener('offline', () => ac.abort());
     window.addEventListener('popstate', () => ac.abort());
 
+    let reqTtl = 0;
     let reqRetry = 0;
     let reqDelay = 1000;
     let reqAttempts = 0;
@@ -75,6 +76,15 @@ export const request = (method, path) => {
                 });
         },
         /**
+         * @param {number} [ttl=21600000]
+         * @returns {ReturnType<typeof request>}
+         */
+        withCache(ttl = 1000 * 60 * 60 * 6) {
+            reqTtl = ttl;
+
+            return this;
+        },
+        /**
          * @param {number} [maxRetries=3]
          * @param {number} [delay=1000]
          * @returns {ReturnType<typeof request>}
@@ -108,8 +118,45 @@ export const request = (method, path) => {
         default(header = null) {
             req.headers = new Headers(header ?? {});
 
+            const baseFetch = () => {
+                if (reqTtl === 0 || !window.isSecureContext) {
+                    return fetch(path, req);
+                }
+
+                if (req.method !== HTTP_GET) {
+                    throw new Error('Only method GET can be cached');
+                }
+
+                const fetchPut = (c) => fetch(path, req).then((res) => {
+                    const headers = new Headers(res.headers);
+
+                    if (!headers.has('Expires')) {
+                        const expiresDate = new Date(Date.now() + reqTtl);
+                        headers.set('Expires', expiresDate.toUTCString());
+                    }
+
+                    const cRes = res.clone();
+                    return c.put(path, new Response(res.body, { headers })).then(() => cRes);
+                });
+
+                return window.caches.open('request').then((c) => c.match(path).then((res) => {
+                    if (!res) {
+                        return fetchPut(c);
+                    }
+
+                    const expiresHeader = res.headers.get('Expires');
+                    const expiresTime = expiresHeader ? (new Date(expiresHeader)).getTime() : 0;
+
+                    if (Date.now() > expiresTime) {
+                        return c.delete(path).then((s) => s ? fetchPut(c) : res);
+                    }
+
+                    return res;
+                }));
+            };
+
             if (reqRetry === 0 && reqDelay === 0) {
-                return fetch(path, req);
+                return baseFetch();
             }
 
             /**
@@ -117,7 +164,7 @@ export const request = (method, path) => {
              */
             const attempt = async () => {
                 try {
-                    const res = await fetch(path, req);
+                    const res = await baseFetch();
                     if (res.ok) {
                         return res;
                     }

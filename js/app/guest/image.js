@@ -25,8 +25,8 @@ export const image = (() => {
 
         img.onload = () => {
             el.src = img.src;
-            el.width = img.width;
-            el.height = img.height;
+            el.width = img.naturalWidth;
+            el.height = img.naturalHeight;
             progress.complete('image');
             img.remove();
             res();

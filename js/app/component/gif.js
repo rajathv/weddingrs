@@ -175,6 +175,7 @@ export const gif = (() => {
         });
 
         ctx.last = request(HTTP_GET, `https://tenor.googleapis.com/v2${path}?${param}`)
+            .withCache()
             .withCancel(reqCancel)
             .default(defaultJSON)
             .then((r) => r.json())
