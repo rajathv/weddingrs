@@ -24,11 +24,6 @@ export const comment = (() => {
     /**
      * @type {ReturnType<typeof storage>|null}
      */
-    let tracker = null;
-
-    /**
-     * @type {ReturnType<typeof storage>|null}
-     */
     let showHide = null;
 
     /**
@@ -136,26 +131,22 @@ export const comment = (() => {
             await Promise.all(c.comments.map((v) => fetchTracker(v)));
         }
 
-        if (c.ip === undefined || c.user_agent === undefined || c.is_admin) {
+        if (!c.ip || !c.user_agent || c.is_admin) {
             return;
         }
 
         /**
-         * @param {string} uuid 
-         * @param {string} ip 
          * @param {string} result 
          * @returns {void}
          */
-        const setResult = (uuid, ip, result) => {
-            util.safeInnerHTML(document.getElementById(`ip-${util.escapeHtml(uuid)}`), `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(ip)} <strong>${util.escapeHtml(result)}</strong>`);
+        const setResult = (result) => {
+            const commentIp = document.getElementById(`ip-${util.escapeHtml(c.uuid)}`);
+            util.safeInnerHTML(commentIp, `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <strong>${util.escapeHtml(result)}</strong>`);
         };
 
-        if (tracker.has(c.ip)) {
-            setResult(c.uuid, c.ip, tracker.get(c.ip));
-            return;
-        }
-
         await request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
+            .withCache()
+            .withRetry()
             .default(defaultJSON)
             .then((res) => res.json())
             .then((res) => {
@@ -165,10 +156,9 @@ export const comment = (() => {
                     result = 'localhost';
                 }
 
-                tracker.set(c.ip, result);
-                setResult(c.uuid, c.ip, result);
+                setResult(result);
             })
-            .catch((err) => setResult(c.uuid, c.ip, err.message));
+            .catch((err) => setResult(err.message));
     };
 
     /**
@@ -697,7 +687,6 @@ export const comment = (() => {
 
         owns = storage('owns');
         user = storage('user');
-        tracker = storage('tracker');
         showHide = storage('comment');
 
         if (!showHide.has('hidden')) {

@@ -56,12 +56,11 @@ export const cache = (cacheName) => {
                         return b;
                     }
 
-                    const headers = new Headers();
+                    const headers = new Headers(r.headers);
                     const expiresDate = new Date(Date.now() + ttl);
 
                     headers.set('Content-Length', String(b.size));
                     headers.set('Expires', expiresDate.toUTCString());
-                    headers.set('Content-Type', r.headers.get('Content-Type'));
 
                     const cBlob = b.slice();
                     return cacheObject.put(url, new Response(b, { headers })).then(() => cBlob);

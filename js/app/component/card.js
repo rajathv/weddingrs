@@ -23,11 +23,6 @@ export const card = (() => {
     /**
      * @type {ReturnType<typeof storage>|null}
      */
-    let tracker = null;
-
-    /**
-     * @type {ReturnType<typeof storage>|null}
-     */
     let showHide = null;
 
     const maxCommentLength = 300;
@@ -140,13 +135,13 @@ export const card = (() => {
      * @returns {string}
      */
     const renderTracker = (c) => {
-        if (c.ip === undefined || c.user_agent === undefined || c.is_admin) {
+        if (!c.ip || !c.user_agent || c.is_admin) {
             return '';
         }
 
         return `
         <div class="mb-1 mt-3">
-            <p class="text-theme-auto mb-1 mx-0 mt-0 p-0" style="font-size: 0.7rem;" id="ip-${c.uuid}"><i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} ${tracker.has(c.ip) ? `<strong>${tracker.get(c.ip)}</strong>` : `<span class="mb-1 placeholder col-2 rounded-3"></span>`}</p>
+            <p class="text-theme-auto mb-1 mx-0 mt-0 p-0" style="font-size: 0.7rem;" id="ip-${c.uuid}"><i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <span class="mb-1 placeholder col-2 rounded-3"></span></p>
             <p class="text-theme-auto m-0 p-0" style="font-size: 0.7rem;"><i class="fa-solid fa-mobile-screen-button me-1"></i>${util.parseUserAgent(util.escapeHtml(c.user_agent))}</p>
         </div>`;
     };
@@ -309,7 +304,6 @@ export const card = (() => {
         owns = storage('owns');
         likes = storage('likes');
         config = storage('config');
-        tracker = storage('tracker');
         showHide = storage('comment');
     };
 

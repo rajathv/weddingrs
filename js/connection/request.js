@@ -127,7 +127,12 @@ export const request = (method, path) => {
                     throw new Error('Only method GET can be cached');
                 }
 
-                const fetchPut = (c) => fetch(path, req).then((res) => {
+                const fetchPut = (c) => fetch(path, req).then(async (res) => {
+                    if (!res.ok) {
+                        return res;
+                    }
+
+                    const cRes = res.clone();
                     const headers = new Headers(res.headers);
 
                     if (!headers.has('Expires')) {
@@ -135,8 +140,15 @@ export const request = (method, path) => {
                         headers.set('Expires', expiresDate.toUTCString());
                     }
 
-                    const cRes = res.clone();
-                    return c.put(path, new Response(res.body, { headers })).then(() => cRes);
+                    if (!headers.has('Content-Length')) {
+                        await res.clone().arrayBuffer().then((a) => {
+                            headers.set('Content-Length', String(a.byteLength));
+                        });
+                    }
+
+                    await c.put(path, new Response(res.body, { headers }));
+
+                    return cRes;
                 });
 
                 return window.caches.open('request').then((c) => c.match(path).then((res) => {
