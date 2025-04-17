@@ -57,6 +57,7 @@ export const session = (() => {
     const guest = () => {
         return request(HTTP_GET, '/api/v2/config')
             .token(getToken())
+            .withCache(1000 * 60 * 60 * 1)
             .send()
             .then((res) => {
                 if (res.code !== HTTP_STATUS_OK) {

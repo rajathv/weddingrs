@@ -1,5 +1,4 @@
 import { dto } from './dto.js';
-import { util } from '../common/util.js';
 
 export const HTTP_GET = 'GET';
 export const HTTP_PUT = 'PUT';
@@ -40,6 +39,111 @@ export const request = (method, path) => {
         url = url.slice(0, -1);
     }
 
+    /**
+     * @param {string} input 
+     * @returns {Promise<Response>}
+     */
+    const baseFetch = (input) => {
+
+        /**
+         * @returns {Promise<Response>}
+         */
+        const abstractFetch = () => {
+
+            /**
+             * @returns {Promise<Response>}
+             */
+            const wrapperFetch = () => window.fetch(input, req);
+
+            if (reqTtl === 0 || !window.isSecureContext) {
+                return wrapperFetch();
+            }
+
+            if (req.method !== HTTP_GET) {
+                console.warn('Only method GET can be cached');
+                return wrapperFetch();
+            }
+
+            /**
+             * @param {Cache} c 
+             * @returns {Promise<Response>}
+             */
+            const fetchPut = (c) => wrapperFetch().then((res) => {
+                if (!res.ok) {
+                    return res;
+                }
+
+                const cRes = res.clone();
+                const headers = new Headers(res.headers);
+
+                return res.clone().arrayBuffer().then((a) => {
+
+                    if (!headers.has('Expires')) {
+                        const exp = new Date(Date.now() + reqTtl);
+                        headers.set('Expires', exp.toUTCString());
+                    }
+
+                    if (!headers.has('Content-Length')) {
+                        headers.set('Content-Length', String(a.byteLength));
+                    }
+
+                    return c.put(input, new Response(res.body, { headers })).then(() => cRes);
+                });
+            });
+
+            return window.caches.open('request').then((c) => c.match(input).then((res) => {
+                if (!res) {
+                    return fetchPut(c);
+                }
+
+                const exp = res.headers.get('Expires');
+                const expTime = exp ? (new Date(exp)).getTime() : 0;
+
+                if (Date.now() > expTime) {
+                    return c.delete(input).then((s) => s ? fetchPut(c) : res);
+                }
+
+                return res;
+            }));
+        };
+
+        if (reqRetry === 0 && reqDelay === 0) {
+            return abstractFetch();
+        }
+
+        /**
+         * @returns {Promise<Response>}
+         */
+        const attempt = async () => {
+            try {
+                const res = await abstractFetch();
+                if (res.ok) {
+                    return res;
+                }
+
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            } catch (error) {
+                if (error.name === ERROR_ABORT) {
+                    throw error;
+                }
+
+                reqDelay *= 2;
+                reqAttempts++;
+
+                if (reqAttempts >= reqRetry) {
+                    throw new Error(`Max retries reached: ${error}`);
+                }
+
+                console.warn(`Retrying fetch (${reqAttempts}/${reqRetry}): ${input}`);
+                await new Promise((resolve) => window.setTimeout(resolve, reqDelay));
+
+                return attempt();
+            }
+        };
+
+        return attempt();
+    };
+
     return {
         /**
          * @template T
@@ -47,7 +151,7 @@ export const request = (method, path) => {
          * @returns {Promise<ReturnType<typeof dto.baseResponse<T>>>}
          */
         send(transform = null) {
-            return fetch(url + path, req)
+            return baseFetch(url + path)
                 .then((res) => {
                     return res.json().then((json) => {
                         if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
@@ -117,98 +221,14 @@ export const request = (method, path) => {
          */
         default(header = null) {
             req.headers = new Headers(header ?? {});
-
-            const baseFetch = () => {
-                if (reqTtl === 0 || !window.isSecureContext) {
-                    return fetch(path, req);
-                }
-
-                if (req.method !== HTTP_GET) {
-                    throw new Error('Only method GET can be cached');
-                }
-
-                const fetchPut = (c) => fetch(path, req).then(async (res) => {
-                    if (!res.ok) {
-                        return res;
-                    }
-
-                    const cRes = res.clone();
-                    const headers = new Headers(res.headers);
-
-                    if (!headers.has('Expires')) {
-                        const expiresDate = new Date(Date.now() + reqTtl);
-                        headers.set('Expires', expiresDate.toUTCString());
-                    }
-
-                    if (!headers.has('Content-Length')) {
-                        await res.clone().arrayBuffer().then((a) => {
-                            headers.set('Content-Length', String(a.byteLength));
-                        });
-                    }
-
-                    await c.put(path, new Response(res.body, { headers }));
-
-                    return cRes;
-                });
-
-                return window.caches.open('request').then((c) => c.match(path).then((res) => {
-                    if (!res) {
-                        return fetchPut(c);
-                    }
-
-                    const expiresHeader = res.headers.get('Expires');
-                    const expiresTime = expiresHeader ? (new Date(expiresHeader)).getTime() : 0;
-
-                    if (Date.now() > expiresTime) {
-                        return c.delete(path).then((s) => s ? fetchPut(c) : res);
-                    }
-
-                    return res;
-                }));
-            };
-
-            if (reqRetry === 0 && reqDelay === 0) {
-                return baseFetch();
-            }
-
-            /**
-             * @returns {Promise<Response>}
-             */
-            const attempt = async () => {
-                try {
-                    const res = await baseFetch();
-                    if (res.ok) {
-                        return res;
-                    }
-
-                    throw new Error(`HTTP error! Status: ${res.status}`);
-                } catch (error) {
-                    if (error.name === ERROR_ABORT) {
-                        throw error;
-                    }
-
-                    reqDelay *= 2;
-                    reqAttempts++;
-
-                    if (reqAttempts >= reqRetry) {
-                        throw new Error(`Max retries reached: ${error}`);
-                    }
-
-                    console.warn(`Retrying fetch (${reqAttempts}/${reqRetry}): ${path}`);
-
-                    await new Promise((resolve) => util.timeOut(resolve, reqDelay));
-                    return attempt();
-                }
-            };
-
-            return attempt();
+            return baseFetch(path);
         },
         /**
          * @returns {Promise<boolean>}
          */
         download() {
             Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
-            return fetch(url + path, req)
+            return baseFetch(url + path)
                 .then((res) => {
                     if (res.status !== HTTP_STATUS_OK) {
                         return false;
