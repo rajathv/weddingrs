@@ -31,7 +31,7 @@ export const request = (method, path) => {
 
     let reqTtl = 0;
     let reqRetry = 0;
-    let reqDelay = 1000;
+    let reqDelay = 0;
     let reqAttempts = 0;
     let url = document.body.getAttribute('data-url');
 
@@ -116,12 +116,7 @@ export const request = (method, path) => {
          */
         const attempt = async () => {
             try {
-                const res = await abstractFetch();
-                if (res.ok) {
-                    return res;
-                }
-
-                throw new Error(`HTTP error! Status: ${res.status}`);
+                return await abstractFetch();
             } catch (error) {
                 if (error.name === ERROR_ABORT) {
                     throw error;
