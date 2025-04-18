@@ -631,9 +631,6 @@ export const comment = (() => {
 
         changeActionButton(id, true);
 
-        const content = document.getElementById(`content-${id}`);
-        const original = util.base64Decode(content.getAttribute('data-comment'));
-
         let isChecklist = false;
         const badge = document.getElementById(`badge-${id}`);
         if (badge) {
@@ -659,6 +656,8 @@ export const comment = (() => {
         }
 
         const formInner = document.getElementById(`form-inner-${id}`);
+        const original = util.base64Decode(document.getElementById(`content-${id}`)?.getAttribute('data-comment'));
+
         formInner.value = original;
         formInner.setAttribute('data-original', util.base64Encode(original));
     };
