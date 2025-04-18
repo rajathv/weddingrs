@@ -32,6 +32,9 @@ jobs:
     - name: Run HTMLHint (HTML)
       run: npx htmlhint "**/*.html"
 
+    - name: Run check circular dependency
+      run: npx madge --circular js
+
   deploy:
     needs: analyze-code
     runs-on: ubuntu-latest

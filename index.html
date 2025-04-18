@@ -58,7 +58,6 @@
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" integrity="sha256-GqiEX9BuR1rv5zPU5Vs2qS/NSHl1BJyBcjQYJ6ycwD4=" crossorigin="anonymous" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha256-ORBCb//WwUWwNh+EjsvO97snO3mAJ1+jhMzrlPBTYSQ=" crossorigin="anonymous" as="script">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" integrity="sha256-pQBbLkFHcP1cy0C8IhoSdxlm0CtcH5yJ2ki9jjgR03c=" crossorigin="anonymous" as="script">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js" integrity="sha256-4QOrAnhDOdVsk8o96+LFopk3LK/FIVFI1VKD3gRuhtE=" crossorigin="anonymous" as="script">
 
     <!-- Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap">
@@ -75,7 +74,6 @@
     <!-- Dependencies JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha256-ORBCb//WwUWwNh+EjsvO97snO3mAJ1+jhMzrlPBTYSQ=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" integrity="sha256-pQBbLkFHcP1cy0C8IhoSdxlm0CtcH5yJ2ki9jjgR03c=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js" integrity="sha256-4QOrAnhDOdVsk8o96+LFopk3LK/FIVFI1VKD3gRuhtE=" crossorigin="anonymous"></script>
     <script src="./dist/guest.js"></script>
 </head>
 
@@ -386,9 +384,9 @@
                 <section class="bg-light-dark pb-4">
                     <div class="container text-center">
                         <h2 class="font-esthetic pt-3 mb-4" style="font-size: 2.25rem;">Love Gift</h2>
-                        <p class="mb-3" style="font-size: 0.95rem;">Dengan hormat, bagi Anda yang ingin memberikan tanda kasih kepada kami, dapat melalui:</p>
+                        <p class="mb-1" style="font-size: 0.95rem;">Dengan hormat, bagi Anda yang ingin memberikan tanda kasih kepada kami, dapat melalui:</p>
 
-                        <div class="bg-theme-auto rounded-4 shadow p-4 mx-4 mt-2 mb-4 text-start" data-aos="fade-up" data-aos-duration="2500">
+                        <div class="bg-theme-auto rounded-4 shadow p-4 mx-4 mt-4 text-start" data-aos="fade-up" data-aos-duration="2500">
                             <img src="./assets/images/placeholder.webp" data-src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/1598px-Bank_Central_Asia.svg.png" class="img-fluid p-1 rounded" style="max-width: 9vh; background-color: var(--bs-gray-300);" alt="bca">
 
                             <div class="d-flex justify-content-between align-items-center mt-1">
@@ -400,7 +398,7 @@
                             <p class="mt-1 mb-0 p-0" style="font-size: 0.9rem;">Nama Wahyu Siapa</p>
                         </div>
 
-                        <div class="bg-theme-auto rounded-4 shadow p-4 mx-4 mt-2 text-start" data-aos="fade-up" data-aos-duration="2500">
+                        <div class="bg-theme-auto rounded-4 shadow p-4 mx-4 mt-4 text-start" data-aos="fade-up" data-aos-duration="2500">
                             <img src="./assets/images/placeholder.webp" data-src="https://upload.wikimedia.org/wikipedia/id/thumb/5/55/BNI_logo.svg/1024px-BNI_logo.svg.png" class="img-fluid p-1 rounded" style="max-width: 9vh; background-color: var(--bs-gray-300);" alt="bni">
 
                             <div class="d-flex justify-content-between align-items-center mt-1">
@@ -409,7 +407,20 @@
                                 <button class="btn btn-outline-auto btn-sm shadow-sm rounded-4" style="font-size: 0.75rem;" data-copy="1234567891234567" onclick="undangan.util.copy(this, 'Copied')"><i class="fa-solid fa-copy me-1"></i>Copy</button>
                             </div>
 
-                            <p class="mt-1 mb-0 p-0" style="font-size: 0.9rem;">Nama Riski Siapa</p>
+                            <p class="mt-1 mb-0 p-0" style="font-size: 0.9rem;">Nama Wahyu Siapa</p>
+                        </div>
+
+                        <div class="bg-theme-auto rounded-4 shadow p-4 mx-4 mt-4 text-start" data-aos="fade-up" data-aos-duration="2500">
+                            <i class="fa-solid fa-gift fa-lg"></i>
+                            <i class="fa-solid fa-box-open fa-lg"></i>
+
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <p class="m-0 p-0" style="font-size: 0.95rem;">RT 10 RW 02, Desa Paje...</p>
+                                <!-- Ubah juga data-copy sesuai dengan alamat lengkap -->
+                                <button class="btn btn-outline-auto btn-sm shadow-sm rounded-4" style="font-size: 0.75rem;" data-copy="RT 10 RW 02, Desa Pajerukan, Kec. Kalibagor, Kab. Banyumas, Jawa Tengah 53191." onclick="undangan.util.copy(this, 'Copied')"><i class="fa-solid fa-copy me-1"></i>Copy</button>
+                            </div>
+
+                            <p class="mt-1 mb-0 p-0" style="font-size: 0.9rem;">Nama Penerima Siapa</p>
                         </div>
                     </div>
                 </section>

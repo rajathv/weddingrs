@@ -196,12 +196,14 @@ export const card = (() => {
             </div>`;
         }
 
-        const original = convertMarkdownToHTML(util.escapeHtml(c.comment));
-        const moreThanMaxLength = original.length > maxCommentLength;
+        const escapeComment = util.escapeHtml(c.comment);
+
+        const moreMaxLength = escapeComment.length > maxCommentLength;
+        const data = convertMarkdownToHTML(moreMaxLength ? (escapeComment.slice(0, maxCommentLength) + '...') : escapeComment);
 
         return head + `
-        <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" ${moreThanMaxLength ? `data-comment="${util.base64Encode(original)}"` : ''} id="content-${c.uuid}">${moreThanMaxLength ? (original.slice(0, maxCommentLength) + '...') : original}</p>
-        ${moreThanMaxLength ? `<p class="d-block mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
+        <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" ${moreMaxLength || owns.has(c.uuid) ? `data-comment="${util.base64Encode(escapeComment)}"` : ''} id="content-${c.uuid}">${data}</p>
+        ${moreMaxLength ? `<p class="d-block mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
     };
 
     /**

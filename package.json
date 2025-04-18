@@ -5,6 +5,7 @@
         "fs-extra": "^11.3.0",
         "globals": "^15.14.0",
         "htmlhint": "^1.1.4",
+        "madge": "^8.0.0",
         "stylelint": "^16.6.1",
         "stylelint-config-recommended": "^14.0.0"
     },

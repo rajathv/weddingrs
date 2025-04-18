@@ -1,4 +1,17 @@
 /**
+ * @returns {Promise<void>}
+ */
+export const loadConfetti = () => new Promise((res, rej) => {
+    const sc = document.createElement('script');
+    sc.onload = res;
+    sc.onerror = rej;
+    sc.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js';
+    sc.integrity = 'sha256-4QOrAnhDOdVsk8o96+LFopk3LK/FIVFI1VKD3gRuhtE=';
+    sc.crossOrigin = 'anonymous';
+    document.head.appendChild(sc);
+});
+
+/**
  * @returns {any}
  */
 const heartShape = () => {
@@ -12,10 +25,12 @@ const heartShape = () => {
  * @returns {void}
  */
 export const basicAnimation = () => {
-    window.confetti({
-        origin: { y: 1 },
-        zIndex: 1057
-    });
+    if (window.confetti) {
+        window.confetti({
+            origin: { y: 1 },
+            zIndex: 1057
+        });
+    }
 };
 
 /**
@@ -23,6 +38,10 @@ export const basicAnimation = () => {
  * @returns {void}
  */
 export const openAnimation = (until = 15) => {
+    if (!window.confetti) {
+        return;
+    }
+
     const duration = until * 1000;
     const animationEnd = Date.now() + duration;
 

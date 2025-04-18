@@ -7,7 +7,7 @@ import { dto } from '../../connection/dto.js';
 import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
-import { request, defaultJSON, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_PUT, HTTP_STATUS_OK, HTTP_STATUS_CREATED } from '../../connection/request.js';
+import { request, defaultJSON, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_PUT, HTTP_STATUS_CREATED } from '../../connection/request.js';
 
 export const comment = (() => {
 
@@ -15,11 +15,6 @@ export const comment = (() => {
      * @type {ReturnType<typeof storage>|null}
      */
     let owns = null;
-
-    /**
-     * @type {ReturnType<typeof storage>|null}
-     */
-    let user = null;
 
     /**
      * @type {ReturnType<typeof storage>|null}
@@ -113,7 +108,7 @@ export const comment = (() => {
         const original = util.base64Decode(content.getAttribute('data-comment'));
         const isCollapsed = anchor.getAttribute('data-show') === 'false';
 
-        util.safeInnerHTML(content, isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...');
+        util.safeInnerHTML(content, card.convertMarkdownToHTML(isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...'));
         anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
         anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
@@ -380,16 +375,17 @@ export const comment = (() => {
 
         if (!gifIsOpen) {
             const showButton = document.querySelector(`[onclick="undangan.comment.showMore(this, '${id}')"]`);
-            const original = card.convertMarkdownToHTML(util.escapeHtml(form.value));
-            const content = document.getElementById(`content-${id}`);
+            const escapeComment = util.escapeHtml(form.value);
 
+            const content = document.getElementById(`content-${id}`);
+            content.setAttribute('data-comment', util.base64Encode(escapeComment));
+
+            const original = card.convertMarkdownToHTML(escapeComment);
             if (original.length > card.maxCommentLength) {
                 util.safeInnerHTML(content, showButton?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original);
-                content.setAttribute('data-comment', util.base64Encode(original));
                 showButton?.classList.replace('d-none', 'd-block');
             } else {
                 util.safeInnerHTML(content, original);
-                content.removeAttribute('data-comment');
                 showButton?.classList.replace('d-block', 'd-none');
             }
         }
@@ -418,11 +414,7 @@ export const comment = (() => {
         const id = button.getAttribute('data-uuid');
 
         const name = document.getElementById('form-name');
-        let nameValue = name.value;
-
-        if (session.isAdmin()) {
-            nameValue = user.get('name');
-        }
+        const nameValue = name.value;
 
         if (nameValue.length === 0) {
             alert('Name cannot be empty.');
@@ -638,39 +630,37 @@ export const comment = (() => {
         }
 
         changeActionButton(id, true);
-        const btn = util.disableButton(button);
 
-        await request(HTTP_GET, '/api/comment/' + id)
-            .token(session.getToken())
-            .send(dto.commentResponse)
-            .then(async (res) => {
-                if (res.code !== HTTP_STATUS_OK) {
-                    return res;
-                }
+        const content = document.getElementById(`content-${id}`);
+        const original = util.base64Decode(content.getAttribute('data-comment'));
 
-                if (res.data.gif_url) {
-                    await gif.remove(id);
-                }
+        let isChecklist = false;
+        const badge = document.getElementById(`badge-${id}`);
+        if (badge) {
+            isChecklist = badge.getAttribute('data-is-presence') === 'true';
+        }
 
-                const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
-                document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, res.data.presence, isParent, !!res.data.gif_url));
+        const gifImage = document.getElementById(`img-gif-${id}`);
+        if (gifImage) {
+            await gif.remove(id);
+        }
 
-                if (res.data.gif_url) {
-                    gif.onOpen(id, () => {
-                        gif.removeGifSearch(id);
-                        gif.removeButtonBack(id);
-                    });
+        const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
+        document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, isChecklist, isParent, !!gifImage));
 
-                    return gif.open(id);
-                }
-
-                const formInner = document.getElementById(`form-inner-${id}`);
-                formInner.value = res.data.comment;
-                formInner.setAttribute('data-original', util.base64Encode(res.data.comment));
-                return res;
+        if (gifImage) {
+            gif.onOpen(id, () => {
+                gif.removeGifSearch(id);
+                gif.removeButtonBack(id);
             });
 
-        btn.restore(true);
+            gif.open(id);
+            return;
+        }
+
+        const formInner = document.getElementById(`form-inner-${id}`);
+        formInner.value = original;
+        formInner.setAttribute('data-original', util.base64Encode(original));
     };
 
     /**
@@ -686,7 +676,6 @@ export const comment = (() => {
         comments.addEventListener('comment.show', show);
 
         owns = storage('owns');
-        user = storage('user');
         showHide = storage('comment');
 
         if (!showHide.has('hidden')) {

@@ -9,7 +9,7 @@ import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
 import { offline } from '../../common/offline.js';
 import { comment } from '../component/comment.js';
-import { basicAnimation, openAnimation } from '../../libs/confetti.js';
+import * as confetti from '../../libs/confetti.js';
 
 export const guest = (() => {
 
@@ -132,8 +132,8 @@ export const guest = (() => {
         audio.play();
         theme.spyTop();
 
-        basicAnimation();
-        util.timeOut(openAnimation, 1500);
+        confetti.basicAnimation();
+        util.timeOut(confetti.openAnimation, 1500);
         util.changeOpacity(document.getElementById('welcome'), false).then((el) => el.remove());
     };
 
@@ -248,8 +248,9 @@ export const guest = (() => {
         }
 
         if (token && token.length > 0) {
-            // add 3 progress for config, comment, and audio.
+            // add 4 progress for config, comment, audio, and confetti.
             // before img.load();
+            progress.add();
             progress.add();
             progress.add();
             progress.add();
@@ -272,6 +273,11 @@ export const guest = (() => {
 
                 audio.init();
                 comment.init();
+
+                confetti.loadConfetti()
+                    .then(() => progress.complete('confetti'))
+                    .catch(() => progress.invalid('confetti'));
+
                 comment.show()
                     .then(() => progress.complete('comment'))
                     .catch(() => progress.invalid('comment'));

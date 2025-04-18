@@ -30,10 +30,10 @@ export const cache = (cacheName) => {
 
     /**
      * @param {string} url
-     * @param {Promise<void>|null} [cancelReq=null]
+     * @param {Promise<void>|null} [cancel=null]
      * @returns {Promise<string>}
      */
-    const get = (url, cancelReq = null) => {
+    const get = (url, cancel = null) => {
         if (objectUrls.has(url)) {
             return Promise.resolve(objectUrls.get(url));
         }
@@ -48,7 +48,7 @@ export const cache = (cacheName) => {
              * @returns {Promise<Blob>}
              */
             const fetchPut = () => request(HTTP_GET, url)
-                .withCancel(cancelReq)
+                .withCancel(cancel)
                 .withRetry()
                 .default()
                 .then((r) => r.blob().then((b) => {
@@ -103,10 +103,10 @@ export const cache = (cacheName) => {
 
     /**
      * @param {object[]} items
-     * @param {Promise<void>|null} cancelReq
+     * @param {Promise<void>|null} cancel
      * @returns {Promise<void>}
      */
-    const run = async (items, cancelReq = null) => {
+    const run = async (items, cancel = null) => {
         await open();
         const uniq = new Map();
 
@@ -115,10 +115,11 @@ export const cache = (cacheName) => {
         }
 
         items.filter((val) => val !== null).forEach((val) => {
-            uniq.set(val.url, [...(uniq.get(val.url) ?? []), [val.res, val?.rej]]);
+            const exist = uniq.get(val.url) ?? [];
+            uniq.set(val.url, [...exist, [val.res, val?.rej]]);
         });
 
-        return Promise.allSettled(Array.from(uniq).map(([k, v]) => get(k, cancelReq)
+        return Promise.allSettled(Array.from(uniq).map(([k, v]) => get(k, cancel)
             .then((s) => {
                 v.forEach((cb) => cb[0]?.(s));
                 return s;
