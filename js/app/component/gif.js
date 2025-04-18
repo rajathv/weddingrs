@@ -107,15 +107,27 @@ export const gif = (() => {
         let total = 0;
         let loaded = 0;
 
-        if (!list.classList.contains('d-none')) {
-            load.classList.replace('d-none', 'd-flex');
-        }
-
-        info.innerText = `${loaded}/${total}`;
         list.setAttribute('data-continue', 'false');
         list.classList.replace('overflow-y-scroll', 'overflow-y-hidden');
 
+        const timeoutMs = 150;
+        let isReleased = false;
+
+        const timeoutId = setTimeout(() => {
+            if (isReleased) {
+                return;
+            }
+
+            info.innerText = `${loaded}/${total}`;
+            if (!list.classList.contains('d-none')) {
+                load.classList.replace('d-none', 'd-flex');
+            }
+        }, timeoutMs);
+
         const release = () => {
+            isReleased = true;
+            clearTimeout(timeoutId);
+
             if (!list.classList.contains('d-none')) {
                 load.classList.replace('d-flex', 'd-none');
             }
