@@ -86,17 +86,19 @@ export const card = (() => {
     const renderAction = (c) => {
         let action = `<div class="d-flex justify-content-start align-items-center" data-button-action="${c.uuid}">`;
 
-        if (config.get('can_reply') === true || config.get('can_reply') === undefined) {
-            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.reply(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Reply</button>`;
+        if (config.get('can_reply') !== false) {
+            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.reply('${c.uuid}')" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Reply</button>`;
         }
 
-        if (owns.has(c.uuid) && (config.get('can_edit') === true || config.get('can_edit') === undefined) && !(!!c.gif_url && config.get('tenor_key') === null)) {
+        if (session.isAdmin() && c.is_admin && (!c.gif_url || gif.isActive())) {
+            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-own="${c.own}" data-offline-disabled="false">Edit</button>`;
+        } else if (owns.has(c.uuid) && config.get('can_edit') !== false && (!c.gif_url || gif.isActive())) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Edit</button>`;
         }
 
         if (session.isAdmin()) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.remove(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-own="${c.own}" data-offline-disabled="false">Delete</button>`;
-        } else if (owns.has(c.uuid) && (config.get('can_delete') === true || config.get('can_delete') === undefined)) {
+        } else if (owns.has(c.uuid) && config.get('can_delete') !== false) {
             action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.remove(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Delete</button>`;
         }
 
@@ -202,7 +204,7 @@ export const card = (() => {
         const data = convertMarkdownToHTML(moreMaxLength ? (escapeComment.slice(0, maxCommentLength) + '...') : escapeComment);
 
         return head + `
-        <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" ${moreMaxLength || owns.has(c.uuid) ? `data-comment="${util.base64Encode(escapeComment)}"` : ''} id="content-${c.uuid}">${data}</p>
+        <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" data-comment="${util.base64Encode(escapeComment)}" id="content-${c.uuid}">${data}</p>
         ${moreMaxLength ? `<p class="d-block mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
     };
 
@@ -256,7 +258,7 @@ export const card = (() => {
         <p class="my-1 mx-0 p-0" style="font-size: 0.95rem;"><i class="fa-solid fa-reply me-2"></i>Reply</p>
         <div class="d-block mb-2" id="comment-form-${id}">
             <div class="position-relative">
-                ${config.get('tenor_key') === null ? '' : `<button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1 position-absolute bottom-0 end-0" onclick="undangan.comment.gif.open('${id}')" aria-label="button gif" data-offline-disabled="false"><i class="fa-solid fa-photo-film"></i></button>`}
+                ${!gif.isActive() ? '' : `<button class="btn btn-secondary btn-sm rounded-4 shadow-sm me-1 my-1 position-absolute bottom-0 end-0" onclick="undangan.comment.gif.open('${id}')" aria-label="button gif" data-offline-disabled="false"><i class="fa-solid fa-photo-film"></i></button>`}
                 <textarea class="form-control shadow-sm rounded-4 mb-2" id="form-inner-${id}" minlength="1" maxlength="1000" placeholder="Type reply comment" rows="3" data-offline-disabled="false"></textarea>
             </div>
         </div>
@@ -290,7 +292,7 @@ export const card = (() => {
             <option value="2" ${presence ? '' : 'selected'}>&#10060; Berhalangan</option>
         </select>`}
         ${!is_gif ? `<textarea class="form-control shadow-sm rounded-4 mb-2" id="form-inner-${id}" minlength="1" maxlength="1000" placeholder="Type update comment" rows="3" data-offline-disabled="false"></textarea>    
-        ` : `${config.get('tenor_key') === null ? '' : `<div class="d-none mb-2" id="gif-form-${id}"></div>`}`}
+        ` : `${!gif.isActive() ? '' : `<div class="d-none mb-2" id="gif-form-${id}"></div>`}`}
         <div class="d-flex justify-content-end align-items-center mb-0">
             <button style="font-size: 0.8rem;" onclick="undangan.comment.cancel(this, '${id}')" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1" data-offline-disabled="false">Cancel</button>
             <button style="font-size: 0.8rem;" onclick="undangan.comment.update(this)" data-uuid="${id}" class="btn btn-sm btn-outline-auto rounded-4 py-0" data-offline-disabled="false">Update</button>

@@ -53,11 +53,11 @@ export const progress = (() => {
      */
     const invalid = (type) => {
         if (valid) {
+            valid = false;
             bar.style.backgroundColor = 'red';
             info.innerText = `Error loading ${type} ${showInformation()}`;
+            document.dispatchEvent(new Event('progress.invalid'));
         }
-
-        valid = false;
     };
 
     /**

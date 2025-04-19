@@ -1,7 +1,3 @@
-* {
-    transition: background-color 350ms ease, color 50ms ease;
-}
-
 html {
     scroll-behavior: smooth !important;
     width: 100vw !important;
@@ -12,6 +8,56 @@ body {
     padding: 0 !important;
     width: 100% !important;
     overflow-x: hidden !important;
+}
+
+a,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ul,
+li,
+div,
+nav,
+span,
+input,
+label,
+button,
+section,
+textarea {
+    will-change: background-color, color;
+}
+
+a,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ul,
+li,
+div,
+nav,
+span,
+input,
+label,
+button,
+section,
+textarea {
+    transition: background-color 350ms ease, color 50ms ease;
+}
+
+svg {
+    will-change: background-color;
+}
+
+svg>path {
+    will-change: color;
 }
 
 svg {

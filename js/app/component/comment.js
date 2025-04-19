@@ -29,7 +29,7 @@ export const comment = (() => {
     /**
      * @type {string[]}
      */
-    let lastRender = [];
+    const lastRender = [];
 
     /**
      * @returns {string}
@@ -181,9 +181,9 @@ export const comment = (() => {
     const show = () => {
 
         // remove all event listener.
-        for (const u of lastRender) {
+        lastRender.forEach((u) => {
             like.removeListener(u);
-        }
+        });
 
         if (comments.getAttribute('data-loading') === 'false') {
             comments.setAttribute('data-loading', 'true');
@@ -205,7 +205,8 @@ export const comment = (() => {
                     return res;
                 }
 
-                lastRender = traverse(res.data.lists).map((i) => i.uuid);
+                lastRender.length = 0;
+                lastRender.push(...traverse(res.data.lists).map((i) => i.uuid));
                 showHide.set('hidden', traverse(res.data.lists, showHide.get('hidden')));
 
                 let data = await card.renderContentMany(res.data.lists);
@@ -215,16 +216,16 @@ export const comment = (() => {
 
                 util.safeInnerHTML(comments, data);
 
-                for (const u of lastRender) {
+                lastRender.forEach((u) => {
                     like.addListener(u);
-                }
+                });
 
                 return res;
             })
             .then(async (res) => {
                 comments.dispatchEvent(new Event('comment.result'));
 
-                if (res.data.lists.length > 0) {
+                if (res.data.lists) {
                     await Promise.all(res.data.lists.map((v) => fetchTracker(v)));
                 }
 
@@ -296,11 +297,8 @@ export const comment = (() => {
             isPresent = presence.value === '1';
         }
 
-        let isChecklist = false;
         const badge = document.getElementById(`badge-${id}`);
-        if (badge) {
-            isChecklist = badge.getAttribute('data-is-presence') === 'true';
-        }
+        const isChecklist = !!badge && badge.getAttribute('data-is-presence') === 'true';
 
         const gifIsOpen = gif.isOpen(id);
         const gifId = gif.getResultId(id);
@@ -598,24 +596,16 @@ export const comment = (() => {
     };
 
     /**
-     * @param {HTMLButtonElement} button 
+     * @param {string} uuid 
      * @returns {Promise<void>}
      */
-    const reply = async (button) => {
-        const id = button.getAttribute('data-uuid');
+    const reply = async (uuid) => {
+        changeActionButton(uuid, true);
 
-        if (document.getElementById(`inner-${id}`)) {
-            return;
-        }
+        await gif.remove(uuid);
+        gif.onOpen(uuid, () => gif.removeGifSearch(uuid));
 
-        changeActionButton(id, true);
-        const btn = util.disableButton(button);
-
-        await gif.remove(id);
-        gif.onOpen(id, () => gif.removeGifSearch(id));
-        btn.restore(true);
-
-        document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderReply(id));
+        document.getElementById(`button-${uuid}`).insertAdjacentElement('afterend', card.renderReply(uuid));
     };
 
     /**
@@ -625,17 +615,14 @@ export const comment = (() => {
     const edit = async (button) => {
         const id = button.getAttribute('data-uuid');
 
-        if (document.getElementById(`inner-${id}`)) {
-            return;
-        }
-
         changeActionButton(id, true);
 
-        let isChecklist = false;
-        const badge = document.getElementById(`badge-${id}`);
-        if (badge) {
-            isChecklist = badge.getAttribute('data-is-presence') === 'true';
+        if (session.isAdmin()) {
+            owns.set(id, button.getAttribute('data-own'));
         }
+
+        const badge = document.getElementById(`badge-${id}`);
+        const isChecklist = !!badge && badge.getAttribute('data-is-presence') === 'true';
 
         const gifImage = document.getElementById(`img-gif-${id}`);
         if (gifImage) {

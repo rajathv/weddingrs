@@ -37,13 +37,15 @@ export const gif = (() => {
      */
     let config = null;
 
+    let isEnabled = true;
+
     /**
      * @param {string} uuid
      * @param {object[]} lists
-     * @param {object} load
+     * @param {object|null} load
      * @returns {object|null[]}
      */
-    const show = (uuid, lists, load) => {
+    const show = (uuid, lists, load = null) => {
         const ctx = objectPool.get(uuid);
 
         return lists.map((data) => {
@@ -71,7 +73,7 @@ export const gif = (() => {
                     <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
                 </figure>`);
 
-                load.step();
+                load?.step();
             };
 
             return {
@@ -299,11 +301,8 @@ export const gif = (() => {
             return;
         }
 
-        const load = loading(uuid);
-        load.until(ctx.gifs.length);
-
         try {
-            await c.run(show(uuid, ctx.gifs, load));
+            await c.run(show(uuid, ctx.gifs));
         } catch {
             ctx.gifs.length = 0;
         }
@@ -314,8 +313,6 @@ export const gif = (() => {
                 behavior: 'instant',
             });
         }
-
-        load.release();
 
         // reset if error
         if (ctx.gifs.length === 0) {
@@ -421,7 +418,7 @@ export const gif = (() => {
                 objectPool.delete(uuid);
             }
         } else {
-            await Promise.all(Array.from(objectPool.keys()).map((k) => waitLastRequest(k)));
+            await Promise.allSettled(Array.from(objectPool.keys()).map((k) => waitLastRequest(k)));
             eventListeners.clear();
             objectPool.clear();
         }
@@ -529,6 +526,8 @@ export const gif = (() => {
         };
     };
 
+    const isActive = () => isEnabled;
+
     /**
      * @returns {void}
      */
@@ -539,7 +538,8 @@ export const gif = (() => {
         c = cache(cacheName);
         config = storage('config');
 
-        if (config.get('tenor_key') === null) {
+        if (!config.get('tenor_key')) {
+            isEnabled = false;
             document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.remove();
         }
     };
@@ -555,6 +555,7 @@ export const gif = (() => {
         remove,
         isOpen,
         onOpen,
+        isActive,
         getResultId,
         buttonCancel,
         removeGifSearch,
