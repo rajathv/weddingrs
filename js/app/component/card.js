@@ -91,9 +91,9 @@ export const card = (() => {
         }
 
         if (session.isAdmin() && c.is_admin && (!c.gif_url || gif.isActive())) {
-            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-own="${c.own}" data-offline-disabled="false">Edit</button>`;
+            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this, ${c.is_parent ? 'true' : 'false'})" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-own="${c.own}" data-offline-disabled="false">Edit</button>`;
         } else if (owns.has(c.uuid) && config.get('can_edit') !== false && (!c.gif_url || gif.isActive())) {
-            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Edit</button>`;
+            action += `<button style="font-size: 0.8rem;" onclick="undangan.comment.edit(this, ${c.is_parent ? 'true' : 'false'})" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto rounded-4 py-0 me-1 shadow-sm" data-offline-disabled="false">Edit</button>`;
         }
 
         if (session.isAdmin()) {
@@ -150,12 +150,11 @@ export const card = (() => {
 
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @param {boolean} isParent
      * @returns {string}
      */
-    const renderHeader = (c, isParent) => {
-        if (isParent) {
-            return `class="bg-theme-auto shadow p-3 mx-0 mt-0 mb-3 rounded-4" data-parent="true"`;
+    const renderHeader = (c) => {
+        if (c.is_parent) {
+            return `class="bg-theme-auto shadow p-3 mx-0 mt-0 mb-3 rounded-4"`;
         }
 
         return `class="${!showHide.get('hidden').find((i) => i.uuid === c.uuid)['show'] ? 'd-none' : ''} overflow-x-scroll mw-100 border-start bg-theme-auto py-2 ps-2 pe-0 my-2 ms-2 me-0"`;
@@ -163,15 +162,14 @@ export const card = (() => {
 
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @param {boolean} isParent
      * @returns {string}
      */
-    const renderTitle = (c, isParent) => {
+    const renderTitle = (c) => {
         if (c.is_admin) {
             return `<strong class="me-1">${util.escapeHtml(c.name)}</strong><i class="fa-solid fa-certificate text-primary"></i>`;
         }
 
-        if (isParent) {
+        if (c.is_parent) {
             return `<strong class="me-1">${util.escapeHtml(c.name)}</strong><i id="badge-${c.uuid}" data-is-presence="${c.presence ? 'true' : 'false'}" class="fa-solid ${c.presence ? 'fa-circle-check text-success' : 'fa-circle-xmark text-danger'}"></i>`;
         }
 
@@ -180,13 +178,12 @@ export const card = (() => {
 
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @param {boolean} isParent
      * @returns {Promise<string>}
      */
-    const renderBody = async (c, isParent) => {
+    const renderBody = async (c) => {
         const head = `
         <div class="d-flex justify-content-between align-items-center">
-            <p class="text-theme-auto text-truncate m-0 p-0" style="font-size: 0.95rem;">${renderTitle(c, isParent)}</p>
+            <p class="text-theme-auto text-truncate m-0 p-0" style="font-size: 0.95rem;">${renderTitle(c)}</p>
             <small class="text-theme-auto m-0 p-0" style="font-size: 0.75rem;">${c.created_at}</small>
         </div>
         <hr class="my-1">`;
@@ -210,15 +207,14 @@ export const card = (() => {
 
     /**
      * @param {ReturnType<typeof dto.getCommentResponse>} c
-     * @param {boolean} [isParent=false]
      * @returns {Promise<string>}
      */
-    const renderContent = async (c, isParent = false) => {
-        const body = await renderBody(c, isParent);
+    const renderContent = async (c) => {
+        const body = await renderBody(c);
         const resData = await Promise.all(c.comments.map((cmt) => renderContent(cmt)));
 
         return `
-        <div ${renderHeader(c, isParent)} id="${c.uuid}" style="overflow-wrap: break-word !important;">
+        <div ${renderHeader(c)} id="${c.uuid}" style="overflow-wrap: break-word !important;">
             <div id="body-content-${c.uuid}" data-tapTime="0" data-liked="false" tabindex="0">${body}</div>
             ${renderTracker(c)}
             ${renderButton(c)}
@@ -232,7 +228,7 @@ export const card = (() => {
      */
     const renderContentMany = (cs) => {
         return gif.prepareCache()
-            .then(() => Promise.all(cs.map((i) => renderContent(i, true))))
+            .then(() => Promise.all(cs.map((i) => renderContent(i))))
             .then((r) => r.join(''));
     };
 

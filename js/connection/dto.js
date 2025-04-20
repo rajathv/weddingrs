@@ -26,10 +26,10 @@ export const dto = (() => {
     };
 
     /**
-     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }} data
-     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }}
+     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, is_parent: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }} data
+     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, is_parent: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }}
      */
-    const getCommentResponse = ({ uuid, own, name, presence, comment, created_at, is_admin, gif_url, ip, user_agent, comments, like }) => {
+    const getCommentResponse = ({ uuid, own, name, presence, comment, created_at, is_admin, is_parent, gif_url, ip, user_agent, comments, like }) => {
         return {
             uuid,
             own,
@@ -38,6 +38,7 @@ export const dto = (() => {
             comment,
             created_at,
             is_admin: is_admin ?? false,
+            is_parent,
             gif_url,
             ip,
             user_agent,
@@ -47,14 +48,14 @@ export const dto = (() => {
     };
 
     /**
-     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }[]} data
-     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }[]}
+     * @param {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, is_parent: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }[]} data
+     * @returns {{ uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, is_parent: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }[]}
      */
     const getCommentsResponse = (data) => data.map(getCommentResponse);
 
     /**
-     * @param {{ count: number, lists: { uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }[] }} data
-     * @returns {{ count: number, lists: { uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }[] }}
+     * @param {{ count: number, lists: { uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, is_parent: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: { love: number } }[] }} data
+     * @returns {{ count: number, lists: { uuid: string, own: string, name: string, presence: boolean, comment: string|null, created_at: string, is_admin: boolean, is_parent: boolean, gif_url: string|null, ip: string|null, user_agent: string|null, comments: ReturnType<getCommentResponse>[], like: ReturnType<likeCommentResponse> }[] }}
      */
     const getCommentsResponseV2 = (data) => {
         return {
@@ -90,21 +91,6 @@ export const dto = (() => {
     const uuidResponse = ({ uuid }) => {
         return {
             uuid,
-        };
-    };
-
-    /**
-     * @param {{name: string, presence: boolean, comment: string|null, is_admin: boolean, gif_url: string|null, created_at: string}} commentData
-     * @returns {{name: string, presence: boolean, comment: string|null, is_admin: boolean, gif_url: string|null, created_at: string}}
-     */
-    const commentResponse = ({ name, presence, comment, is_admin, gif_url, created_at }) => {
-        return {
-            name,
-            presence,
-            comment,
-            is_admin,
-            gif_url,
-            created_at,
         };
     };
 
@@ -169,7 +155,6 @@ export const dto = (() => {
         baseResponse,
         tokenResponse,
         statusResponse,
-        commentResponse,
         likeCommentResponse,
         getCommentResponse,
         getCommentsResponse,

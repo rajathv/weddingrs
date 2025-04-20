@@ -532,6 +532,7 @@ export const comment = (() => {
                 comments.lastElementChild.remove();
             }
 
+            response.data.is_parent = true;
             response.data.is_admin = session.isAdmin();
             const newComment = await card.renderContentMany([response.data]);
 
@@ -545,6 +546,7 @@ export const comment = (() => {
 
             removeInnerForm(id);
 
+            response.data.is_parent = false;
             response.data.is_admin = session.isAdmin();
             document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderContentSingle(response.data));
 
@@ -610,9 +612,10 @@ export const comment = (() => {
 
     /**
      * @param {HTMLButtonElement} button 
+     * @param {boolean} is_parent
      * @returns {Promise<void>}
      */
-    const edit = async (button) => {
+    const edit = async (button, is_parent) => {
         const id = button.getAttribute('data-uuid');
 
         changeActionButton(id, true);
@@ -629,7 +632,7 @@ export const comment = (() => {
             await gif.remove(id);
         }
 
-        const isParent = document.getElementById(id).getAttribute('data-parent') === 'true' && !session.isAdmin();
+        const isParent = is_parent && !session.isAdmin();
         document.getElementById(`button-${id}`).insertAdjacentElement('afterend', card.renderEdit(id, isChecklist, isParent, !!gifImage));
 
         if (gifImage) {
