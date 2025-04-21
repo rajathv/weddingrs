@@ -99,15 +99,6 @@ html[data-bs-theme="dark"] .bg-white-black {
     }
 }
 
-.slide-desktop {
-    transform: scale(1);
-    transition: transform 10s linear;
-}
-
-.slide-desktop-active {
-    transform: scale(1.15);
-}
-
 .no-gap-bottom {
     margin-bottom: -0.75rem !important;
 }
