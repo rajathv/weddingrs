@@ -86,7 +86,7 @@ export const image = (() => {
         }
 
         const c = cache('images');
-        const cancel = new Promise((res) => document.addEventListener('progress.invalid', res));
+        const cancel = new Promise((res) => document.addEventListener('progress.invalid', res, { once: true }));
 
         await c.open();
         await Promise.allSettled(arrImages.filter((el) => el.getAttribute('data-fetch-img') === 'high').map((el) => {

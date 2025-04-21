@@ -195,13 +195,11 @@ export const card = (() => {
             </div>`;
         }
 
-        const escapeComment = util.escapeHtml(c.comment);
-
-        const moreMaxLength = escapeComment.length > maxCommentLength;
-        const data = convertMarkdownToHTML(moreMaxLength ? (escapeComment.slice(0, maxCommentLength) + '...') : escapeComment);
+        const moreMaxLength = c.comment.length > maxCommentLength;
+        const data = util.escapeHtml(convertMarkdownToHTML(moreMaxLength ? (c.comment.slice(0, maxCommentLength) + '...') : c.comment));
 
         return head + `
-        <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" data-comment="${util.base64Encode(escapeComment)}" id="content-${c.uuid}">${data}</p>
+        <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" data-comment="${util.base64Encode(c.comment)}" id="content-${c.uuid}">${data}</p>
         ${moreMaxLength ? `<p class="d-block mb-2 mt-0 mx-0 p-0"><a class="text-theme-auto" role="button" style="font-size: 0.85rem;" data-show="false" onclick="undangan.comment.showMore(this, '${c.uuid}')">Selengkapnya</a></p>` : ''}`;
     };
 

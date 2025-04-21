@@ -241,8 +241,13 @@ export const guest = (() => {
 
         if (!token || token.length <= 0) {
             progress.add(); // for audio.
+            progress.add(); // for confetti.
             image.init().load();
             audio.init();
+            confetti.loadConfetti()
+                .then(() => progress.complete('confetti'))
+                .catch(() => progress.invalid('confetti'));
+
             document.getElementById('comment')?.remove();
             document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
         }

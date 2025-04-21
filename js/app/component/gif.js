@@ -526,6 +526,9 @@ export const gif = (() => {
         };
     };
 
+    /**
+     * @returns {boolean}
+     */
     const isActive = () => isEnabled;
 
     /**
