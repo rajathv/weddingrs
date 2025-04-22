@@ -28,6 +28,11 @@ export const gif = (() => {
     let objectPool = null;
 
     /**
+     * @type {Map<string, function>|null}
+     */
+    let eventListeners = null;
+
+    /**
      * @type {ReturnType<typeof storage>|null}
      */
     let config = null;
@@ -409,10 +414,12 @@ export const gif = (() => {
         if (uuid) {
             if (objectPool.has(uuid)) {
                 await waitLastRequest(uuid);
+                eventListeners.delete(uuid);
                 objectPool.delete(uuid);
             }
         } else {
             await Promise.allSettled(Array.from(objectPool.keys()).map((k) => waitLastRequest(k)));
+            eventListeners.clear();
             objectPool.clear();
         }
     };
@@ -452,7 +459,6 @@ export const gif = (() => {
                 pointer: -1,
                 gifs: [],
                 reqs: [],
-                opens: [],
             });
 
             const deScroll = util.debounce(scroll, 150);
@@ -465,7 +471,9 @@ export const gif = (() => {
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
-        objectPool.get(uuid).opens.forEach((f) => f());
+        if (eventListeners.has(uuid)) {
+            eventListeners.get(uuid)();
+        }
 
         return search(uuid);
     };
@@ -502,7 +510,7 @@ export const gif = (() => {
      * @param {function} callback
      * @returns {void}
      */
-    const onOpen = (uuid, callback) => objectPool.get(uuid)?.opens.push(callback);
+    const onOpen = (uuid, callback) => eventListeners.set(uuid, callback);
 
     /**
      * @param {string|null} [uuid=null] 
@@ -529,6 +537,7 @@ export const gif = (() => {
     const init = () => {
         c = cache(cacheName);
         objectPool = new Map();
+        eventListeners = new Map();
         config = storage('config');
 
         if (!config.get('tenor_key')) {
