@@ -378,7 +378,7 @@ export const comment = (() => {
             content.setAttribute('data-comment', util.base64Encode(form.value));
 
             const original = card.convertMarkdownToHTML(util.escapeHtml(form.value));
-            if (original.length > card.maxCommentLength) {
+            if (form.value.length > card.maxCommentLength) {
                 util.safeInnerHTML(content, showButton?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original);
                 showButton?.classList.replace('d-none', 'd-block');
             } else {
@@ -598,15 +598,15 @@ export const comment = (() => {
 
     /**
      * @param {string} uuid 
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const reply = async (uuid) => {
+    const reply = (uuid) => {
         changeActionButton(uuid, true);
 
-        await gif.remove(uuid);
-        gif.onOpen(uuid, () => gif.removeGifSearch(uuid));
-
-        document.getElementById(`button-${uuid}`).insertAdjacentElement('afterend', card.renderReply(uuid));
+        gif.remove(uuid).then(() => {
+            gif.onOpen(uuid, () => gif.removeGifSearch(uuid));
+            document.getElementById(`button-${uuid}`).insertAdjacentElement('afterend', card.renderReply(uuid));
+        });
     };
 
     /**
@@ -640,7 +640,7 @@ export const comment = (() => {
                 gif.removeButtonBack(id);
             });
 
-            gif.open(id);
+            await gif.open(id);
             return;
         }
 

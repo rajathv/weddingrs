@@ -28,11 +28,6 @@ export const gif = (() => {
     let objectPool = null;
 
     /**
-     * @type {Map<string, function>|null}
-     */
-    let eventListeners = null;
-
-    /**
      * @type {ReturnType<typeof storage>|null}
      */
     let config = null;
@@ -414,12 +409,10 @@ export const gif = (() => {
         if (uuid) {
             if (objectPool.has(uuid)) {
                 await waitLastRequest(uuid);
-                eventListeners.delete(uuid);
                 objectPool.delete(uuid);
             }
         } else {
             await Promise.allSettled(Array.from(objectPool.keys()).map((k) => waitLastRequest(k)));
-            eventListeners.clear();
             objectPool.clear();
         }
     };
@@ -459,6 +452,7 @@ export const gif = (() => {
                 pointer: -1,
                 gifs: [],
                 reqs: [],
+                opens: [],
             });
 
             const deScroll = util.debounce(scroll, 150);
@@ -471,9 +465,7 @@ export const gif = (() => {
         document.getElementById(`gif-form-${uuid}`).classList.toggle('d-none', false);
         document.getElementById(`comment-form-${uuid}`)?.classList.toggle('d-none', true);
 
-        if (eventListeners.has(uuid)) {
-            eventListeners.get(uuid)();
-        }
+        objectPool.get(uuid).opens.forEach((f) => f());
 
         return search(uuid);
     };
@@ -483,8 +475,8 @@ export const gif = (() => {
      * @returns {boolean}
      */
     const isOpen = (uuid) => {
-        const container = document.getElementById(`gif-form-${uuid}`);
-        return container === null ? false : !container.classList.contains('d-none');
+        const el = document.getElementById(`gif-form-${uuid}`);
+        return el && !el.classList.contains('d-none');
     };
 
     /**
@@ -510,7 +502,7 @@ export const gif = (() => {
      * @param {function} callback
      * @returns {void}
      */
-    const onOpen = (uuid, callback) => eventListeners.set(uuid, callback);
+    const onOpen = (uuid, callback) => objectPool.get(uuid)?.opens.push(callback);
 
     /**
      * @param {string|null} [uuid=null] 
@@ -535,10 +527,8 @@ export const gif = (() => {
      * @returns {void}
      */
     const init = () => {
-        objectPool = new Map();
-        eventListeners = new Map();
-
         c = cache(cacheName);
+        objectPool = new Map();
         config = storage('config');
 
         if (!config.get('tenor_key')) {

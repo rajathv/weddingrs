@@ -58,9 +58,7 @@ export const card = (() => {
      * @returns {string}
      */
     const convertMarkdownToHTML = (str) => {
-        listsMarkDown.forEach((data) => {
-            const k = data[0];
-            const v = data[1];
+        listsMarkDown.forEach(([k, v]) => {
             str = str.replace(new RegExp(`\\${k}(?=\\S)(.*?)(?<!\\s)\\${k}`, 'gs'), v);
         });
 
