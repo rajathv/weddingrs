@@ -48,70 +48,19 @@ export const admin = (() => {
 
     /**
      * @param {HTMLElement} checkbox
-     * @returns {Promise<void>}
+     * @param {string} type
+     * @returns {void}
      */
-    const changeFilterBadWord = async (checkbox) => {
+    const changeCheckboxValue = (checkbox, type) => {
         const label = util.disableCheckbox(checkbox);
 
-        await request(HTTP_PATCH, '/api/user').
-            token(session.getToken()).
-            body({
-                filter: Boolean(checkbox.checked)
-            }).
-            send();
-
-        label.restore();
-    };
-
-    /**
-     * @param {HTMLElement} checkbox
-     * @returns {Promise<void>}
-     */
-    const replyComment = async (checkbox) => {
-        const label = util.disableCheckbox(checkbox);
-
-        await request(HTTP_PATCH, '/api/user').
-            token(session.getToken()).
-            body({
-                can_reply: Boolean(checkbox.checked)
-            }).
-            send();
-
-        label.restore();
-    };
-
-    /**
-     * @param {HTMLElement} checkbox
-     * @returns {Promise<void>}
-     */
-    const editComment = async (checkbox) => {
-        const label = util.disableCheckbox(checkbox);
-
-        await request(HTTP_PATCH, '/api/user').
-            token(session.getToken()).
-            body({
-                can_edit: Boolean(checkbox.checked)
-            }).
-            send();
-
-        label.restore();
-    };
-
-    /**
-     * @param {HTMLElement} checkbox
-     * @returns {Promise<void>}
-     */
-    const deleteComment = async (checkbox) => {
-        const label = util.disableCheckbox(checkbox);
-
-        await request(HTTP_PATCH, '/api/user').
-            token(session.getToken()).
-            body({
-                can_delete: Boolean(checkbox.checked)
-            }).
-            send();
-
-        label.restore();
+        request(HTTP_PATCH, '/api/user')
+            .token(session.getToken())
+            .body({
+                [type]: checkbox.checked
+            })
+            .send()
+            .finally(() => label.restore());
     };
 
     /**
@@ -342,12 +291,9 @@ export const admin = (() => {
                 tenor,
                 download,
                 regenerate,
-                editComment,
-                replyComment,
-                deleteComment,
                 changeName,
                 changePassword,
-                changeFilterBadWord,
+                changeCheckboxValue,
                 enableButtonName,
                 enableButtonPassword,
             },

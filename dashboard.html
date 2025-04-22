@@ -309,20 +309,20 @@
                             <p class="mx-0 mt-0 mb-1 p-0 fw-bold"><i class="fa-solid fa-sliders me-2"></i>Control</p>
 
                             <div class="form-check form-switch mb-1">
-                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="filterBadWord" onchange="undangan.admin.changeFilterBadWord(this)" data-offline-disabled="false">
-                                <label class="form-check-label" style="cursor:pointer;" for="filterBadWord">Filter Bad Word</label>
+                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="filterBadWord" onchange="undangan.admin.changeCheckboxValue(this, 'filter')" data-offline-disabled="false">
+                                <label class="form-check-label" style="cursor:pointer;" for="filterBadWord">Filter bad word</label>
                             </div>
                             <div class="form-check form-switch mb-1">
-                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="replyComment" onchange="undangan.admin.replyComment(this)" data-offline-disabled="false">
-                                <label class="form-check-label" style="cursor:pointer;" for="replyComment">Can Reply Comment</label>
+                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="replyComment" onchange="undangan.admin.changeCheckboxValue(this, 'can_reply')" data-offline-disabled="false">
+                                <label class="form-check-label" style="cursor:pointer;" for="replyComment">Can reply</label>
                             </div>
                             <div class="form-check form-switch mb-1">
-                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="editComment" onchange="undangan.admin.editComment(this)" data-offline-disabled="false">
-                                <label class="form-check-label" style="cursor:pointer;" for="editComment">Can Edit Comment</label>
+                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="editComment" onchange="undangan.admin.changeCheckboxValue(this, 'can_edit')" data-offline-disabled="false">
+                                <label class="form-check-label" style="cursor:pointer;" for="editComment">Can edit</label>
                             </div>
                             <div class="form-check form-switch mb-1">
-                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="deleteComment" onchange="undangan.admin.deleteComment(this)" data-offline-disabled="false">
-                                <label class="form-check-label" style="cursor:pointer;" for="deleteComment">Can Delete Comment</label>
+                                <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" role="switch" id="deleteComment" onchange="undangan.admin.changeCheckboxValue(this, 'can_delete')" data-offline-disabled="false">
+                                <label class="form-check-label" style="cursor:pointer;" for="deleteComment">Can delete</label>
                             </div>
                         </div>
 
