@@ -194,7 +194,7 @@ export const card = (() => {
         }
 
         const moreMaxLength = c.comment.length > maxCommentLength;
-        const data = util.escapeHtml(convertMarkdownToHTML(moreMaxLength ? (c.comment.slice(0, maxCommentLength) + '...') : c.comment));
+        const data = convertMarkdownToHTML(util.escapeHtml(moreMaxLength ? (c.comment.slice(0, maxCommentLength) + '...') : c.comment));
 
         return head + `
         <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" data-comment="${util.base64Encode(c.comment)}" id="content-${c.uuid}">${data}</p>
