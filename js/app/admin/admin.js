@@ -56,9 +56,7 @@ export const admin = (() => {
 
         request(HTTP_PATCH, '/api/user')
             .token(session.getToken())
-            .body({
-                [type]: checkbox.checked
-            })
+            .body({ [type]: checkbox.checked })
             .send()
             .finally(() => label.restore());
     };
@@ -74,9 +72,7 @@ export const admin = (() => {
         form.disabled = true;
         await request(HTTP_PATCH, '/api/user')
             .token(session.getToken())
-            .body({
-                tenor_key: form.value.length ? form.value : null
-            })
+            .body({ tenor_key: form.value.length ? form.value : null })
             .send()
             .then(() => alert(`success ${form.value.length ? 'add' : 'remove'} tenor key`));
 
@@ -95,10 +91,10 @@ export const admin = (() => {
 
         const btn = util.disableButton(button);
 
-        await request(HTTP_PUT, '/api/key').
-            token(session.getToken()).
-            send(dto.statusResponse).
-            then((res) => {
+        await request(HTTP_PUT, '/api/key')
+            .token(session.getToken())
+            .send(dto.statusResponse)
+            .then((res) => {
                 if (res.data.status) {
                     getAllRequest();
                 }
@@ -125,14 +121,14 @@ export const admin = (() => {
 
         const btn = util.disableButton(button);
 
-        const result = await request(HTTP_PATCH, '/api/user').
-            token(session.getToken()).
-            body({
+        const result = await request(HTTP_PATCH, '/api/user')
+            .token(session.getToken())
+            .body({
                 old_password: old.value,
                 new_password: newest.value,
-            }).
-            send(dto.statusResponse).
-            then((res) => res.data.status, () => false);
+            })
+            .send(dto.statusResponse)
+            .then((res) => res.data.status, () => false);
 
         btn.restore(true);
 
@@ -161,13 +157,11 @@ export const admin = (() => {
         name.disabled = true;
         const btn = util.disableButton(button);
 
-        const result = await request(HTTP_PATCH, '/api/user').
-            token(session.getToken()).
-            body({
-                name: name.value,
-            }).
-            send(dto.statusResponse).
-            then((res) => res.data.status, () => false);
+        const result = await request(HTTP_PATCH, '/api/user')
+            .token(session.getToken())
+            .body({ name: name.value })
+            .send(dto.statusResponse)
+            .then((res) => res.data.status, () => false);
 
         name.disabled = false;
         btn.restore(true);
@@ -180,14 +174,14 @@ export const admin = (() => {
 
     /**
      * @param {HTMLButtonElement} button
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const download = async (button) => {
+    const download = (button) => {
         const btn = util.disableButton(button);
-
-        await request(HTTP_GET, '/api/download').token(session.getToken()).download();
-
-        btn.restore();
+        request(HTTP_GET, '/api/download')
+            .token(session.getToken())
+            .download()
+            .finally(() => btn.restore());
     };
 
     /**

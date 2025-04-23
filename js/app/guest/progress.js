@@ -66,7 +66,7 @@ export const progress = (() => {
     const init = () => {
         info = document.getElementById('progress-info');
         bar = document.getElementById('progress-bar');
-        info.style.display = 'block';
+        info.classList.remove('d-none');
     };
 
     return {

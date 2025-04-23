@@ -29,7 +29,6 @@
 .btn-float {
     right: 2vh;
     z-index: 1030;
-    display: none;
 }
 
 html[data-bs-theme="dark"] .btn-float {

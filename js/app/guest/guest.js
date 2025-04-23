@@ -125,7 +125,7 @@ export const guest = (() => {
         document.dispatchEvent(new Event('undangan.open'));
 
         if (theme.isAutoMode()) {
-            document.getElementById('button-theme').style.display = 'block';
+            document.getElementById('button-theme').classList.remove('d-none');
         }
 
         slide();
@@ -206,7 +206,7 @@ export const guest = (() => {
         showGuestName();
         normalizeArabicFont();
         buildGoogleCalendar();
-        document.getElementById('root').style.opacity = '1';
+        document.getElementById('root').classList.replace('opacity-0', 'opacity-100');
 
         if (information.has('presence')) {
             document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';

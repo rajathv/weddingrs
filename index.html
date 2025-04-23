@@ -78,14 +78,15 @@
 </head>
 
 <!-- If not using comments, you can remove the data-key, data-url attributes, and ignore dashboard.html -->
-<!-- You can use my CDN (guest.css, guest.js, admin.css, admin.js) instantly without compilation -->
+<!-- If not using song, you can remove the data-audio -->
+<!-- You can use github releases (guest.css, guest.js, admin.css, admin.js) instantly without compilation -->
 <!-- data-bs-theme ['auto', 'dark', 'light'] -->
 <!-- Recommend use 'data-src' in img tag -->
 
-<body data-key="bfb9cfea33ab7ae21a315fbd6f065a815d3e20ff2f007aa2ca" data-url="https://api.ulems.my.id/">
+<body data-key="bfb9cfea33ab7ae21a315fbd6f065a815d3e20ff2f007aa2ca" data-url="https://api.ulems.my.id/" data-audio="./assets/music/sound.mp3">
 
     <!-- Root Invitation -->
-    <div class="row m-0 p-0" style="opacity: 0;" id="root">
+    <div class="row m-0 p-0 opacity-0" id="root">
 
         <!-- Desktop mode -->
         <div class="sticky-top vh-100 d-none d-lg-block col-lg-7 col-xl-8 col-xxl-9 overflow-y-hidden m-0 p-0">
@@ -587,12 +588,12 @@
     </div>
 
     <!-- Theme Button -->
-    <button type="button" id="button-theme" style="display: block; bottom: 15vh;" class="btn bg-light-dark border btn-sm rounded-circle btn-float position-fixed shadow-sm" aria-label="Change theme" onclick="undangan.theme.change()">
+    <button type="button" id="button-theme" style="bottom: 15vh;" class="btn bg-light-dark border btn-sm rounded-circle d-none btn-float position-fixed shadow-sm" aria-label="Change theme" onclick="undangan.theme.change()">
         <i class="fa-solid fa-circle-half-stroke"></i>
     </button>
 
     <!-- Audio Button -->
-    <button type="button" id="button-music" style="bottom: 9vh;" class="btn bg-light-dark border btn-sm rounded-circle btn-float position-fixed shadow-sm" data-url="./assets/music/sound.mp3" aria-label="Change audio" data-offline-disabled="false">
+    <button type="button" id="button-music" style="bottom: 9vh;" class="btn bg-light-dark border btn-sm rounded-circle d-none btn-float position-fixed shadow-sm" aria-label="Change audio" data-offline-disabled="false">
         <i class="fa-solid fa-circle-pause spin-button"></i>
     </button>
 
@@ -604,7 +605,7 @@
                 <div class="progress" role="progressbar" style="height: 0.5rem;" aria-label="progress bar">
                     <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
                 </div>
-                <small class="mt-1 text-theme-auto" id="progress-info" style="font-size: 0.8rem; display: none;">Booting application...</small>
+                <small class="d-none mt-1 text-theme-auto" id="progress-info" style="font-size: 0.8rem;">Booting application...</small>
                 <noscript>
                     <small class="mt-1 text-danger">Sorry, this invitation requires javascript to work</small>
                 </noscript>
