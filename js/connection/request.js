@@ -1,5 +1,3 @@
-import { dto } from './dto.js';
-
 export const HTTP_GET = 'GET';
 export const HTTP_PUT = 'PUT';
 export const HTTP_POST = 'POST';
@@ -143,27 +141,25 @@ export const request = (method, path) => {
         /**
          * @template T
          * @param {((data: any) => T)=} transform
-         * @returns {Promise<ReturnType<typeof dto.baseResponse<T>>>}
+         * @returns {Promise<{code: number, data: T, error: string[]|null}>}
          */
         send(transform = null) {
             return baseFetch(url + path)
-                .then((res) => {
-                    return res.json().then((json) => {
-                        if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
-                            throw new Error(json.message ?? json[0]);
-                        }
+                .then((res) => res.json().then((json) => {
+                    if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
+                        throw new Error(json.message ?? json[0]);
+                    }
 
-                        if (json.error) {
-                            throw new Error(json.error[0]);
-                        }
+                    if (json.error) {
+                        throw new Error(json.error[0]);
+                    }
 
-                        if (transform) {
-                            json.data = transform(json.data);
-                        }
+                    if (transform) {
+                        json.data = transform(json.data);
+                    }
 
-                        return dto.baseResponse(json.code, json.data, json.error);
-                    });
-                })
+                    return json;
+                }))
                 .catch((err) => {
                     if (err.name === ERROR_ABORT) {
                         console.warn('Fetch abort:', err);
@@ -255,7 +251,7 @@ export const request = (method, path) => {
                 .catch((err) => {
                     if (err.name === ERROR_ABORT) {
                         console.warn('Fetch abort:', err);
-                        return err;
+                        return false;
                     }
 
                     alert(err);
@@ -280,6 +276,10 @@ export const request = (method, path) => {
          * @returns {ReturnType<typeof request>}
          */
         body(body) {
+            if (req.method === HTTP_GET) {
+                throw new Error('GET method does not support body');
+            }
+
             req.body = JSON.stringify(body);
             return this;
         },

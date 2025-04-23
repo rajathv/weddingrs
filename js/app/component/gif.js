@@ -1,12 +1,10 @@
 import { util } from '../../common/util.js';
-import { cache } from '../../common/cache.js';
 import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
+import { cache } from '../../connection/cache.js';
 import { request, defaultJSON, ERROR_ABORT, HTTP_GET } from '../../connection/request.js';
 
 export const gif = (() => {
-
-    const cacheName = 'gifs';
 
     const gifDefault = 'default';
 
@@ -535,7 +533,7 @@ export const gif = (() => {
      * @returns {void}
      */
     const init = () => {
-        c = cache(cacheName);
+        c = cache('gif');
         objectPool = new Map();
         eventListeners = new Map();
         config = storage('config');

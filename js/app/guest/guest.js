@@ -304,7 +304,6 @@ export const guest = (() => {
             storage('likes').clear();
             storage('session').clear();
             storage('comment').clear();
-            storage('tracker').clear();
         }
 
         window.addEventListener('DOMContentLoaded', domLoaded);

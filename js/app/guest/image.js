@@ -1,5 +1,5 @@
 import { progress } from './progress.js';
-import { cache } from '../../common/cache.js';
+import { cache } from '../../connection/cache.js';
 
 export const image = (() => {
 
@@ -85,7 +85,7 @@ export const image = (() => {
             return;
         }
 
-        const c = cache('images');
+        const c = cache('image');
         const cancel = new Promise((res) => document.addEventListener('progress.invalid', res, { once: true }));
 
         await c.open();

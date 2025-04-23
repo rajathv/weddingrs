@@ -1,5 +1,5 @@
 import { progress } from './progress.js';
-import { cache } from '../../common/cache.js';
+import { cache } from '../../connection/cache.js';
 
 export const audio = (() => {
 
