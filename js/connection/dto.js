@@ -1,21 +1,6 @@
 export const dto = (() => {
 
     /**
-     * @template T
-     * @param {number} code
-     * @param {T} data
-     * @param {string[]|null} error
-     * @returns {{code: number, data: T, error: string[]|null}}
-     */
-    const baseResponse = (code, data, error) => {
-        return {
-            code,
-            data,
-            error,
-        };
-    };
-
-    /**
      * @param {number} love
      * @returns {{love: number}}
      */
@@ -152,7 +137,6 @@ export const dto = (() => {
 
     return {
         uuidResponse,
-        baseResponse,
         tokenResponse,
         statusResponse,
         likeCommentResponse,

@@ -206,7 +206,7 @@ export const guest = (() => {
         showGuestName();
         normalizeArabicFont();
         buildGoogleCalendar();
-        document.getElementById('root').classList.replace('opacity-0', 'opacity-100');
+        document.getElementById('root').classList.remove('opacity-0');
 
         if (information.has('presence')) {
             document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';

@@ -52,7 +52,7 @@ export const session = (() => {
     const isAdmin = () => String(getToken() ?? '.').split('.').length === 3;
 
     /**
-     * @returns {Promise<ReturnType<typeof dto.baseResponse<object>>}
+     * @returns {Promise<object>}
      */
     const guest = () => {
         return request(HTTP_GET, '/api/v2/config')

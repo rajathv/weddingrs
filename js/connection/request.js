@@ -15,6 +15,28 @@ export const defaultJSON = {
     'Content-Type': 'application/json'
 };
 
+const singleton = (() => {
+    /**
+     * @type {Promise<Cache>|null}
+     */
+    let instance = null;
+
+    /**
+     * @returns {Promise<Cache>}
+     */
+    const getInstance = () => {
+        if (!instance) {
+            instance = window.caches.open('request');
+        }
+
+        return instance;
+    };
+
+    return {
+        getInstance,
+    };
+})();
+
 export const request = (method, path) => {
 
     const ac = new AbortController();
@@ -89,7 +111,7 @@ export const request = (method, path) => {
                 });
             });
 
-            return window.caches.open('request').then((c) => c.match(input).then((res) => {
+            return singleton.getInstance().then((c) => c.match(input).then((res) => {
                 if (!res) {
                     return fetchPut(c);
                 }

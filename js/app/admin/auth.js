@@ -47,7 +47,7 @@ export const auth = (() => {
     };
 
     /**
-     * @returns {Promise<ReturnType<typeof dto.baseResponse>>}
+     * @returns {Promise<object>}
      */
     const getDetailUser = () => {
         return request(HTTP_GET, '/api/user').token(session.getToken()).send().then((res) => {

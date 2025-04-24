@@ -15,24 +15,22 @@ export const admin = (() => {
     /**
      * @returns {Promise<void>}
      */
-    const getAllRequest = () => {
-        return auth.getDetailUser().then((res) => {
+    const getAllRequest = () => auth.getDetailUser().then((res) => {
 
-            util.safeInnerHTML(document.getElementById('dashboard-name'), `${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`);
-            document.getElementById('dashboard-email').textContent = res.data.email;
-            document.getElementById('dashboard-accesskey').value = res.data.access_key;
-            document.getElementById('button-copy-accesskey').setAttribute('data-copy', res.data.access_key);
+        util.safeInnerHTML(document.getElementById('dashboard-name'), `${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`);
+        document.getElementById('dashboard-email').textContent = res.data.email;
+        document.getElementById('dashboard-accesskey').value = res.data.access_key;
+        document.getElementById('button-copy-accesskey').setAttribute('data-copy', res.data.access_key);
 
-            document.getElementById('form-name').value = util.escapeHtml(res.data.name);
-            document.getElementById('filterBadWord').checked = Boolean(res.data.is_filter);
-            document.getElementById('replyComment').checked = Boolean(res.data.can_reply);
-            document.getElementById('editComment').checked = Boolean(res.data.can_edit);
-            document.getElementById('deleteComment').checked = Boolean(res.data.can_delete);
-            document.getElementById('dashboard-tenorkey').value = res.data.tenor_key;
+        document.getElementById('form-name').value = util.escapeHtml(res.data.name);
+        document.getElementById('filterBadWord').checked = Boolean(res.data.is_filter);
+        document.getElementById('replyComment').checked = Boolean(res.data.can_reply);
+        document.getElementById('editComment').checked = Boolean(res.data.can_edit);
+        document.getElementById('deleteComment').checked = Boolean(res.data.can_delete);
+        document.getElementById('dashboard-tenorkey').value = res.data.tenor_key;
 
-            storage('config').set('tenor_key', res.data.tenor_key);
-        });
-    };
+        storage('config').set('tenor_key', res.data.tenor_key);
+    });
 
     /**
      * @returns {void}
