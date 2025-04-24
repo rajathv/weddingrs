@@ -24,6 +24,7 @@ export const admin = (() => {
 
         document.getElementById('form-name').value = util.escapeHtml(res.data.name);
         document.getElementById('filterBadWord').checked = Boolean(res.data.is_filter);
+        document.getElementById('confettiAnimation').checked = Boolean(res.data.is_confetti_animation);
         document.getElementById('replyComment').checked = Boolean(res.data.can_reply);
         document.getElementById('editComment').checked = Boolean(res.data.can_edit);
         document.getElementById('deleteComment').checked = Boolean(res.data.can_delete);
@@ -61,51 +62,54 @@ export const admin = (() => {
 
     /**
      * @param {HTMLButtonElement} button
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const tenor = async (button) => {
+    const tenor = (button) => {
         const btn = util.disableButton(button);
-        const form = document.getElementById('dashboard-tenorkey');
 
+        const form = document.getElementById('dashboard-tenorkey');
         form.disabled = true;
-        await request(HTTP_PATCH, '/api/user')
+
+        request(HTTP_PATCH, '/api/user')
             .token(session.getToken())
             .body({ tenor_key: form.value.length ? form.value : null })
             .send()
-            .then(() => alert(`success ${form.value.length ? 'add' : 'remove'} tenor key`));
-
-        form.disabled = false;
-        btn.restore();
+            .then(() => alert(`success ${form.value.length ? 'add' : 'remove'} tenor key`))
+            .finally(() => {
+                form.disabled = false;
+                btn.restore();
+            });
     };
 
     /**
      * @param {HTMLButtonElement} button
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const regenerate = async (button) => {
+    const regenerate = (button) => {
         if (!confirm('Are you sure?')) {
             return;
         }
 
         const btn = util.disableButton(button);
 
-        await request(HTTP_PUT, '/api/key')
+        request(HTTP_PUT, '/api/key')
             .token(session.getToken())
             .send(dto.statusResponse)
             .then((res) => {
-                if (res.data.status) {
-                    getAllRequest();
+                if (!res.data.status) {
+                    return;
                 }
-            });
 
-        btn.restore();
+                getAllRequest();
+            })
+            .finally(() => btn.restore());
     };
 
     /**
      * @param {HTMLButtonElement} button
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const changePassword = async (button) => {
+    const changePassword = (button) => {
         const old = document.getElementById('old_password');
         const newest = document.getElementById('new_password');
 
@@ -119,32 +123,35 @@ export const admin = (() => {
 
         const btn = util.disableButton(button);
 
-        const result = await request(HTTP_PATCH, '/api/user')
+        request(HTTP_PATCH, '/api/user')
             .token(session.getToken())
             .body({
                 old_password: old.value,
                 new_password: newest.value,
             })
             .send(dto.statusResponse)
-            .then((res) => res.data.status, () => false);
+            .then((res) => {
+                if (!res.data.status) {
+                    return;
+                }
 
-        btn.restore(true);
+                old.value = null;
+                newest.value = null;
+                alert('Success change password');
+            })
+            .finally(() => {
+                btn.restore(true);
 
-        old.disabled = false;
-        newest.disabled = false;
-
-        if (result) {
-            old.value = null;
-            newest.value = null;
-            alert('Success change password');
-        }
+                old.disabled = false;
+                newest.disabled = false;
+            });
     };
 
     /**
      * @param {HTMLButtonElement} button
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const changeName = async (button) => {
+    const changeName = (button) => {
         const name = document.getElementById('form-name');
 
         if (name.value.length === 0) {
@@ -155,19 +162,22 @@ export const admin = (() => {
         name.disabled = true;
         const btn = util.disableButton(button);
 
-        const result = await request(HTTP_PATCH, '/api/user')
+        request(HTTP_PATCH, '/api/user')
             .token(session.getToken())
             .body({ name: name.value })
             .send(dto.statusResponse)
-            .then((res) => res.data.status, () => false);
+            .then((res) => {
+                if (!res.data.status) {
+                    return;
+                }
 
-        name.disabled = false;
-        btn.restore(true);
-
-        if (result) {
-            getAllRequest();
-            alert('Success change name');
-        }
+                util.safeInnerHTML(document.getElementById('dashboard-name'), `${util.escapeHtml(name.value)}<i class="fa-solid fa-hands text-warning ms-2"></i>`);
+                alert('Success change name');
+            })
+            .finally(() => {
+                name.disabled = false;
+                btn.restore(true);
+            });
     };
 
     /**

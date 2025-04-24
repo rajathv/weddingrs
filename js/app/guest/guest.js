@@ -269,7 +269,7 @@ export const guest = (() => {
             session.setToken(params.get('k') ?? token);
 
             // fetch after document is loaded.
-            window.addEventListener('load', () => session.guest().then(() => {
+            window.addEventListener('load', () => session.guest().then((res) => {
                 progress.complete('config');
 
                 if (img.hasDataSrc()) {
@@ -279,9 +279,13 @@ export const guest = (() => {
                 audio.init();
                 comment.init();
 
-                confetti.loadConfetti()
-                    .then(() => progress.complete('confetti'))
-                    .catch(() => progress.invalid('confetti'));
+                if (!res.data.is_confetti_animation) {
+                    progress.complete('confetti', true);
+                } else {
+                    confetti.loadConfetti()
+                        .then(() => progress.complete('confetti'))
+                        .catch(() => progress.invalid('confetti'));
+                }
 
                 comment.show()
                     .then(() => progress.complete('comment'))
