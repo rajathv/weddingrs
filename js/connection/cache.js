@@ -1,5 +1,30 @@
 import { request, HTTP_GET } from './request.js';
 
+const objectPool = (() => {
+    /**
+     * @type {Map<string, Promise<Cache>>|null}
+     */
+    let cachePool = null;
+
+    return {
+        /**
+         * @param {string} name
+         * @returns {Promise<Cache>}
+         */
+        getInstance: (name) => {
+            if (!cachePool) {
+                cachePool = new Map();
+            }
+
+            if (!cachePool.has(name)) {
+                cachePool.set(name, window.caches.open(name));
+            }
+
+            return cachePool.get(name);
+        },
+    };
+})();
+
 export const cache = (cacheName) => {
 
     /**
@@ -24,7 +49,7 @@ export const cache = (cacheName) => {
      */
     const open = async () => {
         if (!cacheObject && window.isSecureContext) {
-            cacheObject = await window.caches.open(cacheName);
+            cacheObject = await objectPool.getInstance(cacheName);
         }
     };
 

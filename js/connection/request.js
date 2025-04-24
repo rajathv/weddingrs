@@ -21,19 +21,17 @@ const singleton = (() => {
      */
     let instance = null;
 
-    /**
-     * @returns {Promise<Cache>}
-     */
-    const getInstance = () => {
-        if (!instance) {
-            instance = window.caches.open('request');
-        }
-
-        return instance;
-    };
-
     return {
-        getInstance,
+        /**
+         * @returns {Promise<Cache>}
+         */
+        getInstance: () => {
+            if (!instance) {
+                instance = window.caches.open('request');
+            }
+
+            return instance;
+        },
     };
 })();
 
