@@ -26,11 +26,6 @@
     object-fit: cover;
 }
 
-.btn-float {
-    right: 2vh;
-    z-index: 1030;
-}
-
 html[data-bs-theme="dark"] .btn-float {
     background-color: rgba(var(--bs-dark-rgb), 0.5) !important;
     backdrop-filter: blur(0.625rem);
