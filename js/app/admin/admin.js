@@ -246,10 +246,10 @@ export const admin = (() => {
         document.addEventListener('hidden.bs.modal', booted);
 
         try {
-            const raw = window.location.href.split('?k=');
-            if (raw.length > 1 && raw[1].length >= 1) {
-                session.setToken(raw[1]);
-                window.history.replaceState({}, document.title, raw[0]);
+            const raw = window.location.hash.slice(1);
+            if (raw.length > 0) {
+                session.setToken(raw);
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
 
             const exp = session.decode()?.exp;
