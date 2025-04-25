@@ -26,12 +26,12 @@
     object-fit: cover;
 }
 
-html[data-bs-theme="dark"] .btn-float {
+html[data-bs-theme="dark"] .btn-transparent {
     background-color: rgba(var(--bs-dark-rgb), 0.5) !important;
     backdrop-filter: blur(0.625rem);
 }
 
-html[data-bs-theme="light"] .btn-float {
+html[data-bs-theme="light"] .btn-transparent {
     background-color: rgba(var(--bs-light-rgb), 0.5) !important;
     backdrop-filter: blur(0.625rem);
 }
