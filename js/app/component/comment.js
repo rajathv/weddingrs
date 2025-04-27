@@ -263,6 +263,7 @@ export const comment = (() => {
         if (!status) {
             btn.restore();
             likes.disabled = false;
+            changeActionButton(id, false);
             return;
         }
 
