@@ -61,6 +61,14 @@ html[data-bs-theme="light"] .text-theme-auto {
     color: rgb(var(--bs-dark-rgb));
 }
 
+html[data-bs-theme="dark"] .nav-link {
+    color: rgba(var(--bs-white-rgb), 0.6);
+}
+
+html[data-bs-theme="light"] .nav-link {
+    color: rgba(var(--bs-black-rgb), 0.6);
+}
+
 html[data-bs-theme="dark"] .bg-theme-auto {
     background-color: var(--bs-gray-800);
 }
