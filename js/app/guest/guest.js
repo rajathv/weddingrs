@@ -244,9 +244,14 @@ export const guest = (() => {
             progress.add(); // for confetti.
             image.init().load();
             audio.init();
-            confetti.loadConfetti()
-                .then(() => progress.complete('confetti'))
-                .catch(() => progress.invalid('confetti'));
+
+            if (document.body.getAttribute('data-confetti') === 'true') {
+                confetti.loadConfetti()
+                    .then(() => progress.complete('confetti'))
+                    .catch(() => progress.invalid('confetti'));
+            } else {
+                progress.complete('confetti', true);
+            }
 
             document.getElementById('comment')?.remove();
             document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();

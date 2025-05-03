@@ -77,19 +77,20 @@
     <script src="./dist/guest.js"></script>
 </head>
 
-<!-- If not using comments, you can remove the data-key, data-url attributes, and ignore dashboard.html -->
-<!-- If not using song, you can remove the data-audio -->
-<!-- You can use github releases (guest.css, guest.js, admin.css, admin.js) instantly without compilation -->
+<!-- If you're not using comments, you can remove the data-key and data-url attributes, and ignore dashboard.html. -->
+<!-- If you're not using a song, you can remove the data-audio attribute. -->
+<!-- Set data-confetti to 'false' if you're not using confetti. Only works when comments are disabled. -->
+<!-- You can use GitHub release files (guest.css, guest.js, admin.css, admin.js) directly without compilation. -->
 <!-- <html lang="id" data-bs-theme="auto"> ['auto', 'dark', 'light'] -->
 <!-- Recommend use 'data-src' in img tag -->
 
-<body data-key="bfb9cfea33ab7ae21a315fbd6f065a815d3e20ff2f007aa2ca" data-url="https://api.ulems.my.id/" data-audio="./assets/music/sound.mp3">
+<body data-key="bfb9cfea33ab7ae21a315fbd6f065a815d3e20ff2f007aa2ca" data-url="https://api.ulems.my.id/" data-audio="./assets/music/sound.mp3" data-confetti="true">
 
     <!-- Root Invitation -->
     <div class="row m-0 p-0 opacity-0" id="root">
 
         <!-- Desktop mode -->
-        <div class="sticky-top vh-100 d-none d-lg-block col-lg-7 col-xl-8 col-xxl-9 overflow-y-hidden m-0 p-0">
+        <div class="sticky-top vh-100 d-none d-sm-block col-sm-5 col-md-6 col-lg-7 col-xl-8 col-xxl-9 overflow-y-hidden m-0 p-0">
             <div class="position-relative bg-white-black d-flex justify-content-center align-items-center vh-100">
                 <div class="d-flex position-absolute w-100 h-100">
                     <div class="position-relative overflow-hidden vw-100">
@@ -113,7 +114,7 @@
         </div>
 
         <!-- Smartphone mode -->
-        <div class="col-lg-5 col-xl-4 col-xxl-3 m-0 p-0">
+        <div class="col-sm-7 col-md-6 col-lg-5 col-xl-4 col-xxl-3 m-0 p-0">
             <!-- Main Content -->
             <main data-bs-spy="scroll" data-bs-target="#navbar-menu" data-bs-root-margin="25% 0% 0% 0%" data-bs-smooth-scroll="true" tabindex="0">
 
