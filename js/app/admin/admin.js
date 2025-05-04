@@ -23,6 +23,7 @@ export const admin = (() => {
         document.getElementById('button-copy-accesskey').setAttribute('data-copy', res.data.access_key);
 
         document.getElementById('form-name').value = util.escapeHtml(res.data.name);
+        document.getElementById('form-timezone').value = res.data.tz;
         document.getElementById('filterBadWord').checked = Boolean(res.data.is_filter);
         document.getElementById('confettiAnimation').checked = Boolean(res.data.is_confetti_animation);
         document.getElementById('replyComment').checked = Boolean(res.data.can_reply);
@@ -215,6 +216,79 @@ export const admin = (() => {
     };
 
     /**
+     * @param {HTMLFormElement} form 
+     * @param {string|null} [query=null] 
+     * @returns {void}
+     */
+    const openLists = (form, query = null) => {
+        let timezones = Intl.supportedValuesOf('timeZone');
+        const dropdown = document.getElementById('dropdown-tz-list');
+
+        if (query && query.trim().length > 0) {
+            timezones = timezones.filter((tz) => tz.toLowerCase().includes(query.trim().toLowerCase()));
+        }
+
+        dropdown.replaceChildren();
+
+        if (timezones.length <= 0) {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.disabled = true;
+            item.className = 'list-group-item list-group-item-action py-1 small';
+            item.textContent = 'not found';
+            dropdown.appendChild(item);
+            return;
+        }
+
+        dropdown.classList.remove('d-none');
+        timezones.slice(0, 20).forEach((tz, i) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'list-group-item list-group-item-action py-1 small';
+            item.textContent = tz;
+            item.tabIndex = i + 1;
+            item.onclick = () => {
+                form.value = tz;
+                document.getElementById('button-timezone').disabled = false;
+                dropdown.classList.add('d-none');
+            };
+            dropdown.appendChild(item);
+        });
+    };
+
+    /**
+     * @param {HTMLButtonElement} button
+     * @returns {void}
+     */
+    const changeTz = (button) => {
+        const tz = document.getElementById('form-timezone');
+
+        if (tz.value.length === 0) {
+            alert('Time zone cannot be empty');
+            return;
+        }
+
+        tz.disabled = true;
+        const btn = util.disableButton(button);
+
+        request(HTTP_PATCH, '/api/user')
+            .token(session.getToken())
+            .body({ tz: tz.value })
+            .send(dto.statusResponse)
+            .then((res) => {
+                if (!res.data.status) {
+                    return;
+                }
+
+                alert('Success change tz');
+            })
+            .finally(() => {
+                tz.disabled = false;
+                btn.restore(true);
+            });
+    };
+
+    /**
      * @returns {void}
      */
     const logout = () => {
@@ -298,6 +372,8 @@ export const admin = (() => {
                 changeCheckboxValue,
                 enableButtonName,
                 enableButtonPassword,
+                openLists,
+                changeTz,
             },
         };
     };

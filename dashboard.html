@@ -296,6 +296,21 @@
                             </div>
                         </div>
 
+                        <!-- Time Zone -->
+                        <div class="p-3 bg-theme-auto mb-3 rounded-4 shadow">
+                            <p class="mx-0 mt-0 mb-1 p-0 fw-bold"><i class="fa-solid fa-location-dot me-2"></i>Time Zone</p>
+                            <form>
+                                <div class="position-relative mb-3">
+                                    <input type="text" class="form-control form-control-sm rounded-4 shadow-sm" id="form-timezone" oninput="undangan.admin.openLists(this, this.value)" onclick="undangan.admin.openLists(this)" autocomplete="off" data-offline-disabled="false">
+                                    <div id="dropdown-tz-list" class="d-none list-group position-absolute w-100 shadow-sm rounded-4 overflow-y-scroll z-3" style="max-height: 15rem;"></div>
+                                </div>
+                            </form>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-sm btn-primary rounded-4 shadow-sm" id="button-timezone" onclick="undangan.admin.changeTz(this)" disabled data-offline-disabled="false">Change</button>
+                            </div>
+                        </div>
+
                         <!-- Tenor Key -->
                         <div class="p-3 bg-theme-auto mb-3 rounded-4 shadow">
                             <p class="mx-0 mt-0 mb-1 p-0 fw-bold"><i class="fa-solid fa-photo-film me-2"></i>Tenor Key</p>
