@@ -56,7 +56,7 @@ export const request = (method, input) => {
      * @returns {Promise<Response>}
      */
     const baseFetch = () => {
-        if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(input)) {
+        if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(input) && !/^(\.\/|\.\.\/)/.test(input)) {
             const url = document.body.getAttribute('data-url');
             if (url && url.slice(-1) === '/') {
                 input = url.slice(0, -1) + input;
