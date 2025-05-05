@@ -35,7 +35,7 @@ const singleton = (() => {
     };
 })();
 
-export const request = (method, input) => {
+export const request = (method, path) => {
 
     const ac = new AbortController();
     const req = {
@@ -51,17 +51,19 @@ export const request = (method, input) => {
     let reqRetry = 0;
     let reqDelay = 0;
     let reqAttempts = 0;
+    let fallbackName = null;
+
+    let url = document.body.getAttribute('data-url');
+
+    if (url && url.slice(-1) === '/') {
+        url = url.slice(0, -1);
+    }
 
     /**
+     * @param {string} input 
      * @returns {Promise<Response>}
      */
-    const baseFetch = () => {
-        if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(input) && !/^(\.\/|\.\.\/)/.test(input)) {
-            const url = document.body.getAttribute('data-url');
-            if (url && url.slice(-1) === '/') {
-                input = url.slice(0, -1) + input;
-            }
-        }
+    const baseFetch = (input) => {
 
         /**
          * @returns {Promise<Response>}
@@ -72,6 +74,10 @@ export const request = (method, input) => {
              * @returns {Promise<Response>}
              */
             const wrapperFetch = () => window.fetch(input, req);
+
+            if (fallbackName) {
+                Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
+            }
 
             if (reqTtl === 0 || !window.isSecureContext) {
                 return wrapperFetch();
@@ -157,38 +163,75 @@ export const request = (method, input) => {
         return attempt();
     };
 
+    /**
+     * @param {Response} res 
+     * @returns {Response}
+     */
+    const baseDownload = (res) => {
+        if (res.status !== HTTP_STATUS_OK) {
+            return res;
+        }
+
+        const exist = document.querySelector('a[download]');
+        if (exist) {
+            document.body.removeChild(exist);
+        }
+
+        const filename = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] ?? fallbackName;
+
+        return res.clone().blob().then((b) => {
+            const link = document.createElement('a');
+            const href = window.URL.createObjectURL(b);
+
+            link.href = href;
+            link.download = filename;
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(href);
+
+            return res;
+        });
+    };
+
     return {
         /**
          * @template T
          * @param {((data: any) => T)=} transform
-         * @returns {Promise<{code: number, data: T, error: string[]|null}>}
+         * @returns {Promise<{code: number, data: T, error: string[]|null|Response}>}
          */
         send(transform = null) {
-            return baseFetch()
-                .then((res) => res.json().then((json) => {
-                    if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
-                        throw new Error(json.message ?? json[0]);
-                    }
+            const f = baseFetch(url + path).catch((err) => {
+                if (err.name === ERROR_ABORT) {
+                    console.warn('Fetch abort:', err);
+                    return err;
+                }
 
-                    if (json.error) {
-                        throw new Error(json.error[0]);
-                    }
+                alert(err);
+                throw new Error(err);
+            });
 
-                    if (transform) {
-                        json.data = transform(json.data);
-                    }
+            if (fallbackName) {
+                return f.then(baseDownload);
+            }
 
-                    return json;
-                }))
-                .catch((err) => {
-                    if (err.name === ERROR_ABORT) {
-                        console.warn('Fetch abort:', err);
-                        return err;
-                    }
+            return f.then((res) => res.json().then((json) => {
+                if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
+                    throw new Error(json.message ?? json[0]);
+                }
 
-                    alert(err);
-                    throw new Error(err);
-                });
+                if (json.error) {
+                    throw new Error(json.error[0]);
+                }
+
+                if (transform) {
+                    json.data = transform(json.data);
+                }
+
+                return json;
+            }));
         },
         /**
          * @param {number} [ttl=21600000]
@@ -227,57 +270,26 @@ export const request = (method, input) => {
             return this;
         },
         /**
+         * @param {string} name 
+         * @returns {ReturnType<typeof request>}
+         */
+        withDownload(name) {
+            fallbackName = name;
+            return this;
+        },
+        /**
          * @param {object|null} header 
          * @returns {Promise<Response>}
          */
         default(header = null) {
             req.headers = new Headers(header ?? {});
-            return baseFetch();
-        },
-        /**
-         * @param {string} name 
-         * @returns {Promise<boolean>}
-         */
-        download(name) {
-            Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
-            return baseFetch()
-                .then((res) => {
-                    if (res.status !== HTTP_STATUS_OK) {
-                        return false;
-                    }
+            const f = baseFetch(path);
 
-                    const existingLink = document.querySelector('a[download]');
-                    if (existingLink) {
-                        document.body.removeChild(existingLink);
-                    }
+            if (fallbackName) {
+                return f.then(baseDownload);
+            }
 
-                    const filename = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1] ?? name;
-
-                    return res.blob().then((blob) => {
-                        const link = document.createElement('a');
-                        const href = window.URL.createObjectURL(blob);
-
-                        link.href = href;
-                        link.download = filename;
-                        document.body.appendChild(link);
-
-                        link.click();
-
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(href);
-
-                        return true;
-                    });
-                })
-                .catch((err) => {
-                    if (err.name === ERROR_ABORT) {
-                        console.warn('Fetch abort:', err);
-                        return false;
-                    }
-
-                    alert(err);
-                    throw new Error(err);
-                });
+            return f;
         },
         /**
          * @param {string} token
