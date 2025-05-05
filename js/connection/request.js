@@ -35,7 +35,7 @@ const singleton = (() => {
     };
 })();
 
-export const request = (method, path) => {
+export const request = (method, input) => {
 
     const ac = new AbortController();
     const req = {
@@ -51,17 +51,17 @@ export const request = (method, path) => {
     let reqRetry = 0;
     let reqDelay = 0;
     let reqAttempts = 0;
-    let url = document.body.getAttribute('data-url');
-
-    if (url && url.slice(-1) === '/') {
-        url = url.slice(0, -1);
-    }
 
     /**
-     * @param {string} input 
      * @returns {Promise<Response>}
      */
-    const baseFetch = (input) => {
+    const baseFetch = () => {
+        if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(input)) {
+            const url = document.body.getAttribute('data-url');
+            if (url && url.slice(-1) === '/') {
+                input = url.slice(0, -1) + input;
+            }
+        }
 
         /**
          * @returns {Promise<Response>}
@@ -164,7 +164,7 @@ export const request = (method, path) => {
          * @returns {Promise<{code: number, data: T, error: string[]|null}>}
          */
         send(transform = null) {
-            return baseFetch(url + path)
+            return baseFetch()
                 .then((res) => res.json().then((json) => {
                     if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
                         throw new Error(json.message ?? json[0]);
@@ -232,14 +232,15 @@ export const request = (method, path) => {
          */
         default(header = null) {
             req.headers = new Headers(header ?? {});
-            return baseFetch(path);
+            return baseFetch();
         },
         /**
+         * @param {string} name 
          * @returns {Promise<boolean>}
          */
-        download() {
+        download(name) {
             Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
-            return baseFetch(url + path)
+            return baseFetch()
                 .then((res) => {
                     if (res.status !== HTTP_STATUS_OK) {
                         return false;
@@ -250,7 +251,7 @@ export const request = (method, path) => {
                         document.body.removeChild(existingLink);
                     }
 
-                    const filename = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1] ?? 'download.csv';
+                    const filename = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1] ?? name;
 
                     return res.blob().then((blob) => {
                         const link = document.createElement('a');

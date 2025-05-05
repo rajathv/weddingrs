@@ -15,7 +15,7 @@ export const admin = (() => {
     /**
      * @returns {Promise<void>}
      */
-    const getAllRequest = () => auth.getDetailUser().then((res) => {
+    const getUserStats = () => auth.getDetailUser().then((res) => {
 
         util.safeInnerHTML(document.getElementById('dashboard-name'), `${util.escapeHtml(res.data.name)}<i class="fa-solid fa-hands text-warning ms-2"></i>`);
         document.getElementById('dashboard-email').textContent = res.data.email;
@@ -32,19 +32,14 @@ export const admin = (() => {
         document.getElementById('dashboard-tenorkey').value = res.data.tenor_key;
 
         storage('config').set('tenor_key', res.data.tenor_key);
-    });
 
-    /**
-     * @returns {void}
-     */
-    const getStatsComment = () => {
-        request(HTTP_GET, '/api/stats').token(session.getToken()).send().then((res) => {
-            document.getElementById('count-comment').textContent = String(res.data.comments).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            document.getElementById('count-like').textContent = String(res.data.likes).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            document.getElementById('count-present').textContent = String(res.data.present).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            document.getElementById('count-absent').textContent = String(res.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        request(HTTP_GET, '/api/stats').token(session.getToken()).send().then((resp) => {
+            document.getElementById('count-comment').textContent = String(resp.data.comments).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('count-like').textContent = String(resp.data.likes).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('count-present').textContent = String(resp.data.present).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('count-absent').textContent = String(resp.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         });
-    };
+    });
 
     /**
      * @param {HTMLElement} checkbox
@@ -101,7 +96,7 @@ export const admin = (() => {
                     return;
                 }
 
-                getAllRequest();
+                getUserStats();
             })
             .finally(() => btn.restore());
     };
@@ -189,7 +184,7 @@ export const admin = (() => {
         const btn = util.disableButton(button);
         request(HTTP_GET, '/api/download')
             .token(session.getToken())
-            .download()
+            .download('download.csv')
             .finally(() => btn.restore());
     };
 
@@ -225,32 +220,38 @@ export const admin = (() => {
         const dropdown = document.getElementById('dropdown-tz-list');
 
         if (query && query.trim().length > 0) {
-            timezones = timezones.filter((tz) => tz.toLowerCase().includes(query.trim().toLowerCase()));
+            const filtered = timezones.filter((tz) => tz.toLowerCase().includes(query.trim().toLowerCase()));
+            if (filtered.length > 0) {
+                timezones = filtered;
+            }
+        }
+
+        if (query === null) {
+            document.addEventListener('click', (e) => {
+                if (!form.contains(e.target) && !dropdown.contains(e.target)) {
+                    if (form.value.trim().length <= 0) {
+                        form.setCustomValidity('Timezone cannot be empty.');
+                        form.reportValidity();
+                        return;
+                    }
+
+                    form.setCustomValidity('');
+                    dropdown.classList.add('d-none');
+                }
+            }, { once: true, capture: true });
         }
 
         dropdown.replaceChildren();
-
-        if (timezones.length <= 0) {
-            const item = document.createElement('button');
-            item.type = 'button';
-            item.disabled = true;
-            item.className = 'list-group-item list-group-item-action py-1 small';
-            item.textContent = 'not found';
-            dropdown.appendChild(item);
-            return;
-        }
-
         dropdown.classList.remove('d-none');
         timezones.slice(0, 20).forEach((tz, i) => {
             const item = document.createElement('button');
             item.type = 'button';
             item.className = 'list-group-item list-group-item-action py-1 small';
             item.textContent = tz;
-            item.tabIndex = i + 1;
             item.onclick = () => {
                 form.value = tz;
-                document.getElementById('button-timezone').disabled = false;
                 dropdown.classList.add('d-none');
+                document.getElementById('button-timezone').disabled = false;
             };
             dropdown.appendChild(item);
         });
@@ -309,13 +310,10 @@ export const admin = (() => {
         offline.init();
         theme.spyTop();
 
-        const booted = async () => {
-            await getAllRequest();
-            getStatsComment();
-
+        const booted = () => getUserStats().then(() => {
             comment.init();
             comment.show();
-        };
+        });
 
         document.addEventListener('hidden.bs.modal', booted);
 
