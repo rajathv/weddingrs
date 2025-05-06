@@ -87,8 +87,7 @@ export const cache = (cacheName) => {
                     headers.set('Content-Length', String(b.size));
                     headers.set('Expires', expiresDate.toUTCString());
 
-                    const cBlob = b.slice();
-                    return cacheObject.put(input, new Response(b, { headers })).then(() => cBlob);
+                    return b.arrayBuffer().then((ab) => cacheObject.put(input, new Response(ab, { headers })).then(() => b));
                 }));
 
             /**
