@@ -184,7 +184,7 @@ export const admin = (() => {
         const btn = util.disableButton(button);
         request(HTTP_GET, '/api/download')
             .token(session.getToken())
-            .withDownload('download.csv')
+            .withDownload('download', 'csv')
             .send()
             .finally(() => btn.restore());
     };

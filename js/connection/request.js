@@ -51,6 +51,7 @@ export const request = (method, path) => {
     let reqRetry = 0;
     let reqDelay = 0;
     let reqAttempts = 0;
+    let fileExt = null;
     let fallbackName = null;
 
     let url = document.body.getAttribute('data-url');
@@ -177,7 +178,7 @@ export const request = (method, path) => {
             document.body.removeChild(exist);
         }
 
-        const filename = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] ?? fallbackName;
+        const filename = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1];
 
         return res.clone().blob().then((b) => {
             const link = document.createElement('a');
@@ -185,6 +186,11 @@ export const request = (method, path) => {
 
             link.href = href;
             link.download = filename;
+
+            if (!filename) {
+                link.download = `${fallbackName}.${fileExt ? fileExt : b.type.split('/')[1]}`;
+            }
+
             document.body.appendChild(link);
 
             link.click();
@@ -271,10 +277,12 @@ export const request = (method, path) => {
         },
         /**
          * @param {string} name 
+         * @param {string|null} ext
          * @returns {ReturnType<typeof request>}
          */
-        withDownload(name) {
+        withDownload(name, ext = null) {
             fallbackName = name;
+            fileExt = ext;
             return this;
         },
         /**
