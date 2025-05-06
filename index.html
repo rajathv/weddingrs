@@ -53,10 +53,10 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Sacramento&display=swap" as="style">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic&display=swap" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" integrity="sha256-WAgYcAck1C1/zEl5sBl5cfyhxtLgKGdpI3oKyJffVRI=" crossorigin="anonymous" as="style">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" integrity="sha256-zzPh8NflvEInFbVSzLYGVMLOn0j0kfsjq/UlNeMBRYw=" crossorigin="anonymous" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" integrity="sha256-oxqX0LQclbvrsJt8IymkxnISn4Np2Wy2rY9jjoQlDEg=" crossorigin="anonymous" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" integrity="sha256-GqiEX9BuR1rv5zPU5Vs2qS/NSHl1BJyBcjQYJ6ycwD4=" crossorigin="anonymous" as="style">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha256-ORBCb//WwUWwNh+EjsvO97snO3mAJ1+jhMzrlPBTYSQ=" crossorigin="anonymous" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha256-y3ibfOyBqlgBd+GzwFYQEVOZdNJD06HeDXihongBXKs=" crossorigin="anonymous" as="script">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" integrity="sha256-pQBbLkFHcP1cy0C8IhoSdxlm0CtcH5yJ2ki9jjgR03c=" crossorigin="anonymous" as="script">
 
     <!-- Fonts -->
@@ -66,14 +66,14 @@
 
     <!-- Dependencies CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" integrity="sha256-WAgYcAck1C1/zEl5sBl5cfyhxtLgKGdpI3oKyJffVRI=" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" integrity="sha256-zzPh8NflvEInFbVSzLYGVMLOn0j0kfsjq/UlNeMBRYw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" integrity="sha256-oxqX0LQclbvrsJt8IymkxnISn4Np2Wy2rY9jjoQlDEg=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" integrity="sha256-GqiEX9BuR1rv5zPU5Vs2qS/NSHl1BJyBcjQYJ6ycwD4=" crossorigin="anonymous">
     <link rel="stylesheet" href="./css/guest.css">
 
     <!-- Dependencies JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha256-ORBCb//WwUWwNh+EjsvO97snO3mAJ1+jhMzrlPBTYSQ=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" integrity="sha256-pQBbLkFHcP1cy0C8IhoSdxlm0CtcH5yJ2ki9jjgR03c=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha256-y3ibfOyBqlgBd+GzwFYQEVOZdNJD06HeDXihongBXKs=" crossorigin="anonymous"></script>
     <script src="./dist/guest.js"></script>
 </head>
 
@@ -631,11 +631,12 @@
                 <h2 class="font-esthetic mb-4" style="font-size: 2.25rem;">Wahyu &amp; Riski</h2>
                 <div id="guest-name" data-message="Kepada Yth Bapak/Ibu/Saudara/i"></div>
 
-                <button type="button" class="btn btn-light shadow rounded-4 mt-3 mx-auto" onclick="undangan.guest.open(this)"><i class="fa-solid fa-envelope-open me-2"></i>Open Invitation</button>
+                <button type="button" class="btn btn-light shadow rounded-4 mt-3 mx-auto" onclick="undangan.guest.open(this)"><i class="fa-solid fa-envelope-open fa-bounce me-2"></i>Open Invitation</button>
             </div>
         </div>
     </div>
 
+    <!-- Button Group -->
     <div class="d-flex position-fixed flex-column" style="bottom: 10vh; right: 2vh; z-index: 1030;">
         <!-- Theme Button -->
         <button type="button" id="button-theme" class="btn bg-light-dark border btn-sm rounded-circle d-none btn-transparent shadow-sm mt-3" aria-label="Change theme" onclick="undangan.theme.change()">
@@ -672,12 +673,19 @@
 
     <!-- Modal Image -->
     <div class="modal fade" id="modal-image" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4">
-                <div class="modal-body p-0">
-                    <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
-                        <img src="./assets/images/placeholder.webp" class="img-fluid w-100 rounded-4" alt="image" id="show-modal-image">
+                <div class="modal-body hover-wrapper p-0">
+                    <div class="hover-area position-absolute top-0 end-0">
+                        <button class="btn d-flex justify-content-center align-items-center bg-overlay-auto p-2 m-1 rounded-circle border shadow-sm z-1" id="button-modal-download">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                        <button class="btn d-flex justify-content-center align-items-center bg-overlay-auto p-2 m-1 rounded-circle border shadow-sm z-1" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
                     </div>
+
+                    <img src="./assets/images/placeholder.webp" class="img-fluid w-100 rounded-4" alt="image" id="show-modal-image">
                 </div>
             </div>
         </div>

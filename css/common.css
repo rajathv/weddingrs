@@ -121,12 +121,12 @@ html[data-bs-theme="light"] .bg-overlay-auto {
     backdrop-filter: blur(0.25rem);
 }
 
-.gif-checklist {
+.hover-area {
     display: none;
     cursor: pointer;
 }
 
-.gif-figure:hover .gif-checklist {
+.hover-wrapper:hover .hover-area {
     display: flex;
 }
 

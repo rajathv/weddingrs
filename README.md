@@ -42,7 +42,7 @@ Untuk kamu yang ingin mencoba secara gratis:
 
 ## ⚙️ Tech stack
 
-- Bootstrap 5.3.5
+- Bootstrap 5.3.6
 - AOS 2.3.4
 - Fontawesome 6.7.2
 - Normalize 8.0.1

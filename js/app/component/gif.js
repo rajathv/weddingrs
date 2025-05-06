@@ -64,8 +64,8 @@ export const gif = (() => {
 
             const res = (uri) => {
                 el.insertAdjacentHTML('beforeend', `
-                <figure class="gif-figure m-0 position-relative">
-                    <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn gif-checklist position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
+                <figure class="hover-wrapper m-0 position-relative">
+                    <button onclick="undangan.comment.gif.click(this, '${ctx.uuid}', '${id}', '${util.base64Encode(url)}')" class="btn hover-area position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-1 m-1 rounded-circle border shadow-sm z-1">
                         <i class="fa-solid fa-circle-check"></i>
                     </button>
                     <img src="${uri}" class="img-fluid" alt="${util.escapeHtml(description)}" style="width: 100%;">
@@ -243,7 +243,7 @@ export const gif = (() => {
         </div>
 
         <figure class="d-flex m-0 position-relative" id="gif-result-${uuid}">
-            <button onclick="undangan.comment.gif.cancel('${uuid}')" id="gif-cancel-${uuid}" class="btn d-none position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-2 m-1 rounded-circle border shadow-sm z-1">
+            <button onclick="undangan.comment.gif.cancel('${uuid}')" id="gif-cancel-${uuid}" class="btn d-none position-absolute justify-content-center align-items-center top-0 end-0 bg-overlay-auto p-2 m-0 rounded-circle border shadow-sm z-1">
                 <i class="fa-solid fa-circle-xmark"></i>
             </button>
         </figure>`;

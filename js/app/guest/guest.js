@@ -146,6 +146,7 @@ export const guest = (() => {
         m.src = img.src;
         m.width = img.width;
         m.height = img.height;
+        document.getElementById('button-modal-download').setAttribute('data-src', m.src);
         bs.modal('modal-image').show();
     };
 
@@ -207,6 +208,11 @@ export const guest = (() => {
         normalizeArabicFont();
         buildGoogleCalendar();
         document.getElementById('root').classList.remove('opacity-0');
+
+        document.getElementById('button-modal-download').addEventListener('click', (e) => {
+            const btn = util.disableButton(e.currentTarget, util.loader.replace('me-1', 'me-0'), true);
+            image.download(e.currentTarget.getAttribute('data-src'), `image_${Date.now()}`).finally(btn.restore);
+        });
 
         if (information.has('presence')) {
             document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';

@@ -1,5 +1,6 @@
 import { progress } from './progress.js';
 import { cache } from '../../connection/cache.js';
+import { request, HTTP_GET } from '../../connection/request.js';
 
 export const image = (() => {
 
@@ -98,6 +99,13 @@ export const image = (() => {
     };
 
     /**
+     * @param {string} blobUrl 
+     * @param {string} filename 
+     * @returns {Promise<Response>}
+     */
+    const download = (blobUrl, filename) => request(HTTP_GET, blobUrl).withDownload(filename).default();
+
+    /**
      * @returns {object}
      */
     const init = () => {
@@ -114,5 +122,6 @@ export const image = (() => {
 
     return {
         init,
+        download,
     };
 })();
