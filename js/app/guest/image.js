@@ -100,10 +100,9 @@ export const image = (() => {
 
     /**
      * @param {string} blobUrl 
-     * @param {string} filename 
      * @returns {Promise<Response>}
      */
-    const download = (blobUrl, filename) => request(HTTP_GET, blobUrl).withDownload(filename).default();
+    const download = (blobUrl) => request(HTTP_GET, blobUrl).withDownload(`image_${Date.now()}`).default();
 
     /**
      * @returns {object}
