@@ -51,8 +51,8 @@ export const request = (method, path) => {
     let reqRetry = 0;
     let reqDelay = 0;
     let reqAttempts = 0;
-    let fileExt = null;
-    let fallbackName = null;
+    let downExt = null;
+    let downName = null;
 
     let url = document.body.getAttribute('data-url');
 
@@ -76,7 +76,7 @@ export const request = (method, path) => {
              */
             const wrapperFetch = () => window.fetch(input, req);
 
-            if (fallbackName) {
+            if (downName) {
                 Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
             }
 
@@ -185,11 +185,7 @@ export const request = (method, path) => {
             const href = window.URL.createObjectURL(b);
 
             link.href = href;
-            link.download = filename;
-
-            if (!filename) {
-                link.download = `${fallbackName}.${fileExt ? fileExt : b.type.split('/')[1]}`;
-            }
+            link.download = filename ? filename : `${downName}.${downExt ? downExt : b.type.split('/')[1]}`;
 
             document.body.appendChild(link);
 
@@ -211,7 +207,7 @@ export const request = (method, path) => {
         send(transform = null) {
             const f = baseFetch(url + path);
 
-            const final = fallbackName ? f.then(baseDownload) : f.then((res) => res.json().then((json) => {
+            const final = downName ? f.then(baseDownload) : f.then((res) => res.json().then((json) => {
                 if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
                     throw new Error(json.message ?? json[0]);
                 }
@@ -279,8 +275,8 @@ export const request = (method, path) => {
          * @returns {ReturnType<typeof request>}
          */
         withDownload(name, ext = null) {
-            fallbackName = name;
-            fileExt = ext;
+            downName = name;
+            downExt = ext;
             return this;
         },
         /**
@@ -290,12 +286,7 @@ export const request = (method, path) => {
         default(header = null) {
             req.headers = new Headers(header ?? {});
             const f = baseFetch(path);
-
-            if (fallbackName) {
-                return f.then(baseDownload);
-            }
-
-            return f;
+            return downName ? f.then(baseDownload) : f;
         },
         /**
          * @param {string} token
