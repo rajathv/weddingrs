@@ -209,21 +209,9 @@ export const request = (method, path) => {
          * @returns {Promise<{code: number, data: T, error: string[]|null|Response}>}
          */
         send(transform = null) {
-            const f = baseFetch(url + path).catch((err) => {
-                if (err.name === ERROR_ABORT) {
-                    console.warn('Fetch abort:', err);
-                    return err;
-                }
+            const f = baseFetch(url + path);
 
-                alert(err);
-                throw new Error(err);
-            });
-
-            if (fallbackName) {
-                return f.then(baseDownload);
-            }
-
-            return f.then((res) => res.json().then((json) => {
+            const final = fallbackName ? f.then(baseDownload) : f.then((res) => res.json().then((json) => {
                 if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
                     throw new Error(json.message ?? json[0]);
                 }
@@ -238,6 +226,16 @@ export const request = (method, path) => {
 
                 return json;
             }));
+
+            return final.catch((err) => {
+                if (err.name === ERROR_ABORT) {
+                    console.warn('Fetch abort:', err);
+                    return err;
+                }
+
+                alert(err);
+                throw new Error(err);
+            });
         },
         /**
          * @param {number} [ttl=21600000]
