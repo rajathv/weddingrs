@@ -83,14 +83,15 @@ export const openAnimation = (until = 15) => {
 
 /**
 * @param {HTMLElement} div
+* @param {number} [duration=25]
 * @returns {void}
 */
-export const tapTapAnimation = (div) => {
+export const tapTapAnimation = (div, duration = 25) => {
     if (!window.confetti) {
         return;
     }
 
-    const end = Date.now() + 25;
+    const end = Date.now() + duration;
     const yPosition = Math.max(0.3, Math.min(1, (div.getBoundingClientRect().top / window.innerHeight) + 0.2));
 
     const heart = heartShape();

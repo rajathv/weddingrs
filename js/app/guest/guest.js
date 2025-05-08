@@ -147,12 +147,23 @@ export const guest = (() => {
      * @returns {void}
      */
     const modal = (img) => {
-        const m = document.getElementById('show-modal-image');
-        m.src = img.src;
-        m.width = img.width;
-        m.height = img.height;
-        document.getElementById('button-modal-download').setAttribute('data-src', m.src);
+        const i = document.getElementById('show-modal-image');
+        i.src = img.src;
+        i.width = img.width;
+        i.height = img.height;
         bs.modal('modal-image').show();
+
+        document.getElementById('button-modal-download').setAttribute('data-src', i.src);
+        document.getElementById('modal-image').querySelector('.position-absolute').classList.replace('d-none', 'd-flex');
+    };
+
+    /**
+     * @param {HTMLDivElement} div 
+     * @returns {void}
+     */
+    const showStory = (div) => {
+        confetti.tapTapAnimation(div, 50);
+        util.changeOpacity(div, false).then((e) => e.remove());
     };
 
     /**
@@ -216,6 +227,14 @@ export const guest = (() => {
 
         document.getElementById('button-modal-download').addEventListener('click', (e) => {
             image.download(e.currentTarget.getAttribute('data-src'));
+        });
+
+        document.querySelector('#modal-image .modal-body').addEventListener('click', (e) => {
+            const abs = e.currentTarget.querySelector('.position-absolute');
+
+            abs.classList.contains('d-none')
+                ? abs.classList.replace('d-none', 'd-flex')
+                : abs.classList.replace('d-flex', 'd-none');
         });
 
         if (information.has('presence')) {
@@ -335,6 +354,7 @@ export const guest = (() => {
             guest: {
                 open,
                 modal,
+                showStory,
                 closeInformation,
             },
         };
