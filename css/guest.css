@@ -10,6 +10,15 @@
     display: none !important;
 }
 
+.with-scrollbar {
+    scrollbar-width: auto !important;
+    -ms-overflow-style: auto !important;
+}
+
+.with-scrollbar::-webkit-scrollbar {
+    display: block !important;
+}
+
 .font-esthetic {
     font-family: 'Sacramento', cursive !important;
 }
@@ -81,7 +90,7 @@ html[data-bs-theme="dark"] .bg-white-black {
     width: 25%;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 992px) {
     .width-loading {
         width: 50%;
     }

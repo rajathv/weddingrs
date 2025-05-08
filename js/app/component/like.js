@@ -139,7 +139,6 @@ export const like = (() => {
     return {
         init,
         love,
-        tapTap,
         getButtonLike,
         addListener,
         removeListener,

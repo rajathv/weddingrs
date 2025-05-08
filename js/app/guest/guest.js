@@ -171,7 +171,7 @@ export const guest = (() => {
      * @returns {void}
      */
     const showStory = (div) => {
-        confetti.tapTapAnimation(div, 50);
+        confetti.tapTapAnimation(div, 100);
         util.changeOpacity(div, false).then((e) => e.remove());
     };
 

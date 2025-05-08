@@ -85,16 +85,17 @@ export const openAnimation = (until = 15) => {
 
 /**
 * @param {HTMLElement} div
-* @param {number} [duration=25]
+* @param {number} [duration=50]
 * @returns {void}
 */
-export const tapTapAnimation = (div, duration = 25) => {
+export const tapTapAnimation = (div, duration = 50) => {
     if (!window.confetti) {
         return;
     }
 
     const end = Date.now() + duration;
-    const yPosition = Math.max(0.3, Math.min(1, (div.getBoundingClientRect().top / window.innerHeight) + 0.2));
+    const domRec = div.getBoundingClientRect();
+    const yPosition = Math.max(0.3, Math.min(1, (domRec.top / window.innerHeight) + 0.2));
 
     const heart = heartShape();
     const colors = ['#FF69B4', '#FF1493'];
@@ -106,7 +107,7 @@ export const tapTapAnimation = (div, duration = 25) => {
                 angle: 60,
                 spread: 55,
                 shapes: [heart],
-                origin: { x: div.getBoundingClientRect().left / window.innerWidth, y: yPosition },
+                origin: { x: domRec.left / window.innerWidth, y: yPosition },
                 zIndex: zIndex,
                 colors: [color]
             });
@@ -115,7 +116,7 @@ export const tapTapAnimation = (div, duration = 25) => {
                 angle: 120,
                 spread: 55,
                 shapes: [heart],
-                origin: { x: div.getBoundingClientRect().right / window.innerWidth, y: yPosition },
+                origin: { x: domRec.right / window.innerWidth, y: yPosition },
                 zIndex: zIndex,
                 colors: [color]
             });
