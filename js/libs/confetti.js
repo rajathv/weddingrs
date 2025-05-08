@@ -11,6 +11,8 @@ export const loadConfetti = () => new Promise((res, rej) => {
     document.head.appendChild(sc);
 });
 
+const zIndex = 1057;
+
 /**
  * @returns {any}
  */
@@ -28,7 +30,7 @@ export const basicAnimation = () => {
     if (window.confetti) {
         window.confetti({
             origin: { y: 1 },
-            zIndex: 1057
+            zIndex: zIndex
         });
     }
 };
@@ -64,7 +66,7 @@ export const openAnimation = (until = 15) => {
                     x: Math.random(),
                     y: Math.abs(Math.random() - (timeLeft / duration)),
                 },
-                zIndex: 1057,
+                zIndex: zIndex,
                 colors: [color],
                 shapes: [heart],
                 drift: randomInRange(-0.5, 0.5),
@@ -104,8 +106,8 @@ export const tapTapAnimation = (div, duration = 25) => {
                 angle: 60,
                 spread: 55,
                 shapes: [heart],
-                origin: { x: 0, y: yPosition },
-                zIndex: 1057,
+                origin: { x: div.getBoundingClientRect().left / window.innerHeight, y: yPosition },
+                zIndex: zIndex,
                 colors: [color]
             });
             window.confetti({
@@ -113,8 +115,8 @@ export const tapTapAnimation = (div, duration = 25) => {
                 angle: 120,
                 spread: 55,
                 shapes: [heart],
-                origin: { x: 1, y: yPosition },
-                zIndex: 1057,
+                origin: { x: div.getBoundingClientRect().right / window.innerHeight, y: yPosition },
+                zIndex: zIndex,
                 colors: [color]
             });
         });

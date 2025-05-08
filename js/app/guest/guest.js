@@ -90,6 +90,15 @@ export const guest = (() => {
         const interval = 6000;
         const slides = document.querySelectorAll('.slide-desktop');
 
+        if (!slides || slides.length === 0) {
+            return;
+        }
+
+        if (slides.length === 1) {
+            util.changeOpacity(slides[0], true);
+            return;
+        }
+
         for (const [i, s] of slides.entries()) {
             if (i === index) {
                 s.classList.add('slide-desktop-active');
