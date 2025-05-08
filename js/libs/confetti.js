@@ -106,7 +106,7 @@ export const tapTapAnimation = (div, duration = 25) => {
                 angle: 60,
                 spread: 55,
                 shapes: [heart],
-                origin: { x: div.getBoundingClientRect().left / window.innerHeight, y: yPosition },
+                origin: { x: div.getBoundingClientRect().left / window.innerWidth, y: yPosition },
                 zIndex: zIndex,
                 colors: [color]
             });
@@ -115,7 +115,7 @@ export const tapTapAnimation = (div, duration = 25) => {
                 angle: 120,
                 spread: 55,
                 shapes: [heart],
-                origin: { x: div.getBoundingClientRect().right / window.innerHeight, y: yPosition },
+                origin: { x: div.getBoundingClientRect().right / window.innerWidth, y: yPosition },
                 zIndex: zIndex,
                 colors: [color]
             });
