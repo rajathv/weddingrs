@@ -156,14 +156,15 @@ export const guest = (() => {
      * @returns {void}
      */
     const modal = (img) => {
+        document.getElementById('button-modal-click').setAttribute('href', img.src);
+        document.getElementById('button-modal-download').setAttribute('data-src', img.src);
+        document.getElementById('modal-image').querySelector('.position-absolute').classList.replace('d-none', 'd-flex');
+
         const i = document.getElementById('show-modal-image');
         i.src = img.src;
         i.width = img.width;
         i.height = img.height;
         bs.modal('modal-image').show();
-
-        document.getElementById('button-modal-download').setAttribute('data-src', i.src);
-        document.getElementById('modal-image').querySelector('.position-absolute').classList.replace('d-none', 'd-flex');
     };
 
     /**
@@ -238,8 +239,8 @@ export const guest = (() => {
             image.download(e.currentTarget.getAttribute('data-src'));
         });
 
-        document.querySelector('#modal-image .modal-body').addEventListener('click', (e) => {
-            const abs = e.currentTarget.querySelector('.position-absolute');
+        document.getElementById('show-modal-image').addEventListener('click', (e) => {
+            const abs = e.currentTarget.parentNode.querySelector('.position-absolute');
 
             abs.classList.contains('d-none')
                 ? abs.classList.replace('d-none', 'd-flex')
