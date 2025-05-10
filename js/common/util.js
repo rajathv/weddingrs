@@ -177,6 +177,10 @@ export const util = (() => {
      * @returns {string}
      */
     const parseUserAgent = (userAgent) => {
+        if (!userAgent || typeof userAgent !== 'string') {
+            return 'Unknown';
+        }
+
         const deviceTypes = [
             { type: 'Mobile', regex: /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i },
             { type: 'Tablet', regex: /iPad|Android(?!.*Mobile)|Tablet/i },
@@ -190,26 +194,27 @@ export const util = (() => {
             { name: 'Firefox', regex: /Firefox|FxiOS/i },
             { name: 'Opera', regex: /Opera|OPR/i },
             { name: 'Internet Explorer', regex: /MSIE|Trident/i },
+            { name: 'Samsung Browser', regex: /SamsungBrowser/i },
         ];
 
         const operatingSystems = [
             { name: 'Windows', regex: /Windows NT ([\d.]+)/i },
-            { name: 'MacOS', regex: /Mac OS X ([\d_]+)/i },
+            { name: 'MacOS', regex: /Mac OS X ([\d_.]+)/i },
             { name: 'Android', regex: /Android ([\d.]+)/i },
             { name: 'iOS', regex: /OS ([\d_]+) like Mac OS X/i },
             { name: 'Linux', regex: /Linux/i },
+            { name: 'Ubuntu', regex: /Ubuntu/i },
+            { name: 'Chrome OS', regex: /CrOS/i },
         ];
 
-        const deviceType = deviceTypes.find((i) => i.regex.test(userAgent))?.type || 'Unknown';
-        const browser = browsers.find((i) => i.regex.test(userAgent))?.name || 'Unknown';
+        const deviceType = deviceTypes.find((i) => i.regex.test(userAgent))?.type ?? 'Unknown';
+        const browser = browsers.find((i) => i.regex.test(userAgent))?.name ?? 'Unknown';
         const osMatch = operatingSystems.find((i) => i.regex.test(userAgent));
 
-        let osVersion = osMatch ? (userAgent.match(osMatch.regex)?.[1]?.replace(/_/g, '.') || '') : '';
+        const osName = osMatch ? osMatch.name : 'Unknown';
+        const osVersion = osMatch ? (userAgent.match(osMatch.regex)?.[1]?.replace(/_/g, '.') ?? null) : null;
 
-        const os = osMatch ? osMatch.name : 'Unknown';
-        osVersion = osVersion ? `${os} ${osVersion}` : os;
-
-        return `${browser} ${deviceType} ${osVersion}`;
+        return `${browser} on ${deviceType} ${osVersion ? `${osName} ${osVersion}` : osName}`;
     };
 
     return {

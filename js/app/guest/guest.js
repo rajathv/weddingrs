@@ -215,7 +215,7 @@ export const guest = (() => {
             text: 'The Wedding of Wahyu and Riski',
             dates: `${formatDate('2023-03-15 10:00')}/${formatDate('2023-03-15 11:00')}`,
             details: 'Tanpa mengurangi rasa hormat, kami mengundang Anda untuk berkenan menghadiri acara pernikahan kami. Terima kasih atas perhatian dan doa restu Anda, yang menjadi kebahagiaan serta kehormatan besar bagi kami.',
-            location: 'https://goo.gl/maps/ALZR6FJZU3kxVwN86',
+            location: `7°28'19.6"S 109°18'39.5"E`, // location gmaps
             ctz: config.get('tz'),
         };
 

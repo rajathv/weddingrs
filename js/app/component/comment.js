@@ -305,11 +305,6 @@ export const comment = (() => {
         const gifId = gif.getResultId(id);
         const gifCancel = gif.buttonCancel(id);
 
-        if (gifIsOpen && !gifId) {
-            alert('Gif cannot be empty.');
-            return;
-        }
-
         if (gifIsOpen && gifId) {
             gifCancel.hide();
         }
