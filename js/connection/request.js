@@ -40,12 +40,12 @@ export const request = (method, path) => {
     const ac = new AbortController();
     const req = {
         signal: ac.signal,
-        method: String(method).toUpperCase(),
         headers: new Headers(defaultJSON),
+        method: String(method).toUpperCase(),
     };
 
-    window.addEventListener('offline', () => ac.abort());
-    window.addEventListener('popstate', () => ac.abort());
+    window.addEventListener('offline', () => ac.abort(), { once: true });
+    window.addEventListener('popstate', () => ac.abort(), { once: true });
 
     let reqTtl = 0;
     let reqRetry = 0;
@@ -54,14 +54,8 @@ export const request = (method, path) => {
     let downExt = null;
     let downName = null;
 
-    let url = document.body.getAttribute('data-url');
-
-    if (url && url.slice(-1) === '/') {
-        url = url.slice(0, -1);
-    }
-
     /**
-     * @param {string} input 
+     * @param {URL} input 
      * @returns {Promise<Response>}
      */
     const baseFetch = (input) => {
@@ -154,7 +148,7 @@ export const request = (method, path) => {
                     throw new Error(`Max retries reached: ${error}`);
                 }
 
-                console.warn(`Retrying fetch (${reqAttempts}/${reqRetry}): ${input}`);
+                console.warn(`Retrying fetch (${reqAttempts}/${reqRetry}): ${input.toString()}`);
                 await new Promise((resolve) => window.setTimeout(resolve, reqDelay));
 
                 return attempt();
@@ -205,7 +199,7 @@ export const request = (method, path) => {
          * @returns {Promise<{code: number, data: T, error: string[]|null|Response}>}
          */
         send(transform = null) {
-            const f = baseFetch(url + path);
+            const f = baseFetch(new URL(path, document.body.getAttribute('data-url')));
 
             const final = downName ? f.then(baseDownload) : f.then((res) => res.json().then((json) => {
                 if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
@@ -285,7 +279,7 @@ export const request = (method, path) => {
          */
         default(header = null) {
             req.headers = new Headers(header ?? {});
-            const f = baseFetch(path);
+            const f = baseFetch(new URL(path));
             return downName ? f.then(baseDownload) : f;
         },
         /**

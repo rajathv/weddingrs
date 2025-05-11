@@ -2,6 +2,32 @@ export const util = (() => {
 
     const loader = '<span class="spinner-border spinner-border-sm my-0 ms-0 me-1 p-0" style="height: 0.8rem; width: 0.8rem;"></span>';
 
+    const deviceTypes = [
+        { type: 'Mobile', regex: /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i },
+        { type: 'Tablet', regex: /iPad|Android(?!.*Mobile)|Tablet/i },
+        { type: 'Desktop', regex: /Windows NT|Macintosh|Linux/i },
+    ];
+
+    const browsers = [
+        { name: 'Chrome', regex: /Chrome|CriOS/i },
+        { name: 'Safari', regex: /Safari/i },
+        { name: 'Edge', regex: /Edg|Edge/i },
+        { name: 'Firefox', regex: /Firefox|FxiOS/i },
+        { name: 'Opera', regex: /Opera|OPR/i },
+        { name: 'Internet Explorer', regex: /MSIE|Trident/i },
+        { name: 'Samsung Browser', regex: /SamsungBrowser/i },
+    ];
+
+    const operatingSystems = [
+        { name: 'Windows', regex: /Windows NT ([\d.]+)/i },
+        { name: 'MacOS', regex: /Mac OS X ([\d_.]+)/i },
+        { name: 'Android', regex: /Android ([\d.]+)/i },
+        { name: 'iOS', regex: /OS ([\d_]+) like Mac OS X/i },
+        { name: 'Linux', regex: /Linux/i },
+        { name: 'Ubuntu', regex: /Ubuntu/i },
+        { name: 'Chrome OS', regex: /CrOS/i },
+    ];
+
     /**
      * @param {string} unsafe
      * @returns {string}
@@ -180,32 +206,6 @@ export const util = (() => {
         if (!userAgent || typeof userAgent !== 'string') {
             return 'Unknown';
         }
-
-        const deviceTypes = [
-            { type: 'Mobile', regex: /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i },
-            { type: 'Tablet', regex: /iPad|Android(?!.*Mobile)|Tablet/i },
-            { type: 'Desktop', regex: /Windows NT|Macintosh|Linux/i },
-        ];
-
-        const browsers = [
-            { name: 'Chrome', regex: /Chrome|CriOS/i },
-            { name: 'Safari', regex: /Safari/i },
-            { name: 'Edge', regex: /Edg|Edge/i },
-            { name: 'Firefox', regex: /Firefox|FxiOS/i },
-            { name: 'Opera', regex: /Opera|OPR/i },
-            { name: 'Internet Explorer', regex: /MSIE|Trident/i },
-            { name: 'Samsung Browser', regex: /SamsungBrowser/i },
-        ];
-
-        const operatingSystems = [
-            { name: 'Windows', regex: /Windows NT ([\d.]+)/i },
-            { name: 'MacOS', regex: /Mac OS X ([\d_.]+)/i },
-            { name: 'Android', regex: /Android ([\d.]+)/i },
-            { name: 'iOS', regex: /OS ([\d_]+) like Mac OS X/i },
-            { name: 'Linux', regex: /Linux/i },
-            { name: 'Ubuntu', regex: /Ubuntu/i },
-            { name: 'Chrome OS', regex: /CrOS/i },
-        ];
 
         const deviceType = deviceTypes.find((i) => i.regex.test(userAgent))?.type ?? 'Unknown';
         const browser = browsers.find((i) => i.regex.test(userAgent))?.name ?? 'Unknown';

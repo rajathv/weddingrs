@@ -210,17 +210,16 @@ export const guest = (() => {
         const formatDate = (d) => (new Date(d + ':00Z')).toISOString().replace(/[-:]/g, '').split('.').shift();
 
         const url = new URL('https://calendar.google.com/calendar/render');
-        const data = {
+        const data = new URLSearchParams({
             action: 'TEMPLATE',
             text: 'The Wedding of Wahyu and Riski',
             dates: `${formatDate('2023-03-15 10:00')}/${formatDate('2023-03-15 11:00')}`,
             details: 'Tanpa mengurangi rasa hormat, kami mengundang Anda untuk berkenan menghadiri acara pernikahan kami. Terima kasih atas perhatian dan doa restu Anda, yang menjadi kebahagiaan serta kehormatan besar bagi kami.',
-            location: `7°28'19.6"S 109°18'39.5"E`, // location gmaps
+            location: 'RT 10 RW 02, Desa Pajerukan, Kec. Kalibagor, Kab. Banyumas, Jawa Tengah 53191.',
             ctz: config.get('tz'),
-        };
+        });
 
-        Object.entries(data).forEach(([k, v]) => url.searchParams.set(k, v));
-
+        url.search = data.toString();
         document.querySelector('#home button')?.addEventListener('click', () => window.open(url, '_blank'));
     };
 
