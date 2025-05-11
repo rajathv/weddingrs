@@ -70,10 +70,6 @@ export const request = (method, path) => {
              */
             const wrapperFetch = () => window.fetch(input, req);
 
-            if (downName) {
-                Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
-            }
-
             if (reqTtl === 0 || !window.isSecureContext) {
                 return wrapperFetch();
             }
@@ -179,7 +175,7 @@ export const request = (method, path) => {
             const href = window.URL.createObjectURL(b);
 
             link.href = href;
-            link.download = filename ? filename : `${downName}.${downExt ? downExt : b.type.split('/')[1]}`;
+            link.download = filename ? filename : `${downName}.${downExt ? downExt : (b.type.split('/')?.[1] ?? 'bin')}`;
 
             document.body.appendChild(link);
 
@@ -199,6 +195,10 @@ export const request = (method, path) => {
          * @returns {Promise<{code: number, data: T, error: string[]|null|Response}>}
          */
         send(transform = null) {
+            if (downName) {
+                Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
+            }
+
             const f = baseFetch(new URL(path, document.body.getAttribute('data-url')));
 
             const final = downName ? f.then(baseDownload) : f.then((res) => res.json().then((json) => {

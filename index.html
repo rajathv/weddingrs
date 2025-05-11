@@ -79,12 +79,13 @@
 
 <!-- If you're not using comments, you can remove the data-key and data-url attributes, and ignore dashboard.html. -->
 <!-- If you're not using a song, you can remove the data-audio attribute. -->
+<!-- Change the time to time-data (according to that format) -->
 <!-- Set data-confetti to 'false' if you're not using confetti. Only works when comments are disabled. -->
 <!-- You can use GitHub release files (guest.css, guest.js, admin.css, admin.js) directly without compilation. -->
 <!-- <html lang="id" data-bs-theme="auto"> ['auto', 'dark', 'light'] -->
 <!-- Recommend use 'data-src' in img tag -->
 
-<body data-key="bfb9cfea33ab7ae21a315fbd6f065a815d3e20ff2f007aa2ca" data-url="https://api.ulems.my.id/" data-audio="./assets/music/sound.mp3" data-confetti="true">
+<body data-key="bfb9cfea33ab7ae21a315fbd6f065a815d3e20ff2f007aa2ca" data-url="https://api.ulems.my.id/" data-audio="./assets/music/sound.mp3" data-confetti="true" data-time="2024-01-01 09:30:00">
 
     <!-- Root Invitation -->
     <div class="row m-0 p-0 opacity-0" id="root">
@@ -131,7 +132,7 @@
                         <p class="my-2" style="font-size: 1.25rem;">Rabu, 15 Maret 2023</p>
 
                         <button class="btn btn-outline-auto btn-sm shadow rounded-pill px-3 py-1" style="font-size: 0.825rem;">
-                            <i class="fa-solid fa-calendar-check fa-shake me-2"></i>Save Google Calendar
+                            <i class="fa-solid fa-calendar-check me-2"></i>Save Google Calendar
                         </button>
 
                         <div class="d-flex justify-content-center align-items-center mt-4 mb-2">
@@ -244,7 +245,7 @@
                                     <button class="btn btn-outline-auto btn-sm rounded-4 shadow-sm" onclick="undangan.guest.showStory(this.parentNode)"><i class="fa-solid fa-heart-pulse fa-beat me-2"></i>Lihat Story</button>
                                 </div>
 
-                                <div class="overflow-y-scroll overflow-x-hidden p-1 with-scrollbar" style="height: 14rem;">
+                                <div class="overflow-y-scroll overflow-x-hidden p-2 with-scrollbar" style="height: 14rem;">
                                     <div class="row">
                                         <div class="col-auto position-relative">
                                             <p class="position-relative d-flex justify-content-center align-items-center bg-light-dark border border-secondary border-2 opacity-100 rounded-circle m-0 p-0 z-1" style="width: 2rem; height: 2rem;">1</p>
@@ -298,8 +299,7 @@
                         <h2 class="font-esthetic py-4 m-0" style="font-size: 2.25rem;">Moment Bahagia</h2>
 
                         <div class="border rounded-pill shadow py-2 px-4 mt-2 mb-4">
-                            <!-- Ganti waktunya pada data-waktu (sesuai format tersebut) -->
-                            <div class="row justify-content-center" data-time="2024-01-01 00:00:00" id="count-down">
+                            <div class="row justify-content-center">
                                 <div class="col-3 p-1">
                                     <p class="d-inline m-0 p-0" style="font-size: 1.25rem;" id="day">0</p><small class="ms-1 me-0 my-0 p-0 d-inline">Hari</small>
                                 </div>

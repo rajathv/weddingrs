@@ -1,6 +1,5 @@
 import { progress } from './progress.js';
 import { cache } from '../../connection/cache.js';
-import { request, HTTP_GET } from '../../connection/request.js';
 
 export const image = (() => {
 
@@ -8,6 +7,11 @@ export const image = (() => {
      * @type {NodeListOf<HTMLImageElement>|null}
      */
     let images = null;
+
+    /**
+     * @type {ReturnType<typeof cache>|null}
+     */
+    let c = null;
 
     let hasSrc = false;
 
@@ -86,7 +90,6 @@ export const image = (() => {
             return;
         }
 
-        const c = cache('image');
         const cancel = new Promise((res) => document.addEventListener('progress.invalid', res, { once: true }));
 
         await c.open();
@@ -102,12 +105,13 @@ export const image = (() => {
      * @param {string} blobUrl 
      * @returns {Promise<Response>}
      */
-    const download = (blobUrl) => request(HTTP_GET, blobUrl).withDownload(`image_${Date.now()}`).default();
+    const download = (blobUrl) => c.download(blobUrl, `image_${Date.now()}`);
 
     /**
      * @returns {object}
      */
     const init = () => {
+        c = cache('image');
         images = document.querySelectorAll('img');
 
         images.forEach(progress.add);
@@ -115,12 +119,12 @@ export const image = (() => {
 
         return {
             load,
+            download,
             hasDataSrc,
         };
     };
 
     return {
         init,
-        download,
     };
 })();

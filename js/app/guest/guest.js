@@ -27,13 +27,7 @@ export const guest = (() => {
      * @returns {void}
      */
     const countDownDate = () => {
-        const until = document.getElementById('count-down')?.getAttribute('data-time')?.replace(' ', 'T');
-        if (!until) {
-            alert('Invalid countdown date.');
-            return;
-        }
-
-        const count = (new Date(until)).getTime();
+        const count = (new Date(document.body.getAttribute('data-time').replace(' ', 'T'))).getTime();
 
         const updateCountdown = () => {
             const distance = Math.abs(count - Date.now());
@@ -143,7 +137,6 @@ export const guest = (() => {
         }
 
         slide();
-        audio.play();
         theme.spyTop();
 
         confetti.basicAnimation();
@@ -224,6 +217,32 @@ export const guest = (() => {
     };
 
     /**
+     * @returns {object}
+     */
+    const loaderConfetti = () => {
+        progress.add();
+
+        /**
+         * @param {boolean} isLoad 
+         * @returns {void}
+         */
+        const load = (isLoad) => {
+            if (!isLoad) {
+                progress.complete('confetti', true);
+                return;
+            }
+
+            confetti.loadConfetti()
+                .then(() => progress.complete('confetti'))
+                .catch(() => progress.invalid('confetti'));
+        };
+
+        return {
+            load,
+        };
+    };
+
+    /**
      * @returns {Promise<void>}
      */
     const booting = async () => {
@@ -232,11 +251,8 @@ export const guest = (() => {
         showGuestName();
         normalizeArabicFont();
         buildGoogleCalendar();
-        document.getElementById('root').classList.remove('opacity-0');
 
-        document.getElementById('button-modal-download').addEventListener('click', (e) => {
-            image.download(e.currentTarget.getAttribute('data-src'));
-        });
+        document.getElementById('root').classList.remove('opacity-0');
 
         document.getElementById('show-modal-image').addEventListener('click', (e) => {
             const abs = e.currentTarget.parentNode.querySelector('.position-absolute');
@@ -271,71 +287,61 @@ export const guest = (() => {
         lang.init();
         offline.init();
         progress.init();
+
         config = storage('config');
         information = storage('information');
+
+        const img = image.init();
+        const aud = audio.init();
+        const cfi = loaderConfetti();
         const token = document.body.getAttribute('data-key');
+        const params = new URLSearchParams(window.location.search);
 
         document.addEventListener('progress.done', () => booting());
         document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
+        document.getElementById('button-modal-download').addEventListener('click', (e) => {
+            img.download(e.currentTarget.getAttribute('data-src'));
+        });
 
         if (!token || token.length <= 0) {
-            progress.add(); // for audio.
-            progress.add(); // for confetti.
-            image.init().load();
-            audio.init();
-
-            if (document.body.getAttribute('data-confetti') === 'true') {
-                confetti.loadConfetti()
-                    .then(() => progress.complete('confetti'))
-                    .catch(() => progress.invalid('confetti'));
-            } else {
-                progress.complete('confetti', true);
-            }
+            img.load();
+            aud.load();
+            cfi.load(document.body.getAttribute('data-confetti') === 'true');
 
             document.getElementById('comment')?.remove();
             document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
         }
 
         if (token && token.length > 0) {
-            // add 4 progress for config, comment, audio, and confetti.
+            // add 2 progress for config and comment.
             // before img.load();
             progress.add();
             progress.add();
-            progress.add();
-            progress.add();
 
-            const img = image.init();
+            // if don't have data-src.
             if (!img.hasDataSrc()) {
                 img.load();
             }
 
-            const params = new URLSearchParams(window.location.search);
-            session.setToken(params.get('k') ?? token);
-
             // fetch after document is loaded.
-            window.addEventListener('load', () => session.guest().then((res) => {
+            const loader = () => session.guest(params.get('k') ?? token).then(({ data }) => {
                 progress.complete('config');
 
                 if (img.hasDataSrc()) {
                     img.load();
                 }
 
-                audio.init();
+                aud.load();
                 comment.init();
-
-                if (!res.data.is_confetti_animation) {
-                    progress.complete('confetti', true);
-                } else {
-                    confetti.loadConfetti()
-                        .then(() => progress.complete('confetti'))
-                        .catch(() => progress.invalid('confetti'));
-                }
+                cfi.load(data.is_confetti_animation);
 
                 comment.show()
                     .then(() => progress.complete('comment'))
                     .catch(() => progress.invalid('comment'));
 
-            }).catch(() => progress.invalid('config')));
+            }).catch(() => progress.invalid('config'));
+
+            window.addEventListener('load', loader);
         }
     };
 

@@ -52,7 +52,7 @@ Untuk kamu yang ingin mencoba secara gratis:
 
 ## ⭐️ Stargazers
 
-<img src="https://starchart.cc/dewanakl/undangan.svg" alt="Stargazers over time" style="max-width: 100%">
+![Stargazers](https://starchart.cc/dewanakl/undangan.svg)
 
 ## 🤝 Contributing
 

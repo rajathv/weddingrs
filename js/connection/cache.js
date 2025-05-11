@@ -84,10 +84,12 @@ export const cache = (cacheName) => {
                     const headers = new Headers(r.headers);
                     const expiresDate = new Date(Date.now() + ttl);
 
-                    headers.set('Content-Length', String(b.size));
-                    headers.set('Expires', expiresDate.toUTCString());
+                    return b.arrayBuffer().then((ab) => {
+                        headers.set('Expires', expiresDate.toUTCString());
+                        headers.set('Content-Length', String(ab.byteLength));
 
-                    return b.arrayBuffer().then((ab) => cacheObject.put(input, new Response(ab, { headers })).then(() => b));
+                        return cacheObject.put(input, new Response(ab, { headers })).then(() => b);
+                    });
                 }));
 
             /**
@@ -155,10 +157,27 @@ export const cache = (cacheName) => {
         ));
     };
 
+    /**
+     * @param {string} url
+     * @param {string} name
+     * @returns {Promise<Response>}
+     */
+    const download = (url, name) => {
+        for (const [key, value] of objectUrls.entries()) {
+            if (value === url) {
+                url = key;
+                break;
+            }
+        }
+
+        return get(url).then((uri) => request(HTTP_GET, uri).withDownload(name).default());
+    };
+
     return {
         run,
         get,
         open,
+        download,
         /**
          * @param {number} v
          * @returns {this} 
