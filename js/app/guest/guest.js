@@ -8,7 +8,7 @@ import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
 import { offline } from '../../common/offline.js';
-import { comment } from '../component/comment.js';
+import { comment } from '../components/comment.js';
 import * as confetti from '../../libs/confetti.js';
 
 export const guest = (() => {
