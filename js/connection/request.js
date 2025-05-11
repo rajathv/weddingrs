@@ -55,7 +55,7 @@ export const request = (method, path) => {
     let downName = null;
 
     /**
-     * @param {URL} input 
+     * @param {string|URL} input 
      * @returns {Promise<Response>}
      */
     const baseFetch = (input) => {
@@ -279,7 +279,7 @@ export const request = (method, path) => {
          */
         default(header = null) {
             req.headers = new Headers(header ?? {});
-            const f = baseFetch(new URL(path));
+            const f = baseFetch(path);
             return downName ? f.then(baseDownload) : f;
         },
         /**
