@@ -7,11 +7,12 @@ export const audio = (() => {
     const statePause = '<i class="fa-solid fa-circle-play"></i>';
 
     /**
+     * @param {boolean} [playOnOpen=true]
      * @returns {Promise<void>}
      */
-    const load = async () => {
-        const url = document.body.getAttribute('data-audio');
+    const load = async (playOnOpen = true) => {
 
+        const url = document.body.getAttribute('data-audio');
         if (!url) {
             progress.complete('audio', true);
             return;
@@ -26,14 +27,11 @@ export const audio = (() => {
             const cancel = new Promise((res) => document.addEventListener('progress.invalid', res, { once: true }));
 
             audioEl = new Audio(await cache('audio').get(url, cancel));
-            audioEl.volume = 1;
             audioEl.loop = true;
             audioEl.muted = false;
-            audioEl.currentTime = 0;
             audioEl.autoplay = false;
             audioEl.controls = false;
 
-            await new Promise((res) => audioEl.addEventListener('canplay', res, { once: true }));
             progress.complete('audio');
         } catch {
             progress.invalid('audio');
@@ -73,8 +71,11 @@ export const audio = (() => {
         };
 
         document.addEventListener('undangan.open', () => {
-            play();
             music.classList.remove('d-none');
+
+            if (playOnOpen) {
+                play();
+            }
         });
 
         music.addEventListener('offline', pause);
