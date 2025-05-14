@@ -15,6 +15,11 @@ export const progress = (() => {
     let valid = true;
 
     /**
+     * @type {Promise<void>|null}
+     */
+    let cancelProgress = null;
+
+    /**
      * @returns {void}
      */
     const add = () => {
@@ -61,12 +66,18 @@ export const progress = (() => {
     };
 
     /**
+     * @returns {Promise<void>|null}
+     */
+    const getAbort = () => cancelProgress;
+
+    /**
      * @returns {void}
      */
     const init = () => {
         info = document.getElementById('progress-info');
         bar = document.getElementById('progress-bar');
         info.classList.remove('d-none');
+        cancelProgress = new Promise((res) => document.addEventListener('progress.invalid', res));
     };
 
     return {
@@ -74,5 +85,6 @@ export const progress = (() => {
         add,
         invalid,
         complete,
+        getAbort,
     };
 })();

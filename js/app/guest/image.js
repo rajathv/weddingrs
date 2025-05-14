@@ -95,15 +95,13 @@ export const image = (() => {
             return;
         }
 
-        const cancel = new Promise((res) => document.addEventListener('progress.invalid', res, { once: true }));
-
         await c.open();
         await Promise.allSettled(arrImages.filter((el) => el.getAttribute('data-fetch-img') === 'high').map((el) => {
-            return c.get(el.getAttribute('data-src'), cancel)
+            return c.get(el.getAttribute('data-src'), progress.getAbort())
                 .then((i) => appendImage(el, i))
                 .then(() => el.classList.remove('opacity-0'));
         }));
-        await c.run(urlCache, cancel);
+        await c.run(urlCache, progress.getAbort());
     };
 
     /**

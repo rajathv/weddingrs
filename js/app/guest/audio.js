@@ -24,9 +24,7 @@ export const audio = (() => {
         let audioEl = null;
 
         try {
-            const cancel = new Promise((res) => document.addEventListener('progress.invalid', res, { once: true }));
-
-            audioEl = new Audio(await cache('audio').get(url, cancel));
+            audioEl = new Audio(await cache('audio').get(url, progress.getAbort()));
             audioEl.loop = true;
             audioEl.muted = false;
             audioEl.autoplay = false;
