@@ -162,15 +162,23 @@ export const cache = (cacheName) => {
      * @param {string} name
      * @returns {Promise<Response>}
      */
-    const download = (url, name) => {
-        for (const [key, value] of objectUrls.entries()) {
-            if (value === url) {
-                url = key;
-                break;
+    const download = async (url, name) => {
+        const reverse = new Map(Array.from(objectUrls.entries()).map(([k, v]) => [v, k]));
+
+        if (reverse.has(url)) {
+            url = reverse.get(url);
+        } else {
+            try {
+                const checkUrl = new URL(url);
+                if (checkUrl.protocol !== 'blob:') {
+                    throw new Error('Is not blob');
+                }
+            } catch {
+                url = await get(url);
             }
         }
 
-        return get(url).then((uri) => request(HTTP_GET, uri).withDownload(name).default());
+        return request(HTTP_GET, url).withDownload(name).default();
     };
 
     return {

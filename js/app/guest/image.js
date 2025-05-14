@@ -21,23 +21,28 @@ export const image = (() => {
     const urlCache = [];
 
     /**
+     * @param {string} src 
+     * @returns {Promise<HTMLImageElement>}
+     */
+    const loadedImage = (src) => new Promise((res, rej) => {
+        const i = new Image();
+        i.onload = () => res(i);
+        i.onerror = rej;
+        i.src = src;
+    });
+
+    /**
      * @param {HTMLImageElement} el 
      * @param {string} src 
      * @returns {Promise<void>}
      */
-    const appendImage = (el, src) => new Promise((res) => {
-        const img = new Image();
+    const appendImage = (el, src) => loadedImage(src).then((img) => {
+        el.width = img.naturalWidth;
+        el.height = img.naturalHeight;
+        el.src = img.src;
+        img.remove();
 
-        img.onload = () => {
-            el.src = img.src;
-            el.width = img.naturalWidth;
-            el.height = img.naturalHeight;
-            progress.complete('image');
-            img.remove();
-            res();
-        };
-
-        img.src = src;
+        progress.complete('image');
     });
 
     /**
