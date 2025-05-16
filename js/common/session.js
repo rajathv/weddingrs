@@ -56,13 +56,9 @@ export const session = (() => {
      * @returns {Promise<object>}
      */
     const guest = (token) => {
-        if (!getToken()) {
-            setToken(token);
-        }
-
         return request(HTTP_GET, '/api/v2/config')
             .withCache(1000 * 60 * 60 * 1)
-            .token(getToken())
+            .token(token)
             .send()
             .then((res) => {
                 if (res.code !== HTTP_STATUS_OK) {
@@ -74,6 +70,7 @@ export const session = (() => {
                     config.set(k, v);
                 }
 
+                setToken(token);
                 return res;
             });
     };

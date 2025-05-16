@@ -85,7 +85,7 @@ export const request = (method, path) => {
              */
             const fetchPut = (c) => wrapperFetch().then((res) => {
                 if (!res.ok) {
-                    throw res.statusText;
+                    return res;
                 }
 
                 const cRes = res.clone();

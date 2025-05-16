@@ -29,13 +29,24 @@ export const guest = (() => {
     const countDownDate = () => {
         const count = (new Date(document.body.getAttribute('data-time').replace(' ', 'T'))).getTime();
 
+        /**
+         * @param {number} num 
+         * @returns {string}
+         */
+        const pad = (num) => num < 10 ? `0${num}` : `${num}`;
+
+        const day = document.getElementById('day');
+        const hour = document.getElementById('hour');
+        const minute = document.getElementById('minute');
+        const second = document.getElementById('second');
+
         const updateCountdown = () => {
             const distance = Math.abs(count - Date.now());
 
-            document.getElementById('day').innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString();
-            document.getElementById('hour').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString();
-            document.getElementById('minute').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString();
-            document.getElementById('second').innerText = Math.floor((distance % (1000 * 60)) / 1000).toString();
+            day.textContent = pad(Math.floor(distance / (1000 * 60 * 60 * 24)));
+            hour.textContent = pad(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+            minute.textContent = pad(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)));
+            second.textContent = pad(Math.floor((distance % (1000 * 60)) / 1000));
 
             util.timeOut(updateCountdown, 1000 - (Date.now() % 1000));
         };
