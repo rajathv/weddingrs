@@ -77,6 +77,10 @@ export const cache = (cacheName) => {
                 .withRetry()
                 .default()
                 .then((r) => r.blob().then((b) => {
+                    if (!r.ok) {
+                        throw r.statusText;
+                    }
+
                     if (!window.isSecureContext) {
                         return b;
                     }
@@ -170,7 +174,7 @@ export const cache = (cacheName) => {
         } else {
             try {
                 const checkUrl = new URL(url);
-                if (checkUrl.protocol !== 'blob:') {
+                if (!checkUrl.protocol.includes('blob')) {
                     throw new Error('Is not blob');
                 }
             } catch {
