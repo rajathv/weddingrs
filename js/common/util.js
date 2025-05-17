@@ -217,6 +217,26 @@ export const util = (() => {
         return `${browser} on ${deviceType} ${osVersion ? `${osName} ${osVersion}` : osName}`;
     };
 
+    /**
+     * @param {string} tz 
+     * @returns {string}
+     */
+    const getGMTOffset = (tz) => {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz,
+            hourCycle: 'h23',
+            hour: 'numeric',
+        });
+
+        let offset = (parseInt(formatter.format(now)) - now.getUTCHours() + 24) % 24;
+        if (offset > 12) {
+            offset -= 24;
+        }
+
+        return `GMT${offset >= 0 ? '+' : ''}${offset}`;
+    };
+
     return {
         loader,
         copy,
@@ -230,5 +250,6 @@ export const util = (() => {
         safeInnerHTML,
         parseUserAgent,
         changeOpacity,
+        getGMTOffset,
     };
 })();

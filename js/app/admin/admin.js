@@ -220,16 +220,13 @@ export const admin = (() => {
         let timezones = Intl.supportedValuesOf('timeZone');
         const dropdown = document.getElementById('dropdown-tz-list');
 
-        if (query && query.trim().length > 0) {
-            const filtered = timezones.filter((tz) => tz.toLowerCase().includes(query.trim().toLowerCase()));
-            if (filtered.length > 0) {
-                timezones = filtered;
-            }
+        if (form.value && form.value.trim().length > 0) {
+            timezones = timezones.filter((tz) => tz.toLowerCase().includes(form.value.trim().toLowerCase()));
         }
 
         if (query === null) {
             document.addEventListener('click', (e) => {
-                if (!form.contains(e.target) && !dropdown.contains(e.target)) {
+                if (!form.contains(e.currentTarget) && !dropdown.contains(e.currentTarget)) {
                     if (form.value.trim().length <= 0) {
                         form.setCustomValidity('Timezone cannot be empty.');
                         form.reportValidity();
@@ -244,11 +241,12 @@ export const admin = (() => {
 
         dropdown.replaceChildren();
         dropdown.classList.remove('d-none');
-        timezones.slice(0, 20).forEach((tz, i) => {
+
+        timezones.slice(0, 20).forEach((tz) => {
             const item = document.createElement('button');
             item.type = 'button';
             item.className = 'list-group-item list-group-item-action py-1 small';
-            item.textContent = tz;
+            item.textContent = `${tz} (${util.getGMTOffset(tz)})`;
             item.onclick = () => {
                 form.value = tz;
                 dropdown.classList.add('d-none');
