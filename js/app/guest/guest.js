@@ -91,11 +91,20 @@ export const guest = (() => {
      */
     const slide = async () => {
         let index = 0;
-        let lastTime = 0;
         const interval = 6000;
         const slides = document.querySelectorAll('.slide-desktop');
 
         if (!slides || slides.length === 0) {
+            return;
+        }
+
+        const desktopEl = document.getElementById('root')?.querySelector('.d-sm-block');
+        if (!desktopEl) {
+            return;
+        }
+
+        if (window.getComputedStyle(desktopEl).display === 'none') {
+            desktopEl.dispatchEvent(new Event('undangan.slide.stop'));
             return;
         }
 
@@ -112,24 +121,33 @@ export const guest = (() => {
             }
         }
 
+        let run = true;
         const nextSlide = async () => {
             await util.changeOpacity(slides[index], false);
             slides[index].classList.remove('slide-desktop-active');
 
             index = (index + 1) % slides.length;
 
-            slides[index].classList.add('slide-desktop-active');
-            await util.changeOpacity(slides[index], true);
-        };
-
-        const loop = async (time) => {
-            if (time - lastTime >= interval) {
-                lastTime = time;
-                await nextSlide();
+            if (run) {
+                slides[index].classList.add('slide-desktop-active');
+                await util.changeOpacity(slides[index], true);
             }
 
-            requestAnimationFrame(loop);
+            return run;
         };
+
+        const loop = async () => {
+            const next = await nextSlide();
+            await new Promise((res) => util.timeOut(res, interval));
+
+            if (next) {
+                requestAnimationFrame(loop);
+            }
+        };
+
+        desktopEl.addEventListener('undangan.slide.stop', () => {
+            run = false;
+        });
 
         util.timeOut(loop, interval);
     };
@@ -360,6 +378,7 @@ export const guest = (() => {
             }).catch(() => progress.invalid('config'));
 
             window.addEventListener('load', loader);
+            window.addEventListener('resize', util.debounce(slide));
         }
     };
 

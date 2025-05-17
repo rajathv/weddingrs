@@ -95,10 +95,10 @@ export const util = (() => {
 
     /**
      * @param {function} callback
-     * @param {number} delay
+     * @param {number} [delay=100]
      * @returns {function}
      */
-    const debounce = (callback, delay) => {
+    const debounce = (callback, delay = 100) => {
         let timeout = null;
         return (...args) => {
             clearTimeout(timeout);
