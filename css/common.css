@@ -10,9 +10,11 @@ body {
     overflow-x: hidden !important;
 }
 
-* {
-    will-change: background-color, color;
-    transition: background-color 350ms ease, color 50ms ease;
+div,
+nav,
+section {
+    will-change: background-color;
+    transition: background-color 350ms ease;
 }
 
 svg {
