@@ -140,7 +140,7 @@ export const request = (method, path) => {
                 reqDelay *= 2;
                 reqAttempts++;
 
-                if (reqAttempts >= reqRetry) {
+                if (reqAttempts > reqRetry) {
                     throw new Error(`Max retries reached: ${error}`);
                 }
 
