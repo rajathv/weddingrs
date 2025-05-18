@@ -192,32 +192,38 @@ export const request = (method, path) => {
         /**
          * @template T
          * @param {((data: any) => T)=} transform
-         * @returns {Promise<{code: number, data: T, error: string[]|null|Response}>}
+         * @returns {Promise<{code: number, data: T, error: string[]|null}>}
          */
         send(transform = null) {
             if (downName) {
                 Object.keys(defaultJSON).forEach((k) => req.headers.delete(k));
             }
 
-            const f = baseFetch(new URL(path, document.body.getAttribute('data-url')));
-
-            const final = downName ? f.then(baseDownload) : f.then((res) => res.json().then((json) => {
-                if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
-                    throw new Error(json.message ?? json[0]);
+            return baseFetch(new URL(path, document.body.getAttribute('data-url'))).then((res) => {
+                if (downName && res.ok) {
+                    return {
+                        code: res.status,
+                        data: baseDownload(res),
+                        error: null,
+                    };
                 }
 
-                if (json.error) {
-                    throw new Error(json.error[0]);
-                }
+                return res.json().then((json) => {
+                    if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
+                        throw new Error(json.message ?? json[0]);
+                    }
 
-                if (transform) {
-                    json.data = transform(json.data);
-                }
+                    if (json.error) {
+                        throw new Error(json.error[0]);
+                    }
 
-                return json;
-            }));
+                    if (transform) {
+                        json.data = transform(json.data);
+                    }
 
-            return final.catch((err) => {
+                    return json;
+                });
+            }).catch((err) => {
                 if (err.name === ERROR_ABORT) {
                     console.warn('Fetch abort:', err);
                     return err;
@@ -279,8 +285,13 @@ export const request = (method, path) => {
          */
         default(header = null) {
             req.headers = new Headers(header ?? {});
-            const f = baseFetch(path);
-            return downName ? f.then(baseDownload) : f;
+            return baseFetch(path).then((res) => {
+                if (downName) {
+                    return baseDownload(res);
+                }
+
+                return res;
+            });
         },
         /**
          * @param {string} token
