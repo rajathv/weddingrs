@@ -223,14 +223,14 @@ export const comment = (() => {
                 return res;
             })
             .then(async (res) => {
-                comments.dispatchEvent(new Event('comment.result'));
+                comments.dispatchEvent(new Event('undangan.comment.result'));
 
                 if (res.data.lists) {
                     await Promise.all(res.data.lists.map((v) => fetchTracker(v)));
                 }
 
                 pagination.setTotal(res.data.count);
-                comments.dispatchEvent(new Event('comment.done'));
+                comments.dispatchEvent(new Event('undangan.comment.done'));
                 return res;
             });
     };
@@ -657,7 +657,7 @@ export const comment = (() => {
         pagination.init();
 
         comments = document.getElementById('comments');
-        comments.addEventListener('comment.show', show);
+        comments.addEventListener('undangan.comment.show', show);
 
         owns = storage('owns');
         showHide = storage('comment');

@@ -50,10 +50,6 @@ Untuk kamu yang ingin mencoba secara gratis:
 - Google Fonts
 - Vanilla JS
 
-## ⭐️ Stargazers
-
-![Stargazers](https://starchart.cc/dewanakl/undangan.svg)
-
 ## 🤝 Contributing
 
 I'm very open to those of you who want to contribute to the undangan!

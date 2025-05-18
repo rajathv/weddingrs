@@ -169,9 +169,7 @@ export const cache = (cacheName) => {
     const download = async (url, name) => {
         const reverse = new Map(Array.from(objectUrls.entries()).map(([k, v]) => [v, k]));
 
-        if (reverse.has(url)) {
-            url = reverse.get(url);
-        } else {
+        if (!reverse.has(url)) {
             try {
                 const checkUrl = new URL(url);
                 if (!checkUrl.protocol.includes('blob')) {

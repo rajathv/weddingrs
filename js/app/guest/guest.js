@@ -51,7 +51,7 @@ export const guest = (() => {
             util.timeOut(updateCountdown, 1000 - (Date.now() % 1000));
         };
 
-        requestAnimationFrame(updateCountdown);
+        util.timeOut(updateCountdown);
     };
 
     /**
@@ -90,7 +90,6 @@ export const guest = (() => {
      * @returns {Promise<void>}
      */
     const slide = async () => {
-        let index = 0;
         const interval = 6000;
         const slides = document.querySelectorAll('.slide-desktop');
 
@@ -113,6 +112,7 @@ export const guest = (() => {
             return;
         }
 
+        let index = 0;
         for (const [i, s] of slides.entries()) {
             if (i === index) {
                 s.classList.add('slide-desktop-active');
@@ -136,18 +136,15 @@ export const guest = (() => {
             return run;
         };
 
-        const loop = async () => {
-            const next = await nextSlide();
-            await new Promise((res) => util.timeOut(res, interval));
-
-            if (next) {
-                requestAnimationFrame(loop);
-            }
-        };
-
         desktopEl.addEventListener('undangan.slide.stop', () => {
             run = false;
         });
+
+        const loop = async () => {
+            if (await nextSlide()) {
+                util.timeOut(loop, interval);
+            }
+        };
 
         util.timeOut(loop, interval);
     };
@@ -333,7 +330,7 @@ export const guest = (() => {
         const token = document.body.getAttribute('data-key');
         const params = new URLSearchParams(window.location.search);
 
-        document.addEventListener('progress.done', () => booting());
+        document.addEventListener('undangan.progress.done', () => booting());
         document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
         document.getElementById('button-modal-download').addEventListener('click', (e) => {
             img.download(e.currentTarget.getAttribute('data-src'));

@@ -48,7 +48,7 @@ export const progress = (() => {
         bar.style.width = Math.min((loaded / total) * 100, 100).toString() + '%';
 
         if (loaded === total) {
-            document.dispatchEvent(new Event('progress.done'));
+            document.dispatchEvent(new Event('undangan.progress.done'));
         }
     };
 
@@ -61,7 +61,7 @@ export const progress = (() => {
             valid = false;
             bar.style.backgroundColor = 'red';
             info.innerText = `Error loading ${type} ${showInformation()}`;
-            document.dispatchEvent(new Event('progress.invalid'));
+            document.dispatchEvent(new Event('undangan.progress.invalid'));
         }
     };
 
@@ -77,7 +77,7 @@ export const progress = (() => {
         info = document.getElementById('progress-info');
         bar = document.getElementById('progress-bar');
         info.classList.remove('d-none');
-        cancelProgress = new Promise((res) => document.addEventListener('progress.invalid', res));
+        cancelProgress = new Promise((res) => document.addEventListener('undangan.progress.invalid', res));
     };
 
     return {

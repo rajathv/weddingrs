@@ -85,10 +85,10 @@ export const pagination = (() => {
         const btn = util.disableButton(button, util.loader.replace('ms-0 me-1', 'mx-1'), true);
 
         const process = () => {
-            comment.addEventListener('comment.done', () => btn.restore(), { once: true });
-            comment.addEventListener('comment.result', () => comment.scrollIntoView(), { once: true });
+            comment.addEventListener('undangan.comment.done', () => btn.restore(), { once: true });
+            comment.addEventListener('undangan.comment.result', () => comment.scrollIntoView(), { once: true });
 
-            comment.dispatchEvent(new Event('comment.show'));
+            comment.dispatchEvent(new Event('undangan.comment.show'));
         };
 
         const next = () => {

@@ -1,22 +1,14 @@
 @import url("common.css");
 @import url("animation.css");
 
-* {
+html {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
-}
-
-*::-webkit-scrollbar {
-    display: none !important;
 }
 
 .with-scrollbar {
     scrollbar-width: auto !important;
     -ms-overflow-style: auto !important;
-}
-
-.with-scrollbar::-webkit-scrollbar {
-    display: block !important;
 }
 
 .font-esthetic {

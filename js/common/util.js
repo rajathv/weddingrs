@@ -79,10 +79,10 @@ export const util = (() => {
 
     /**
      * @param {function} callback
-     * @param {number} delay
+     * @param {number} [delay=0]
      * @returns {void}
      */
-    const timeOut = (callback, delay) => {
+    const timeOut = (callback, delay = 0) => {
         let clear = null;
         const c = () => {
             callback();
