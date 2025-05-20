@@ -53,6 +53,7 @@ export const request = (method, path) => {
     let reqAttempts = 0;
     let downExt = null;
     let downName = null;
+    let callbackFunc = null;
 
     /**
      * @param {string|URL} input 
@@ -68,7 +69,39 @@ export const request = (method, path) => {
             /**
              * @returns {Promise<Response>}
              */
-            const wrapperFetch = () => window.fetch(input, req);
+            const wrapperFetch = () => window.fetch(input, req).then(async (res) => {
+                if (!res.ok || !callbackFunc) {
+                    return res;
+                }
+
+                const contentLength = parseInt(res.headers.get('Content-Length') ?? '0');
+                if (contentLength === 0) {
+                    return res;
+                }
+
+                const chunks = [];
+                let receivedLength = 0;
+                const reader = res.body.getReader();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        break;
+                    }
+
+                    chunks.push(value);
+                    receivedLength += value.length;
+
+                    callbackFunc(receivedLength, contentLength);
+                }
+
+                const contentType = res.headers.get('Content-Type') ?? 'application/octet-stream';
+                return new Response(new Blob(chunks, { type: contentType }), {
+                    status: res.status,
+                    statusText: res.statusText,
+                    headers: new Headers(res.headers),
+                });
+            });
 
             if (reqTtl === 0 || !window.isSecureContext) {
                 return wrapperFetch();
@@ -277,6 +310,14 @@ export const request = (method, path) => {
         withDownload(name, ext = null) {
             downName = name;
             downExt = ext;
+            return this;
+        },
+        /**
+         * @param {function|null} [func=null]
+         * @returns {ReturnType<typeof request>}
+         */
+        withProgressFunc(func = null) {
+            callbackFunc = func;
             return this;
         },
         /**

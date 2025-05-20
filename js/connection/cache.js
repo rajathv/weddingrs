@@ -78,7 +78,7 @@ export const cache = (cacheName) => {
                 .default()
                 .then((r) => r.blob().then((b) => {
                     if (!r.ok) {
-                        throw r.statusText;
+                        throw new Error(r.statusText);
                     }
 
                     if (!window.isSecureContext) {

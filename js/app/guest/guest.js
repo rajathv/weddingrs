@@ -102,8 +102,9 @@ export const guest = (() => {
             return;
         }
 
+        desktopEl.dispatchEvent(new Event('undangan.slide.stop'));
+
         if (window.getComputedStyle(desktopEl).display === 'none') {
-            desktopEl.dispatchEvent(new Event('undangan.slide.stop'));
             return;
         }
 
