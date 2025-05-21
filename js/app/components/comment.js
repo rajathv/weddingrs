@@ -192,6 +192,7 @@ export const comment = (() => {
 
         return request(HTTP_GET, `/api/v2/comment?per=${pagination.getPer()}&next=${pagination.getNext()}&lang=${lang.getLanguage()}`)
             .token(session.getToken())
+            .withCache(1000 * 30)
             .send(dto.getCommentsResponseV2)
             .then(async (res) => {
                 comments.setAttribute('data-loading', 'false');

@@ -33,7 +33,7 @@ export const admin = (() => {
 
         storage('config').set('tenor_key', res.data.tenor_key);
 
-        request(HTTP_GET, '/api/stats').token(session.getToken()).send().then((resp) => {
+        request(HTTP_GET, '/api/stats').token(session.getToken()).withCache(1000 * 30).send().then((resp) => {
             document.getElementById('count-comment').textContent = String(resp.data.comments).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             document.getElementById('count-like').textContent = String(resp.data.likes).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             document.getElementById('count-present').textContent = String(resp.data.present).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -265,6 +265,11 @@ export const admin = (() => {
 
         if (tz.value.length === 0) {
             alert('Time zone cannot be empty');
+            return;
+        }
+
+        if (!Intl.supportedValuesOf('timeZone').includes(tz.value)) {
+            alert('Timezone not supported');
             return;
         }
 
