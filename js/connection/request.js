@@ -242,12 +242,8 @@ export const request = (method, path) => {
                 }
 
                 return res.json().then((json) => {
-                    if (res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR && (json.message ?? json[0])) {
-                        throw new Error(json.message ?? json[0]);
-                    }
-
                     if (json.error) {
-                        throw new Error(json.error[0]);
+                        throw new Error(json.error.at(0));
                     }
 
                     if (transform) {
