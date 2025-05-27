@@ -2,6 +2,13 @@ export const util = (() => {
 
     const loader = '<span class="spinner-border spinner-border-sm my-0 ms-0 me-1 p-0" style="height: 0.8rem; width: 0.8rem;"></span>';
 
+    const listsMarkDown = [
+        ['*', `<strong class="text-theme-auto">$1</strong>`],
+        ['_', `<em class="text-theme-auto">$1</em>`],
+        ['~', `<del class="text-theme-auto">$1</del>`],
+        ['```', `<code class="font-monospace text-theme-auto">$1</code>`]
+    ];
+
     const deviceTypes = [
         { type: 'Mobile', regex: /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i },
         { type: 'Tablet', regex: /iPad|Android(?!.*Mobile)|Tablet/i },
@@ -214,7 +221,7 @@ export const util = (() => {
         const osName = osMatch ? osMatch.name : 'Unknown';
         const osVersion = osMatch ? (userAgent.match(osMatch.regex)?.[1]?.replace(/_/g, '.') ?? null) : null;
 
-        return `${browser} on ${deviceType} ${osVersion ? `${osName} ${osVersion}` : osName}`;
+        return `${browser} ${deviceType} ${osVersion ? `${osName} ${osVersion}` : osName}`;
     };
 
     /**
@@ -237,6 +244,18 @@ export const util = (() => {
         return `GMT${offset >= 0 ? '+' : ''}${offset}`;
     };
 
+    /**
+     * @param {string} str 
+     * @returns {string}
+     */
+    const convertMarkdownToHTML = (str) => {
+        listsMarkDown.forEach(([k, v]) => {
+            str = str.replace(new RegExp(`\\${k}(?=\\S)(.*?)(?<!\\s)\\${k}`, 'gs'), v);
+        });
+
+        return str;
+    };
+
     return {
         loader,
         copy,
@@ -251,5 +270,6 @@ export const util = (() => {
         parseUserAgent,
         changeOpacity,
         getGMTOffset,
+        convertMarkdownToHTML,
     };
 })();

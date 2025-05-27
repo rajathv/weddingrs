@@ -108,7 +108,7 @@ export const comment = (() => {
         const original = util.base64Decode(content.getAttribute('data-comment'));
         const isCollapsed = anchor.getAttribute('data-show') === 'false';
 
-        util.safeInnerHTML(content, card.convertMarkdownToHTML(util.escapeHtml(isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...')));
+        util.safeInnerHTML(content, util.convertMarkdownToHTML(util.escapeHtml(isCollapsed ? original : original.slice(0, card.maxCommentLength) + '...')));
         anchor.innerText = isCollapsed ? 'Sebagian' : 'Selengkapnya';
         anchor.setAttribute('data-show', isCollapsed ? 'true' : 'false');
     };
@@ -374,7 +374,7 @@ export const comment = (() => {
             const content = document.getElementById(`content-${id}`);
             content.setAttribute('data-comment', util.base64Encode(form.value));
 
-            const original = card.convertMarkdownToHTML(util.escapeHtml(form.value));
+            const original = util.convertMarkdownToHTML(util.escapeHtml(form.value));
             if (form.value.length > card.maxCommentLength) {
                 util.safeInnerHTML(content, showButton?.getAttribute('data-show') === 'false' ? original.slice(0, card.maxCommentLength) + '...' : original);
                 showButton?.classList.replace('d-none', 'd-block');

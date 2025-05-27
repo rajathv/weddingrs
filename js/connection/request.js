@@ -322,13 +322,7 @@ export const request = (method, path) => {
          */
         default(header = null) {
             req.headers = new Headers(header ?? {});
-            return baseFetch(path).then((res) => {
-                if (downName) {
-                    return baseDownload(res);
-                }
-
-                return res;
-            });
+            return baseFetch(path).then((res) => downName ? baseDownload(res) : res);
         },
         /**
          * @param {string} token

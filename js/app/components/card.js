@@ -27,13 +27,6 @@ export const card = (() => {
 
     const maxCommentLength = 300;
 
-    const listsMarkDown = [
-        ['*', `<strong class="text-theme-auto">$1</strong>`],
-        ['_', `<em class="text-theme-auto">$1</em>`],
-        ['~', `<del class="text-theme-auto">$1</del>`],
-        ['```', `<code class="font-monospace text-theme-auto">$1</code>`]
-    ];
-
     /**
      * @returns {string}
      */
@@ -51,18 +44,6 @@ export const card = (() => {
                 <span class="placeholder bg-secondary col-12 rounded-3 my-1"></span>
             </p>
         </div>`;
-    };
-
-    /**
-     * @param {string} str 
-     * @returns {string}
-     */
-    const convertMarkdownToHTML = (str) => {
-        listsMarkDown.forEach(([k, v]) => {
-            str = str.replace(new RegExp(`\\${k}(?=\\S)(.*?)(?<!\\s)\\${k}`, 'gs'), v);
-        });
-
-        return str;
     };
 
     /**
@@ -194,7 +175,7 @@ export const card = (() => {
         }
 
         const moreMaxLength = c.comment.length > maxCommentLength;
-        const data = convertMarkdownToHTML(util.escapeHtml(moreMaxLength ? (c.comment.slice(0, maxCommentLength) + '...') : c.comment));
+        const data = util.convertMarkdownToHTML(util.escapeHtml(moreMaxLength ? (c.comment.slice(0, maxCommentLength) + '...') : c.comment));
 
         return head + `
         <p class="text-theme-auto my-1 mx-0 p-0" style="white-space: pre-wrap !important; font-size: 0.95rem;" data-comment="${util.base64Encode(c.comment)}" id="content-${c.uuid}">${data}</p>
@@ -311,7 +292,6 @@ export const card = (() => {
         renderReadMore,
         renderContentMany,
         renderContentSingle,
-        convertMarkdownToHTML,
         maxCommentLength,
     };
 })();

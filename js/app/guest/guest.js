@@ -331,6 +331,7 @@ export const guest = (() => {
         const token = document.body.getAttribute('data-key');
         const params = new URLSearchParams(window.location.search);
 
+        window.addEventListener('resize', util.debounce(slide));
         document.addEventListener('undangan.progress.done', () => booting());
         document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
         document.getElementById('button-modal-download').addEventListener('click', (e) => {
@@ -376,7 +377,6 @@ export const guest = (() => {
             }).catch(() => progress.invalid('config'));
 
             window.addEventListener('load', loader);
-            window.addEventListener('resize', util.debounce(slide));
         }
     };
 
