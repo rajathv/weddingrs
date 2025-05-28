@@ -139,6 +139,7 @@ export const comment = (() => {
             util.safeInnerHTML(commentIp, `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <strong>${util.escapeHtml(result)}</strong>`);
         };
 
+        // FREE for commercial and non-commercial use.
         await request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
             .withCache()
             .withRetry()
