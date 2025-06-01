@@ -179,7 +179,6 @@ export const guest = (() => {
     const modal = (img) => {
         document.getElementById('button-modal-click').setAttribute('href', img.src);
         document.getElementById('button-modal-download').setAttribute('data-src', img.src);
-        document.getElementById('modal-image').querySelector('.position-absolute').classList.replace('d-none', 'd-flex');
 
         const i = document.getElementById('show-modal-image');
         i.src = img.src;
@@ -229,7 +228,9 @@ export const guest = (() => {
      */
     const animateSvg = () => {
         document.querySelectorAll('svg').forEach((el) => {
-            util.timeOut(() => el.classList.add(el.getAttribute('data-class')), parseInt(el.getAttribute('data-time')));
+            if (el.hasAttribute('data-class')) {
+                util.timeOut(() => el.classList.add(el.getAttribute('data-class')), parseInt(el.getAttribute('data-time')));
+            }
         });
     };
 
@@ -395,7 +396,7 @@ export const guest = (() => {
             storage('comment').clear();
         }
 
-        window.addEventListener('DOMContentLoaded', domLoaded);
+        document.addEventListener('DOMContentLoaded', domLoaded);
 
         return {
             util,

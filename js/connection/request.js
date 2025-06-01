@@ -51,8 +51,20 @@ export const request = (method, path) => {
     let reqRetry = 0;
     let reqDelay = 0;
     let reqAttempts = 0;
+
+    /**
+     * @type {string|null}
+     */
     let downExt = null;
+
+    /**
+    * @type {string|null}
+    */
     let downName = null;
+
+    /**
+    * @type {function|null}
+    */
     let callbackFunc = null;
 
     /**

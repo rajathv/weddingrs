@@ -356,7 +356,7 @@ export const admin = (() => {
             storage('information').clear();
         }
 
-        window.addEventListener('DOMContentLoaded', domLoaded);
+        document.addEventListener('DOMContentLoaded', domLoaded);
 
         return {
             util,

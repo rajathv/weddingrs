@@ -162,25 +162,25 @@ export const cache = (cacheName) => {
     };
 
     /**
-     * @param {string} url
+     * @param {string} input
      * @param {string} name
      * @returns {Promise<Response>}
      */
-    const download = async (url, name) => {
+    const download = async (input, name) => {
         const reverse = new Map(Array.from(objectUrls.entries()).map(([k, v]) => [v, k]));
 
-        if (!reverse.has(url)) {
+        if (!reverse.has(input)) {
             try {
-                const checkUrl = new URL(url);
+                const checkUrl = new URL(input);
                 if (!checkUrl.protocol.includes('blob')) {
                     throw new Error('Is not blob');
                 }
             } catch {
-                url = await get(url);
+                input = await get(input);
             }
         }
 
-        return request(HTTP_GET, url).withDownload(name).default();
+        return request(HTTP_GET, input).withDownload(name).default();
     };
 
     return {
