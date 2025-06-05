@@ -163,17 +163,39 @@ export const comment = (() => {
      * @returns {ReturnType<typeof dto.commentShowMore>[]}
      */
     const traverse = (items, hide = []) => {
-        items.forEach((item) => {
-            if (!hide.find((i) => i.uuid === item.uuid)) {
-                hide.push(dto.commentShowMore(item.uuid));
-            }
+        const dataShow = showHide.get('show');
 
-            if (item.comments && item.comments.length > 0) {
-                traverse(item.comments, hide);
-            }
-        });
+        const buildHide = (lists) => {
+            lists.forEach((item) => {
+                if (!hide.find((i) => i.uuid === item.uuid)) {
+                    hide.push(dto.commentShowMore(item.uuid));
+                }
 
-        return hide;
+                buildHide(item.comments);
+            });
+
+            return lists;
+        };
+
+        const setVisible = (lists) => {
+            lists.forEach((item) => {
+                if (dataShow.includes(item.uuid)) {
+                    item.comments.forEach((c) => {
+                        hide.forEach((h) => {
+                            if (c.uuid === h.uuid) {
+                                h.show = true;
+                            }
+                        });
+                    });
+                }
+
+                setVisible(item.comments);
+            });
+
+            return hide;
+        };
+
+        return setVisible(buildHide(items));
     };
 
     /**
@@ -207,8 +229,8 @@ export const comment = (() => {
                     return res;
                 }
 
-                lastRender.length = 0;
-                lastRender.push(...traverse(res.data.lists).map((i) => i.uuid));
+                const flatten = (ii) => ii.flatMap((i) => [i.uuid, ...flatten(i.comments)]);
+                lastRender.splice(0, lastRender.length, ...flatten(res.data.lists));
                 showHide.set('hidden', traverse(res.data.lists, showHide.get('hidden')));
 
                 let data = await card.renderContentMany(res.data.lists);
