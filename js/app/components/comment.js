@@ -71,18 +71,11 @@ export const comment = (() => {
         const ids = button.getAttribute('data-uuids').split(',');
         const isShow = button.getAttribute('data-show') === 'true';
         const uuid = button.getAttribute('data-uuid');
+        const currentShow = showHide.get('show');
 
-        if (isShow) {
-            button.setAttribute('data-show', 'false');
-            button.innerText = `Show replies (${ids.length})`;
-
-            showHide.set('show', showHide.get('show').filter((i) => i !== uuid));
-        } else {
-            button.setAttribute('data-show', 'true');
-            button.innerText = 'Hide replies';
-
-            showHide.set('show', showHide.get('show').concat([uuid]));
-        }
+        button.setAttribute('data-show', isShow ? 'false' : 'true');
+        button.innerText = isShow ? `Show replies (${ids.length})` : 'Hide replies';
+        showHide.set('show', isShow ? currentShow.filter((i) => i !== uuid) : [...currentShow, uuid]);
 
         for (const id of ids) {
             showHide.set('hidden', showHide.get('hidden').map((i) => {
@@ -93,8 +86,7 @@ export const comment = (() => {
                 return i;
             }));
 
-            const cls = document.getElementById(id).classList;
-            isShow ? cls.add('d-none') : cls.remove('d-none');
+            document.getElementById(id).classList.toggle('d-none', isShow);
         }
     };
 
@@ -165,37 +157,36 @@ export const comment = (() => {
     const traverse = (items, hide = []) => {
         const dataShow = showHide.get('show');
 
-        const buildHide = (lists) => {
-            lists.forEach((item) => {
-                if (!hide.find((i) => i.uuid === item.uuid)) {
-                    hide.push(dto.commentShowMore(item.uuid));
-                }
-
+        const buildHide = (lists) => lists.forEach((item) => {
+            if (hide.find((i) => i.uuid === item.uuid)) {
                 buildHide(item.comments);
-            });
+                return;
+            }
 
-            return lists;
-        };
+            hide.push(dto.commentShowMore(item.uuid));
+            buildHide(item.comments);
+        });
 
-        const setVisible = (lists) => {
-            lists.forEach((item) => {
-                if (dataShow.includes(item.uuid)) {
-                    item.comments.forEach((c) => {
-                        hide.forEach((h) => {
-                            if (c.uuid === h.uuid) {
-                                h.show = true;
-                            }
-                        });
-                    });
-                }
-
+        const setVisible = (lists) => lists.forEach((item) => {
+            if (!dataShow.includes(item.uuid)) {
                 setVisible(item.comments);
+                return;
+            }
+
+            item.comments.forEach((c) => {
+                const i = hide.findIndex((h) => h.uuid === c.uuid);
+                if (i !== -1) {
+                    hide[i].show = true;
+                }
             });
 
-            return hide;
-        };
+            setVisible(item.comments);
+        });
 
-        return setVisible(buildHide(items));
+        buildHide(items);
+        setVisible(items);
+
+        return hide;
     };
 
     /**
@@ -294,7 +285,7 @@ export const comment = (() => {
         document.querySelectorAll('a[onclick="undangan.comment.showOrHide(this)"]').forEach((n) => {
             const oldUuids = n.getAttribute('data-uuids').split(',');
 
-            if (oldUuids.find((i) => i === id)) {
+            if (oldUuids.includes(id)) {
                 const uuids = oldUuids.filter((i) => i !== id).join(',');
                 uuids.length === 0 ? n.remove() : n.setAttribute('data-uuids', uuids);
             }
@@ -553,9 +544,7 @@ export const comment = (() => {
 
             response.data.is_parent = true;
             response.data.is_admin = session.isAdmin();
-            const newComment = await card.renderContentMany([response.data]);
-
-            comments.insertAdjacentHTML('afterbegin', newComment);
+            comments.insertAdjacentHTML('afterbegin', await card.renderContentMany([response.data]));
             comments.scrollIntoView();
         }
 
@@ -570,8 +559,6 @@ export const comment = (() => {
             document.getElementById(`reply-content-${id}`).insertAdjacentHTML('beforeend', await card.renderContentSingle(response.data));
 
             const anchorTag = document.getElementById(`button-${id}`).querySelector('a');
-            const uuids = [response.data.uuid];
-
             if (anchorTag) {
                 if (anchorTag.getAttribute('data-show') === 'false') {
                     showOrHide(anchorTag);
@@ -580,6 +567,7 @@ export const comment = (() => {
                 anchorTag.remove();
             }
 
+            const uuids = [response.data.uuid];
             const readMoreElement = document.createRange().createContextualFragment(card.renderReadMore(id, anchorTag ? anchorTag.getAttribute('data-uuids').split(',').concat(uuids) : uuids));
 
             const buttonLike = like.getButtonLike(id);
