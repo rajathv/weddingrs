@@ -1,6 +1,6 @@
 # 💌 Template website undangan pernikahan sederhana
 
-![Thumbnail](/assets/images/banner.png)
+![Thumbnail](/assets/images/banner.webp)
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/cef32dbf-f26f-4865-84a9-b85a439c9994/deploy-status)](https://app.netlify.com/sites/ulems/deploys)
 [![Hits](https://dikit.my.id/0b3y8q)](https://cie.my.id)
