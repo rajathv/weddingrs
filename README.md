@@ -49,6 +49,7 @@ Untuk kamu yang ingin mencoba secara gratis:
 - Canvas Confetti 1.9.3
 - Google Fonts
 - Vanilla JS
+- Image from Pixabay
 
 ## 🤝 Contributing
 
