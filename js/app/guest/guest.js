@@ -206,7 +206,7 @@ export const guest = (() => {
      */
     const showStory = (div) => {
         if (navigator.vibrate) {
-            navigator.vibrate(1000);
+            navigator.vibrate(500);
         }
 
         confetti.tapTapAnimation(div, 100);
