@@ -205,6 +205,10 @@ export const guest = (() => {
      * @returns {void}
      */
     const showStory = (div) => {
+        if (navigator.vibrate) {
+            navigator.vibrate(1000);
+        }
+
         confetti.tapTapAnimation(div, 100);
         util.changeOpacity(div, false).then((e) => e.remove());
     };
