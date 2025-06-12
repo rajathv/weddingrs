@@ -264,7 +264,7 @@ export const request = (method, path) => {
                         json.data = transform(json.data);
                     }
 
-                    return json;
+                    return Object.assign(json, { code: res.status });
                 });
             }).catch((err) => {
                 if (err.name === ERROR_ABORT) {
