@@ -86,11 +86,15 @@ export const cache = (cacheName) => {
                     }
 
                     const headers = new Headers(r.headers);
-                    const expiresDate = new Date(Date.now() + ttl);
-
                     return b.arrayBuffer().then((ab) => {
-                        headers.set('Expires', expiresDate.toUTCString());
-                        headers.set('Content-Length', String(ab.byteLength));
+
+                        if (!headers.has('Cache-Control')) {
+                            headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
+                        }
+
+                        if (!headers.has('Content-Length')) {
+                            headers.set('Content-Length', String(ab.byteLength));
+                        }
 
                         return cacheObject.put(input, new Response(ab, { headers })).then(() => b);
                     });
@@ -114,8 +118,8 @@ export const cache = (cacheName) => {
                     return fetchPut();
                 }
 
-                const expiresHeader = res.headers.get('Expires');
-                const expiresTime = expiresHeader ? (new Date(expiresHeader)).getTime() : 0;
+                const maxAge = parseInt(res.headers.get('Cache-Control')?.match(/max-age=(\d+)/)?.[1] ?? 0);
+                const expiresTime = Date.parse(res.headers.get('Date') ?? new Date()) + (maxAge * 1000);
 
                 if (Date.now() > expiresTime) {
                     return cacheObject.delete(input).then((s) => s ? fetchPut() : res.blob());
