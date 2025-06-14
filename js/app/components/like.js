@@ -100,7 +100,7 @@ export const like = (() => {
             div.setAttribute('data-liked', 'false');
         }
 
-        div.setAttribute('data-tapTime', currentTime);
+        div.setAttribute('data-tapTime', String(currentTime));
     };
 
     /**
