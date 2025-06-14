@@ -58,6 +58,7 @@ export const session = (() => {
     const guest = (token) => {
         return request(HTTP_GET, '/api/v2/config')
             .withCache(1000 * 60 * 30)
+            .withForceCache()
             .token(token)
             .send()
             .then((res) => {

@@ -186,6 +186,7 @@ export const gif = (() => {
             ctx.reqs.push(r);
         });
 
+        // https://developers.google.com/tenor/guides/api-terms
         ctx.last = request(HTTP_GET, `https://tenor.googleapis.com/v2${path}?${param}`)
             .withCache()
             .withRetry()

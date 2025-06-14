@@ -114,7 +114,7 @@ export const image = (() => {
      * @returns {object}
      */
     const init = () => {
-        c = cache('image');
+        c = cache('image').withForceCache();
         images = document.querySelectorAll('img');
 
         images.forEach(progress.add);
