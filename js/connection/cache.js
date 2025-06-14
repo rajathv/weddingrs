@@ -44,6 +44,8 @@ export const cache = (cacheName) => {
 
     let ttl = 1000 * 60 * 60 * 6;
 
+    let forceCache = false;
+
     /**
      * @returns {Promise<void>}
      */
@@ -88,7 +90,7 @@ export const cache = (cacheName) => {
                     const headers = new Headers(r.headers);
                     return b.arrayBuffer().then((ab) => {
 
-                        if (!headers.has('Cache-Control')) {
+                        if (!headers.has('Cache-Control') || forceCache) {
                             headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
                         }
 
@@ -198,6 +200,13 @@ export const cache = (cacheName) => {
          */
         setTtl(v) {
             ttl = Number(v);
+            return this;
+        },
+        /**
+         * @returns {this} 
+         */
+        withForceCache() {
+            forceCache = true;
             return this;
         },
     };

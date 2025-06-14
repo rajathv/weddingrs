@@ -51,6 +51,7 @@ export const request = (method, path) => {
     let reqRetry = 0;
     let reqDelay = 0;
     let reqAttempts = 0;
+    let reqForceCache = false;
 
     /**
      * @type {string|null}
@@ -138,7 +139,7 @@ export const request = (method, path) => {
 
                 return res.clone().arrayBuffer().then((a) => {
 
-                    if (!headers.has('Cache-Control')) {
+                    if (!headers.has('Cache-Control') || reqForceCache) {
                         headers.set('Cache-Control', `public, max-age=${Math.floor(reqTtl / 1000)}`);
                     }
 
@@ -281,6 +282,14 @@ export const request = (method, path) => {
          */
         withCache(ttl = 1000 * 60 * 60 * 6) {
             reqTtl = ttl;
+
+            return this;
+        },
+        /**
+         * @returns {ReturnType<typeof request>}
+         */
+        withForceCache() {
+            reqForceCache = true;
 
             return this;
         },
