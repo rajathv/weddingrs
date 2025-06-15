@@ -266,6 +266,7 @@ export const request = (method, path) => {
                     if (json.error) {
                         const msg = json.error.at(0);
                         const isErrServer = res.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR;
+
                         throw new Error(isErrServer ? `ID: ${json.id}\n${msg}` : msg);
                     }
 
