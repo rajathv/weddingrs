@@ -90,8 +90,20 @@ export const cache = (cacheName) => {
                     const headers = new Headers(r.headers);
                     return b.arrayBuffer().then((ab) => {
 
-                        if (!headers.has('Cache-Control') || forceCache) {
-                            headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
+                        if (headers.has('Cache-Control')) {
+                            if (!headers.has('Date')) {
+                                const now = new Date();
+                                headers.set('Date', now.toUTCString());
+                            }
+
+                            const date = new Date(headers.get('Date'));
+                            const maxAge = parseInt(headers.get('Cache-Control')?.match(/max-age=(\d+)/)?.[1] ?? 0);
+
+                            const expires = new Date(date.getTime() + maxAge * 1000);
+                            headers.set('Expires', expires.toUTCString());
+                        } else if (forceCache || !headers.has('Expires')) {
+                            const exp = new Date(Date.now() + ttl);
+                            headers.set('Expires', exp.toUTCString());
                         }
 
                         if (!headers.has('Content-Length')) {
@@ -120,10 +132,8 @@ export const cache = (cacheName) => {
                     return fetchPut();
                 }
 
-                const maxAge = parseInt(res.headers.get('Cache-Control')?.match(/max-age=(\d+)/)?.[1] ?? 0);
-                const expiresTime = Date.parse(res.headers.get('Date') ?? new Date()) + (maxAge * 1000);
-
-                if (Date.now() > expiresTime) {
+                const expTime = new Date(res.headers.get('Expires'));
+                if (Date.now() > expTime.getTime()) {
                     return cacheObject.delete(input).then((s) => s ? fetchPut() : res.blob());
                 }
 
