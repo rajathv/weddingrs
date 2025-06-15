@@ -134,32 +134,29 @@ export const request = (method, path) => {
                     return res;
                 }
 
-                const cRes = res.clone();
-                const headers = new Headers(res.headers);
-
                 return res.clone().arrayBuffer().then((a) => {
 
-                    if (headers.has('Cache-Control')) {
-                        if (!headers.has('Date')) {
-                            const now = new Date();
-                            headers.set('Date', now.toUTCString());
+                    const now = new Date();
+                    const headers = new Headers(res.headers);
+
+                    if (!headers.has('Date')) {
+                        headers.set('Date', now.toUTCString());
+                    }
+
+                    if (reqForceCache || !headers.has('Cache-Control')) {
+                        if (!reqForceCache && headers.has('Expires')) {
+                            const expTime = new Date(headers.get('Expires'));
+                            reqTtl = Math.max(0, expTime.getTime() - now.getTime());
                         }
 
-                        const date = new Date(headers.get('Date'));
-                        const maxAge = parseInt(headers.get('Cache-Control')?.match(/max-age=(\d+)/)?.[1] ?? 0);
-
-                        const expires = new Date(date.getTime() + maxAge * 1000);
-                        headers.set('Expires', expires.toUTCString());
-                    } else if (reqForceCache || !headers.has('Expires')) {
-                        const exp = new Date(Date.now() + reqTtl);
-                        headers.set('Expires', exp.toUTCString());
+                        headers.set('Cache-Control', `public, max-age=${Math.floor(reqTtl / 1000)}`);
                     }
 
                     if (!headers.has('Content-Length')) {
                         headers.set('Content-Length', String(a.byteLength));
                     }
 
-                    return c.put(input, new Response(res.body, { headers })).then(() => cRes);
+                    return c.put(input, new Response(a, { headers })).then(() => res);
                 });
             });
 
@@ -168,8 +165,10 @@ export const request = (method, path) => {
                     return fetchPut(c);
                 }
 
-                const expTime = new Date(res.headers.get('Expires'));
-                if (Date.now() > expTime.getTime()) {
+                const maxAge = parseInt(res.headers.get('Cache-Control').match(/max-age=(\d+)/)[1]);
+                const expTime = Date.parse(res.headers.get('Date')) + (maxAge * 1000);
+
+                if (Date.now() > expTime) {
                     return c.delete(input).then((s) => s ? fetchPut(c) : res);
                 }
 
