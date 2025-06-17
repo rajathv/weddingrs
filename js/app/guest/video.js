@@ -21,11 +21,11 @@ export const video = (() => {
         const vid = document.createElement('video');
         vid.src = util.escapeHtml(container.getAttribute('data-src'));
         vid.className = container.getAttribute('data-vid-class');
-        vid.controls = true;
-        vid.preload = 'metadata';
-        vid.muted = true;
         vid.loop = true;
+        vid.muted = true;
+        vid.controls = true;
         vid.playsInline = true;
+        vid.preload = 'metadata';
         vid.disablePictureInPicture = true;
         vid.disableRemotePlayback = true;
         vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
@@ -60,13 +60,8 @@ export const video = (() => {
 
         // run in async
         c.open()
-            .then(() => c.has(vid.src).then((res) => {
-                if (res) {
-                    return res;
-                }
-
-                return c.del(vid.src).then(() => fetchVideo());
-            }))
+            .then(() => c.has(vid.src))
+            .then((r) => r ? r : c.del(vid.src).then(fetchVideo))
             .then((r) => r.blob())
             .then((b) => {
                 vid.src = URL.createObjectURL(b);

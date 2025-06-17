@@ -35,6 +35,73 @@ const singleton = (() => {
     };
 })();
 
+/**
+ * @param {Cache} cacheObject 
+ */
+export const cacheWrapper = (cacheObject) => {
+    /**
+    * @param {string|URL} input 
+    * @param {Response} res 
+    * @param {boolean} forceCache
+    * @param {number} ttl
+    * @returns {Response}
+    */
+    const set = (input, res, forceCache, ttl) => res.clone().arrayBuffer().then((ab) => {
+        if (!res.ok || !window.isSecureContext) {
+            return res;
+        }
+
+        const now = new Date();
+        const headers = new Headers(res.headers);
+
+        if (!headers.has('Date')) {
+            headers.set('Date', now.toUTCString());
+        }
+
+        if (forceCache || !headers.has('Cache-Control')) {
+            if (!forceCache && headers.has('Expires')) {
+                const expTime = new Date(headers.get('Expires'));
+                ttl = Math.max(0, expTime.getTime() - now.getTime());
+            }
+
+            headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
+        }
+
+        if (!headers.has('Content-Length')) {
+            headers.set('Content-Length', String(ab.byteLength));
+        }
+
+        return cacheObject.put(input, new Response(ab, { headers })).then(() => res);
+    });
+
+    /**
+     * @param {string|URL} input 
+     * @returns {Promise<Response|null>}
+     */
+    const has = (input) => cacheObject.match(input).then((res) => {
+        if (!res) {
+            return null;
+        }
+
+        const maxAge = res.headers.get('Cache-Control').match(/max-age=(\d+)/)[1];
+        const expTime = Date.parse(res.headers.get('Date')) + (parseInt(maxAge) * 1000);
+
+        return Date.now() > expTime ? null : res;
+    });
+
+    /**
+     * @param {string|URL} input 
+     * @returns {Promise<boolean>}
+     */
+    const del = (input) => cacheObject.delete(input);
+
+    return {
+        set,
+        has,
+        del,
+    };
+};
+
 export const request = (method, path) => {
 
     const ac = new AbortController();
@@ -125,55 +192,9 @@ export const request = (method, path) => {
                 return wrapperFetch();
             }
 
-            /**
-             * @param {Cache} c 
-             * @returns {Promise<Response>}
-             */
-            const fetchPut = (c) => wrapperFetch().then((res) => {
-                if (!res.ok) {
-                    return res;
-                }
-
-                return res.clone().arrayBuffer().then((a) => {
-
-                    const now = new Date();
-                    const headers = new Headers(res.headers);
-
-                    if (!headers.has('Date')) {
-                        headers.set('Date', now.toUTCString());
-                    }
-
-                    if (reqForceCache || !headers.has('Cache-Control')) {
-                        if (!reqForceCache && headers.has('Expires')) {
-                            const expTime = new Date(headers.get('Expires'));
-                            reqTtl = Math.max(0, expTime.getTime() - now.getTime());
-                        }
-
-                        headers.set('Cache-Control', `public, max-age=${Math.floor(reqTtl / 1000)}`);
-                    }
-
-                    if (!headers.has('Content-Length')) {
-                        headers.set('Content-Length', String(a.byteLength));
-                    }
-
-                    return c.put(input, new Response(a, { headers })).then(() => res);
-                });
-            });
-
-            return singleton.getInstance().then((c) => c.match(input).then((res) => {
-                if (!res) {
-                    return fetchPut(c);
-                }
-
-                const maxAge = parseInt(res.headers.get('Cache-Control').match(/max-age=(\d+)/)[1]);
-                const expTime = Date.parse(res.headers.get('Date')) + (maxAge * 1000);
-
-                if (Date.now() > expTime) {
-                    return c.delete(input).then((s) => s ? fetchPut(c) : res);
-                }
-
-                return res;
-            }));
+            return singleton.getInstance()
+                .then(cacheWrapper)
+                .then((cw) => cw.has(input).then((res) => res ? res : cw.del(input).then(wrapperFetch).then((r) => cw.set(input, r, reqForceCache, reqTtl))));
         };
 
         if (reqRetry === 0 && reqDelay === 0) {

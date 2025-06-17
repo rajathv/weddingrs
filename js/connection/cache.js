@@ -1,4 +1,4 @@
-import { request, HTTP_GET } from './request.js';
+import { request, cacheWrapper, HTTP_GET } from './request.js';
 
 const objectPool = (() => {
     /**
@@ -38,7 +38,7 @@ export const cache = (cacheName) => {
     const inFlightRequests = new Map();
 
     /**
-     * @type {caches|null}
+     * @type {Cache|null}
      */
     let cacheObject = null;
 
@@ -47,12 +47,14 @@ export const cache = (cacheName) => {
     let forceCache = false;
 
     /**
-     * @returns {Promise<void>}
+     * @returns {Promise<Cache>}
      */
     const open = async () => {
         if (!cacheObject && window.isSecureContext) {
             cacheObject = await objectPool.getInstance(cacheName);
         }
+
+        return cacheObject;
     };
 
     /**
@@ -60,58 +62,25 @@ export const cache = (cacheName) => {
      * @param {Response} res 
      * @returns {Response}
      */
-    const set = (input, res) => open().then(() => res.clone().arrayBuffer().then((ab) => {
+    const set = (input, res) => open().then(cacheWrapper).then((cw) => {
         if (!res.ok) {
             throw new Error(res.statusText);
         }
 
-        if (!window.isSecureContext) {
-            return res;
-        }
-
-        const now = new Date();
-        const headers = new Headers(res.headers);
-
-        if (!headers.has('Date')) {
-            headers.set('Date', now.toUTCString());
-        }
-
-        if (forceCache || !headers.has('Cache-Control')) {
-            if (!forceCache && headers.has('Expires')) {
-                const expTime = new Date(headers.get('Expires'));
-                ttl = Math.max(0, expTime.getTime() - now.getTime());
-            }
-
-            headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
-        }
-
-        if (!headers.has('Content-Length')) {
-            headers.set('Content-Length', String(ab.byteLength));
-        }
-
-        return cacheObject.put(input, new Response(ab, { headers })).then(() => res);
-    }));
+        return cw.set(input, res, forceCache, ttl);
+    });
 
     /**
      * @param {string|URL} input 
      * @returns {Promise<Response|null>}
      */
-    const has = (input) => open().then(() => cacheObject.match(input).then((res) => {
-        if (!res) {
-            return null;
-        }
-
-        const maxAge = res.headers.get('Cache-Control').match(/max-age=(\d+)/)[1];
-        const expTime = Date.parse(res.headers.get('Date')) + (parseInt(maxAge) * 1000);
-
-        return Date.now() > expTime ? null : res;
-    }));
+    const has = (input) => open().then(cacheWrapper).then((cw) => cw.has(input));
 
     /**
      * @param {string|URL} input 
      * @returns {Promise<boolean>}
      */
-    const del = (input) => open().then(() => cacheObject.delete(input));
+    const del = (input) => open().then(cacheWrapper).then((cw) => cw.del(input));
 
     /**
      * @param {string} input
@@ -130,42 +99,28 @@ export const cache = (cacheName) => {
         const inflightPromise = open().then(() => {
 
             /**
-             * @returns {Promise<Blob>}
+             * @returns {Promise<Response>}
              */
             const fetchPut = () => request(HTTP_GET, input)
                 .withCancel(cancel)
                 .withRetry()
                 .default()
-                .then((res) => set(input, res))
-                .then((res) => res.blob());
+                .then((res) => set(input, res));
 
             /**
-             * @param {Blob} b 
-             * @returns {string}
+             * @param {Response} r
+             * @returns {Promise<string>}
              */
-            const blobToUrl = (b) => {
+            const responseToUrl = (r) => r.blob().then((b) => {
                 objectUrls.set(input, URL.createObjectURL(b));
                 return objectUrls.get(input);
-            };
+            });
 
             if (!window.isSecureContext) {
-                return fetchPut().then((b) => blobToUrl(b));
+                return fetchPut().then(responseToUrl);
             }
 
-            return cacheObject.match(input).then((res) => {
-                if (!res) {
-                    return fetchPut();
-                }
-
-                const maxAge = parseInt(res.headers.get('Cache-Control').match(/max-age=(\d+)/)[1]);
-                const expTime = Date.parse(res.headers.get('Date')) + (maxAge * 1000);
-
-                if (Date.now() > expTime) {
-                    return cacheObject.delete(input).then((s) => s ? fetchPut() : res.blob());
-                }
-
-                return res.blob();
-            }).then((b) => blobToUrl(b));
+            return has(input).then((res) => res ? res : del(input).then(fetchPut)).then(responseToUrl);
         }).finally(() => {
             inFlightRequests.delete(input);
         });
