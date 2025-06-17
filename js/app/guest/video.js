@@ -1,3 +1,4 @@
+import { util } from '../../common/util.js';
 import { cache } from '../../connection/cache.js';
 import { HTTP_GET, request } from '../../connection/request.js';
 
@@ -18,7 +19,7 @@ export const video = (() => {
         }
 
         const vid = document.createElement('video');
-        vid.src = container.getAttribute('data-src');
+        vid.src = util.escapeHtml(container.getAttribute('data-src'));
         vid.className = container.getAttribute('data-vid-class');
         vid.controls = true;
         vid.preload = 'metadata';
