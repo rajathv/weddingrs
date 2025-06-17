@@ -1,3 +1,4 @@
+import { video } from './video.js';
 import { image } from './image.js';
 import { audio } from './audio.js';
 import { progress } from './progress.js';
@@ -330,6 +331,7 @@ export const guest = (() => {
         config = storage('config');
         information = storage('information');
 
+        const vid = video.init();
         const img = image.init();
         const aud = audio.init();
         const cfi = loaderConfetti();
@@ -344,6 +346,7 @@ export const guest = (() => {
         });
 
         if (!token || token.length <= 0) {
+            vid.load();
             img.load();
             aud.load();
             cfi.load(document.body.getAttribute('data-confetti') === 'true');
@@ -371,6 +374,7 @@ export const guest = (() => {
                     img.load();
                 }
 
+                vid.load();
                 aud.load();
                 comment.init();
                 cfi.load(data.is_confetti_animation);

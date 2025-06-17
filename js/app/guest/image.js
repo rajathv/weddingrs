@@ -53,7 +53,10 @@ export const image = (() => {
         urlCache.push({
             url: el.getAttribute('data-src'),
             res: (url) => appendImage(el, url),
-            rej: () => progress.invalid('image'),
+            rej: (err) => {
+                console.error(err);
+                progress.invalid('image');
+            },
         });
     };
 

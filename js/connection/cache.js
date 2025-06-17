@@ -56,6 +56,64 @@ export const cache = (cacheName) => {
     };
 
     /**
+     * @param {string|URL} input 
+     * @param {Response} res 
+     * @returns {Response}
+     */
+    const set = (input, res) => open().then(() => res.clone().arrayBuffer().then((ab) => {
+        if (!res.ok) {
+            throw new Error(res.statusText);
+        }
+
+        if (!window.isSecureContext) {
+            return res;
+        }
+
+        const now = new Date();
+        const headers = new Headers(res.headers);
+
+        if (!headers.has('Date')) {
+            headers.set('Date', now.toUTCString());
+        }
+
+        if (forceCache || !headers.has('Cache-Control')) {
+            if (!forceCache && headers.has('Expires')) {
+                const expTime = new Date(headers.get('Expires'));
+                ttl = Math.max(0, expTime.getTime() - now.getTime());
+            }
+
+            headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
+        }
+
+        if (!headers.has('Content-Length')) {
+            headers.set('Content-Length', String(ab.byteLength));
+        }
+
+        return cacheObject.put(input, new Response(ab, { headers })).then(() => res);
+    }));
+
+    /**
+     * @param {string|URL} input 
+     * @returns {Promise<Response|null>}
+     */
+    const has = (input) => open().then(() => cacheObject.match(input).then((res) => {
+        if (!res) {
+            return null;
+        }
+
+        const maxAge = res.headers.get('Cache-Control').match(/max-age=(\d+)/)[1];
+        const expTime = Date.parse(res.headers.get('Date')) + (parseInt(maxAge) * 1000);
+
+        return Date.now() > expTime ? null : res;
+    }));
+
+    /**
+     * @param {string|URL} input 
+     * @returns {Promise<boolean>}
+     */
+    const del = (input) => open().then(() => cacheObject.delete(input));
+
+    /**
      * @param {string} input
      * @param {Promise<void>|null} [cancel=null]
      * @returns {Promise<string>}
@@ -78,40 +136,8 @@ export const cache = (cacheName) => {
                 .withCancel(cancel)
                 .withRetry()
                 .default()
-                .then((r) => r.blob().then((b) => {
-                    if (!r.ok) {
-                        throw new Error(r.statusText);
-                    }
-
-                    if (!window.isSecureContext) {
-                        return b;
-                    }
-
-                    return b.arrayBuffer().then((ab) => {
-
-                        const now = new Date();
-                        const headers = new Headers(r.headers);
-
-                        if (!headers.has('Date')) {
-                            headers.set('Date', now.toUTCString());
-                        }
-
-                        if (forceCache || !headers.has('Cache-Control')) {
-                            if (!forceCache && headers.has('Expires')) {
-                                const expTime = new Date(headers.get('Expires'));
-                                ttl = Math.max(0, expTime.getTime() - now.getTime());
-                            }
-
-                            headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
-                        }
-
-                        if (!headers.has('Content-Length')) {
-                            headers.set('Content-Length', String(ab.byteLength));
-                        }
-
-                        return cacheObject.put(input, new Response(ab, { headers })).then(() => b);
-                    });
-                }));
+                .then((res) => set(input, res))
+                .then((res) => res.blob());
 
             /**
              * @param {Blob} b 
@@ -202,6 +228,9 @@ export const cache = (cacheName) => {
 
     return {
         run,
+        del,
+        has,
+        set,
         get,
         open,
         download,
