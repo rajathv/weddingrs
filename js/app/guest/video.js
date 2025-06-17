@@ -30,14 +30,17 @@ export const video = (() => {
         vid.disableRemotePlayback = true;
         vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
 
-        vid.addEventListener('loadedmetadata', () => {
-            const ratio = vid.videoHeight / vid.videoWidth;
-            const width = vid.getBoundingClientRect().width;
+        const loaded = new Promise((resolve) => {
+            vid.addEventListener('loadedmetadata', () => {
+                const ratio = vid.videoHeight / vid.videoWidth;
+                const width = vid.getBoundingClientRect().width;
 
-            vid.style.height = `${width * ratio}px`;
+                vid.style.height = `${width * ratio}px`;
 
-            container.removeAttribute('data-src');
-            container.removeAttribute('data-vid-class');
+                container.removeAttribute('data-src');
+                container.removeAttribute('data-vid-class');
+                resolve();
+            }, { once: true });
         });
 
         container.appendChild(vid);
@@ -59,7 +62,7 @@ export const video = (() => {
         };
 
         // run in async
-        c.open()
+        loaded.then(() => c.open())
             .then(() => c.has(vid.src))
             .then((r) => r ? r : c.del(vid.src).then(fetchVideo))
             .then((r) => r.blob())
