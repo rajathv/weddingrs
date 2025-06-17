@@ -31,7 +31,7 @@ export const video = (() => {
     /**
      * @returns {Promise<void>}
      */
-    const load = () => c.has(vid.src).then((res) => {
+    const load = () => c.open().then(() => c.has(vid.src).then((res) => {
         if (res) {
             return res;
         }
@@ -39,7 +39,8 @@ export const video = (() => {
         return c.del(vid.src).then(() => getVideo());
     }).then((r) => r.blob()).then((b) => {
         vid.src = URL.createObjectURL(b);
-    });
+        vid.dispatchEvent(new Event('undangan.cache.video'));
+    }));
 
     /**
      * @returns {object}
@@ -63,9 +64,16 @@ export const video = (() => {
 
         const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
 
-        vid.addEventListener('loadeddata', () => {
+        vid.addEventListener('undangan.cache.video', () => {
             observer.observe(vid);
             document.getElementById('video-love-stroy-loading')?.remove();
+        });
+
+        vid.addEventListener('loadedmetadata', () => {
+            const ratio = vid.videoHeight / vid.videoWidth;
+            const width = vid.getBoundingClientRect().width;
+
+            vid.style.height = `${width * ratio}px`;
         });
 
         container.appendChild(vid);
