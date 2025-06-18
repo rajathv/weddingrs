@@ -73,6 +73,7 @@ export const video = (() => {
         };
 
         /**
+         * @param {string} src
          * @returns {Promise<Response>}
          */
         const fetchCache = (src) => c.has(src)
