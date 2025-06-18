@@ -96,34 +96,17 @@ export const cache = (cacheName) => {
             return inFlightRequests.get(input);
         }
 
-        const inflightPromise = open().then(() => {
+        /**
+         * @returns {Promise<Response>}
+         */
+        const fetchPut = () => request(HTTP_GET, input).withCancel(cancel).withRetry().default();
 
-            /**
-             * @returns {Promise<Response>}
-             */
-            const fetchPut = () => request(HTTP_GET, input)
-                .withCancel(cancel)
-                .withRetry()
-                .default()
-                .then((res) => set(input, res));
-
-            /**
-             * @param {Response} r
-             * @returns {Promise<string>}
-             */
-            const responseToUrl = (r) => r.blob().then((b) => {
-                objectUrls.set(input, URL.createObjectURL(b));
-                return objectUrls.get(input);
-            });
-
-            if (!window.isSecureContext) {
-                return fetchPut().then(responseToUrl);
-            }
-
-            return has(input).then((res) => res ? res : del(input).then(fetchPut)).then(responseToUrl);
-        }).finally(() => {
-            inFlightRequests.delete(input);
-        });
+        const inflightPromise = open()
+            .then(() => window.isSecureContext ? has(input).then((res) => res ? Promise.resolve(res) : del(input).then(fetchPut).then((r) => set(input, r))) : fetchPut())
+            .then((r) => r.blob())
+            .then((b) => objectUrls.set(input, URL.createObjectURL(b)))
+            .then(() => objectUrls.get(input))
+            .finally(() => inFlightRequests.delete(input));
 
         inFlightRequests.set(input, inflightPromise);
         return inflightPromise;

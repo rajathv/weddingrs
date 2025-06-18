@@ -102,6 +102,10 @@ export const cacheWrapper = (cacheObject) => {
     };
 };
 
+/**
+ * @param {string} method 
+ * @param {string} path 
+ */
 export const request = (method, path) => {
 
     const ac = new AbortController();
@@ -194,7 +198,7 @@ export const request = (method, path) => {
 
             return singleton.getInstance()
                 .then(cacheWrapper)
-                .then((cw) => cw.has(input).then((res) => res ? res : cw.del(input).then(wrapperFetch).then((r) => cw.set(input, r, reqForceCache, reqTtl))));
+                .then((cw) => cw.has(input).then((res) => res ? Promise.resolve(res) : cw.del(input).then(wrapperFetch).then((r) => cw.set(input, r, reqForceCache, reqTtl))));
         };
 
         if (reqRetry === 0 && reqDelay === 0) {

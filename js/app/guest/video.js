@@ -26,25 +26,21 @@ export const video = (() => {
         vid.controls = true;
         vid.playsInline = true;
         vid.preload = 'metadata';
-        vid.disablePictureInPicture = true;
         vid.disableRemotePlayback = true;
+        vid.disablePictureInPicture = true;
         vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
 
-        const loaded = new Promise((resolve) => {
-            vid.addEventListener('loadedmetadata', () => {
-                const ratio = vid.videoHeight / vid.videoWidth;
-                const width = vid.getBoundingClientRect().width;
+        vid.addEventListener('loadedmetadata', () => {
+            const ratio = vid.videoHeight / vid.videoWidth;
+            const width = vid.getBoundingClientRect().width;
 
-                vid.style.height = `${width * ratio}px`;
+            vid.style.height = `${width * ratio}px`;
+        }, { once: true });
 
-                container.removeAttribute('data-src');
-                container.removeAttribute('data-vid-class');
-                resolve();
-            }, { once: true });
-        });
+        const loaded = new Promise((resolve) => vid.addEventListener('loadedmetadata', resolve, { once: true }));
+        const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
 
         container.appendChild(vid);
-        const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
 
         /**
          * @returns {Promise<Response>}
@@ -58,13 +54,13 @@ export const video = (() => {
 
                 bar.style.width = result;
                 inf.innerText = result;
-            }).default().then((r) => c.set(vid.src, r));
+            }).default();
         };
 
         // run in async
         loaded.then(() => c.open())
             .then(() => c.has(vid.src))
-            .then((r) => r ? r : c.del(vid.src).then(fetchVideo))
+            .then((res) => res ? Promise.resolve(res) : c.del(vid.src).then(fetchVideo).then((r) => c.set(vid.src, r)))
             .then((r) => r.blob())
             .then((b) => {
                 vid.src = URL.createObjectURL(b);
