@@ -75,11 +75,11 @@ export const video = (() => {
         /**
          * @returns {Promise<Response>}
          */
-        const fetchCache = () => c.has(vid.src)
-            .then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)) : c.del(vid.src).then(fetchBasic).then((r) => c.set(vid.src, r)));
+        const fetchCache = (src) => c.has(src)
+            .then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)) : c.del(src).then(fetchBasic).then((r) => c.set(src, r)));
 
         // run in async
-        c.open().then(() => window.isSecureContext ? fetchCache() : fetchBasic());
+        c.open().then(() => window.isSecureContext ? fetchCache(wrap.getAttribute('data-src')) : fetchBasic());
     };
 
     /**
