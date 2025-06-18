@@ -198,7 +198,7 @@ export const request = (method, path) => {
 
             return singleton.getInstance()
                 .then(cacheWrapper)
-                .then((cw) => cw.has(input).then((res) => res ? Promise.resolve(res) : cw.del(input).then(wrapperFetch).then((r) => cw.set(input, r, reqForceCache, reqTtl))));
+                .then((cw) => window.isSecureContext ? cw.has(input).then((res) => res ? Promise.resolve(res) : cw.del(input).then(wrapperFetch).then((r) => cw.set(input, r, reqForceCache, reqTtl))) : wrapperFetch());
         };
 
         if (reqRetry === 0 && reqDelay === 0) {

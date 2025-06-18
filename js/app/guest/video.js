@@ -18,12 +18,16 @@ export const video = (() => {
             return;
         }
 
+        const bar = document.getElementById('progress-bar-video-love-stroy');
+        const inf = document.getElementById('progress-info-video-love-stroy');
+
         const vid = document.createElement('video');
         vid.src = util.escapeHtml(container.getAttribute('data-src'));
         vid.className = container.getAttribute('data-vid-class');
         vid.loop = true;
         vid.muted = true;
         vid.controls = true;
+        vid.autoplay = false;
         vid.playsInline = true;
         vid.preload = 'metadata';
         vid.disableRemotePlayback = true;
@@ -45,22 +49,16 @@ export const video = (() => {
         /**
          * @returns {Promise<Response>}
          */
-        const fetchVideo = () => {
-            const bar = document.getElementById('progress-bar-video-love-stroy');
-            const inf = document.getElementById('progress-info-video-love-stroy');
+        const fetchVideo = () => request(HTTP_GET, vid.src).withRetry().withProgressFunc((a, b) => {
+            const result = Math.min((a / b) * 100).toFixed(0) + '%';
 
-            return request(HTTP_GET, vid.src).withRetry().withProgressFunc((a, b) => {
-                const result = Math.min((a / b) * 100).toFixed(0) + '%';
-
-                bar.style.width = result;
-                inf.innerText = result;
-            }).default();
-        };
+            bar.style.width = result;
+            inf.innerText = result;
+        }).default();
 
         // run in async
         loaded.then(() => c.open())
-            .then(() => c.has(vid.src))
-            .then((res) => res ? Promise.resolve(res) : c.del(vid.src).then(fetchVideo).then((r) => c.set(vid.src, r)))
+            .then(() => window.isSecureContext ? c.has(vid.src).then((res) => res ? Promise.resolve(res) : c.del(vid.src).then(fetchVideo).then((r) => c.set(vid.src, r))) : fetchVideo())
             .then((r) => r.blob())
             .then((b) => {
                 vid.src = URL.createObjectURL(b);

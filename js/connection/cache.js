@@ -174,14 +174,14 @@ export const cache = (cacheName) => {
         download,
         /**
          * @param {number} v
-         * @returns {this} 
+         * @returns {ReturnType<typeof cache>} 
          */
         setTtl(v) {
             ttl = Number(v);
             return this;
         },
         /**
-         * @returns {this} 
+         * @returns {ReturnType<typeof cache>} 
          */
         withForceCache() {
             forceCache = true;
