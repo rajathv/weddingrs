@@ -13,17 +13,13 @@ export const video = (() => {
      * @returns {void}
      */
     const load = () => {
-        const container = document.getElementById('video-love-stroy');
-        if (!container) {
+        const wrap = document.getElementById('video-love-stroy');
+        if (!wrap) {
             return;
         }
 
-        const bar = document.getElementById('progress-bar-video-love-stroy');
-        const inf = document.getElementById('progress-info-video-love-stroy');
-
         const vid = document.createElement('video');
-        vid.src = util.escapeHtml(container.getAttribute('data-src'));
-        vid.className = container.getAttribute('data-vid-class');
+        vid.className = wrap.getAttribute('data-vid-class');
         vid.loop = true;
         vid.muted = true;
         vid.controls = true;
@@ -34,37 +30,56 @@ export const video = (() => {
         vid.disablePictureInPicture = true;
         vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
 
-        vid.addEventListener('loadedmetadata', () => {
-            const ratio = vid.videoHeight / vid.videoWidth;
-            const width = vid.getBoundingClientRect().width;
-
-            vid.style.height = `${width * ratio}px`;
-        }, { once: true });
-
-        const loaded = new Promise((resolve) => vid.addEventListener('loadedmetadata', resolve, { once: true }));
         const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
 
-        container.appendChild(vid);
+        /**
+         * @param {Response} res 
+         * @returns {Promise<Response>}
+         */
+        const resToVideo = (res) => res.clone().blob().then((b) => {
+            vid.src = URL.createObjectURL(b);
+            document.getElementById('video-love-stroy-loading')?.remove();
+
+            return res;
+        });
 
         /**
          * @returns {Promise<Response>}
          */
-        const fetchVideo = () => request(HTTP_GET, vid.src).withRetry().withProgressFunc((a, b) => {
-            const result = Math.min((a / b) * 100).toFixed(0) + '%';
+        const fetchBasic = () => {
+            const bar = document.getElementById('progress-bar-video-love-stroy');
+            const inf = document.getElementById('progress-info-video-love-stroy');
 
-            bar.style.width = result;
-            inf.innerText = result;
-        }).default();
+            vid.src = util.escapeHtml(wrap.getAttribute('data-src'));
+            const loaded = new Promise((resolve) => vid.addEventListener('loadedmetadata', resolve, { once: true }));
+
+            wrap.appendChild(vid);
+            observer.observe(vid);
+
+            return loaded.then(() => {
+                vid.style.height = `${vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth)}px`;
+
+                return request(HTTP_GET, vid.src)
+                    .withProgressFunc((a, b) => {
+                        const result = Math.min((a / b) * 100).toFixed(0) + '%';
+
+                        bar.style.width = result;
+                        inf.innerText = result;
+                    })
+                    .withRetry()
+                    .default()
+                    .then(resToVideo);
+            });
+        };
+
+        /**
+         * @returns {Promise<Response>}
+         */
+        const fetchCache = () => c.has(vid.src)
+            .then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)) : c.del(vid.src).then(fetchBasic).then((r) => c.set(vid.src, r)));
 
         // run in async
-        loaded.then(() => c.open())
-            .then(() => window.isSecureContext ? c.has(vid.src).then((res) => res ? Promise.resolve(res) : c.del(vid.src).then(fetchVideo).then((r) => c.set(vid.src, r))) : fetchVideo())
-            .then((r) => r.blob())
-            .then((b) => {
-                vid.src = URL.createObjectURL(b);
-                observer.observe(vid);
-                document.getElementById('video-love-stroy-loading')?.remove();
-            });
+        c.open().then(() => window.isSecureContext ? fetchCache() : fetchBasic());
     };
 
     /**
