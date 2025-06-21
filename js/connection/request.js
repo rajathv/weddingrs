@@ -9,6 +9,7 @@ export const HTTP_STATUS_CREATED = 201;
 export const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 
 export const ERROR_ABORT = 'AbortError';
+export const ERROR_TYPE = 'TypeError';
 
 export const defaultJSON = {
     'Accept': 'application/json',
@@ -111,6 +112,7 @@ export const request = (method, path) => {
     const ac = new AbortController();
     const req = {
         signal: ac.signal,
+        credential: 'include',
         headers: new Headers(defaultJSON),
         method: String(method).toUpperCase(),
     };
@@ -303,12 +305,16 @@ export const request = (method, path) => {
                 });
             }).catch((err) => {
                 if (err.name === ERROR_ABORT) {
-                    console.warn('Fetch abort:', err);
+                    console.warn('Fetch aborted:', err);
                     return err;
                 }
 
-                alert(err);
-                throw new Error(err);
+                if (err.name === ERROR_TYPE) {
+                    err = new Error('Network error or rate limit exceeded');
+                }
+
+                alert(err.message || String(err));
+                throw err;
             });
         },
         /**
