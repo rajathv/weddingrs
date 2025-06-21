@@ -131,16 +131,16 @@ export const comment = (() => {
             util.safeInnerHTML(commentIp, `<i class="fa-solid fa-location-dot me-1"></i>${util.escapeHtml(c.ip)} <strong>${util.escapeHtml(result)}</strong>`);
         };
 
-        // FREE for commercial and non-commercial use.
-        await request(HTTP_GET, `https://free.freeipapi.com/api/json/${c.ip}`)
+        // Free for commercial and non-commercial use.
+        await request(HTTP_GET, `https://apip.cc/api-json/${c.ip}`)
             .withCache()
             .withRetry()
             .default(defaultJSON)
             .then((res) => res.json())
             .then((res) => {
-                let result = res.cityName + ' - ' + res.regionName;
+                let result = res.City + ' - ' + res.RegionName;
 
-                if (res.cityName === '-' && res.regionName === '-') {
+                if (res.City === '-' && res.RegionName === '-') {
                     result = 'localhost';
                 }
 
@@ -591,7 +591,7 @@ export const comment = (() => {
         const badge = document.getElementById(`badge-${id}`);
         const isChecklist = badge && owns.has(id) && presence ? badge.getAttribute('data-is-presence') === 'true' : false;
 
-        util.disableButton(button);
+        const btn = util.disableButton(button);
 
         if (gif.isOpen(id) && ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?'))) {
             await gif.remove(id);
@@ -602,7 +602,10 @@ export const comment = (() => {
         const form = document.getElementById(`form-inner-${id}`);
         if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
             removeInnerForm(id);
+            return;
         }
+
+        btn.restore();
     };
 
     /**
