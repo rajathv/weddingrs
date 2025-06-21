@@ -132,7 +132,7 @@ export const comment = (() => {
         };
 
         // FREE for commercial and non-commercial use.
-        await request(HTTP_GET, `https://freeipapi.com/api/json/${c.ip}`)
+        await request(HTTP_GET, `https://free.freeipapi.com/api/json/${c.ip}`)
             .withCache()
             .withRetry()
             .default(defaultJSON)

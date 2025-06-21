@@ -14,7 +14,8 @@ export const video = (() => {
      */
     const load = () => {
         const wrap = document.getElementById('video-love-stroy');
-        if (!wrap) {
+        if (!wrap || !wrap.hasAttribute('data-src')) {
+            wrap?.remove();
             return;
         }
 
@@ -38,6 +39,7 @@ export const video = (() => {
          */
         const resToVideo = (res) => res.clone().blob().then((b) => {
             vid.src = URL.createObjectURL(b);
+            vid.style.removeProperty('height');
             document.getElementById('video-love-stroy-loading')?.remove();
 
             return res;
@@ -68,7 +70,8 @@ export const video = (() => {
                     })
                     .withRetry()
                     .default()
-                    .then(resToVideo);
+                    .then(resToVideo)
+                    .finally(() => vid.play());
             });
         };
 
@@ -76,8 +79,7 @@ export const video = (() => {
          * @param {string} src
          * @returns {Promise<Response>}
          */
-        const fetchCache = (src) => c.has(src)
-            .then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)) : c.del(src).then(fetchBasic).then((r) => c.set(src, r)));
+        const fetchCache = (src) => c.has(src).then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)).finally(() => vid.play()) : c.del(src).then(fetchBasic).then((r) => c.set(src, r)));
 
         // run in async
         c.open().then(() => window.isSecureContext ? fetchCache(wrap.getAttribute('data-src')) : fetchBasic());
