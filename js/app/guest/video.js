@@ -31,19 +31,24 @@ export const video = (() => {
         vid.disablePictureInPicture = true;
         vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
 
+        const src = wrap.getAttribute('data-src');
         const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
 
         /**
          * @param {Response} res 
          * @returns {Promise<Response>}
          */
-        const resToVideo = (res) => res.clone().blob().then((b) => {
-            vid.src = URL.createObjectURL(b);
-            vid.style.removeProperty('height');
-            document.getElementById('video-love-stroy-loading')?.remove();
+        const resToVideo = (res) => {
+            vid.addEventListener('canplay', () => {
+                vid.style.removeProperty('height');
+                document.getElementById('video-love-stroy-loading')?.remove();
+            }, { once: true });
 
-            return res;
-        });
+            return res.clone().blob().then((b) => {
+                vid.src = URL.createObjectURL(b);
+                return res;
+            });
+        };
 
         /**
          * @returns {Promise<Response>}
@@ -51,37 +56,48 @@ export const video = (() => {
         const fetchBasic = () => {
             const bar = document.getElementById('progress-bar-video-love-stroy');
             const inf = document.getElementById('progress-info-video-love-stroy');
+            const loaded = new Promise((res) => vid.addEventListener('loadedmetadata', res, { once: true }));
 
-            vid.src = util.escapeHtml(wrap.getAttribute('data-src'));
-            const loaded = new Promise((resolve) => vid.addEventListener('loadedmetadata', resolve, { once: true }));
-
+            vid.src = util.escapeHtml(src);
             wrap.appendChild(vid);
-            observer.observe(vid);
 
             return loaded.then(() => {
-                vid.style.height = `${vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth)}px`;
+                const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
+                vid.style.height = `${height}px`;
 
                 return request(HTTP_GET, vid.src)
                     .withProgressFunc((a, b) => {
-                        const result = Math.min((a / b) * 100).toFixed(0) + '%';
+                        const result = Number((a / b) * 100).toFixed(0) + '%';
 
                         bar.style.width = result;
                         inf.innerText = result;
                     })
                     .withRetry()
                     .default()
-                    .then(resToVideo);
+                    .then(resToVideo)
+                    .finally(() => observer.observe(vid));
             });
         };
 
-        /**
-         * @param {string} src
-         * @returns {Promise<Response>}
-         */
-        const fetchCache = (src) => c.has(src).then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)) : c.del(src).then(fetchBasic).then((r) => c.set(src, r)));
-
         // run in async
-        c.open().then(() => window.isSecureContext ? fetchCache(wrap.getAttribute('data-src')) : fetchBasic());
+        c.open().then(() => {
+            if (!window.isSecureContext) {
+                return fetchBasic();
+            }
+
+            return c.has(src).then((res) => {
+                if (res) {
+                    return resToVideo(res).finally(() => {
+                        wrap.appendChild(vid);
+                        observer.observe(vid);
+                    });
+                }
+
+                return c.del(src)
+                    .then(fetchBasic)
+                    .then((r) => c.set(src, r));
+            });
+        });
     };
 
     /**
