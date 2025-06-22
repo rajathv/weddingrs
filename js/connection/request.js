@@ -16,6 +16,8 @@ export const defaultJSON = {
     'Content-Type': 'application/json'
 };
 
+export const cacheName = 'request';
+
 const singleton = (() => {
     /**
      * @type {Promise<Cache>|null}
@@ -28,7 +30,7 @@ const singleton = (() => {
          */
         getInstance: () => {
             if (!instance) {
-                instance = window.caches.open('request');
+                instance = window.caches.open(cacheName);
             }
 
             return instance;
@@ -198,9 +200,13 @@ export const request = (method, path) => {
                 return wrapperFetch();
             }
 
-            return singleton.getInstance()
-                .then(cacheWrapper)
-                .then((cw) => window.isSecureContext ? cw.has(input).then((res) => res ? Promise.resolve(res) : cw.del(input).then(wrapperFetch).then((r) => cw.set(input, r, reqForceCache, reqTtl))) : wrapperFetch());
+            return singleton.getInstance().then(cacheWrapper).then((cw) => cw.has(input).then((res) => {
+                if (res) {
+                    return Promise.resolve(res);
+                }
+
+                return cw.del(input).then(wrapperFetch).then((r) => cw.set(input, r, reqForceCache, reqTtl));
+            }));
         };
 
         if (reqRetry === 0 && reqDelay === 0) {

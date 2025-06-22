@@ -47,7 +47,7 @@ export const cache = (cacheName) => {
     let forceCache = false;
 
     /**
-     * @returns {Promise<Cache>}
+     * @returns {Promise<Cache>|null}
      */
     const open = async () => {
         if (!cacheObject && window.isSecureContext) {
@@ -117,8 +117,7 @@ export const cache = (cacheName) => {
      * @param {Promise<void>|null} cancel
      * @returns {Promise<void>}
      */
-    const run = async (items, cancel = null) => {
-        await open();
+    const run = (items, cancel = null) => open().then(() => {
         const uniq = new Map();
 
         if (!window.isSecureContext) {
@@ -140,7 +139,7 @@ export const cache = (cacheName) => {
                 return r;
             })
         ));
-    };
+    });
 
     /**
      * @param {string} input

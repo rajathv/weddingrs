@@ -137,15 +137,7 @@ export const comment = (() => {
             .withRetry()
             .default()
             .then((res) => res.json())
-            .then((res) => {
-                let result = res.City + ' - ' + res.RegionName;
-
-                if (res.City === '-' && res.RegionName === '-') {
-                    result = 'localhost';
-                }
-
-                setResult(result);
-            })
+            .then((res) => setResult(res.City.length === 0 && res.RegionName.length === 0 ? 'localhost' : res.City + ' - ' + res.RegionName))
             .catch((err) => setResult(err.message));
     };
 

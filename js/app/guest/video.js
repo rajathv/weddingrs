@@ -70,8 +70,7 @@ export const video = (() => {
                     })
                     .withRetry()
                     .default()
-                    .then(resToVideo)
-                    .finally(() => vid.play());
+                    .then(resToVideo);
             });
         };
 
@@ -79,7 +78,7 @@ export const video = (() => {
          * @param {string} src
          * @returns {Promise<Response>}
          */
-        const fetchCache = (src) => c.has(src).then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)).finally(() => vid.play()) : c.del(src).then(fetchBasic).then((r) => c.set(src, r)));
+        const fetchCache = (src) => c.has(src).then((res) => res ? resToVideo(res).finally(() => wrap.appendChild(vid)).finally(() => observer.observe(vid)) : c.del(src).then(fetchBasic).then((r) => c.set(src, r)));
 
         // run in async
         c.open().then(() => window.isSecureContext ? fetchCache(wrap.getAttribute('data-src')) : fetchBasic());
