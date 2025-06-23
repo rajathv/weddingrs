@@ -45,11 +45,12 @@ Untuk kamu yang ingin mencoba secara gratis:
 - Bootstrap 5.3.6
 - AOS 2.3.4
 - Fontawesome 6.7.2
-- Normalize 8.0.1
 - Canvas Confetti 1.9.3
 - Google Fonts
 - Vanilla JS
-- Image from Pixabay
+
+## 🎨 Credit
+All visual assets in this project are sourced from Pixabay.
 
 ## 🤝 Contributing
 
