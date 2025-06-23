@@ -2,6 +2,7 @@ import { video } from './video.js';
 import { image } from './image.js';
 import { audio } from './audio.js';
 import { progress } from './progress.js';
+import { loadAOS } from '../../libs/aos.js';
 import { util } from '../../common/util.js';
 import { bs } from '../../libs/bootstrap.js';
 import { theme } from '../../common/theme.js';
@@ -290,6 +291,19 @@ export const guest = (() => {
     };
 
     /**
+     * @returns {object}
+     */
+    const loaderAos = () => {
+        progress.add();
+
+        return {
+            load: () => loadAOS()
+                .then(() => progress.complete('aos'))
+                .catch(() => progress.invalid('aos')),
+        };
+    };
+
+    /**
      * @returns {Promise<void>}
      */
     const booting = async () => {
@@ -310,7 +324,6 @@ export const guest = (() => {
             document.getElementById('information')?.remove();
         }
 
-        window.AOS.init();
         document.body.scrollIntoView({ behavior: 'instant' });
 
         // wait until welcome screen is show.
@@ -334,6 +347,7 @@ export const guest = (() => {
         const vid = video.init();
         const img = image.init();
         const aud = audio.init();
+        const aos = loaderAos();
         const cfi = loaderConfetti();
         const token = document.body.getAttribute('data-key');
         const params = new URLSearchParams(window.location.search);
@@ -349,6 +363,7 @@ export const guest = (() => {
             vid.load();
             img.load();
             aud.load();
+            aos.load();
             cfi.load(document.body.getAttribute('data-confetti') === 'true');
 
             document.getElementById('comment')?.remove();
@@ -376,6 +391,7 @@ export const guest = (() => {
 
                 vid.load();
                 aud.load();
+                aos.load();
                 comment.init();
                 cfi.load(data.is_confetti_animation);
 

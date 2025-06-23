@@ -316,7 +316,7 @@ export const request = (method, path) => {
                 }
 
                 if (err.name === ERROR_TYPE) {
-                    err = new Error('Network error or rate limit exceeded');
+                    err = new Error('🟥 Network error or rate limit exceeded');
                 }
 
                 alert(err.message || String(err));

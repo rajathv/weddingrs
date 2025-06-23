@@ -61,6 +61,7 @@ export const util = (() => {
             success: () => exec('🟩'),
             error: () => exec('🟥'),
             warning: () => exec('🟨'),
+            info: () => exec('🟦'),
             custom: (emoji) => exec(emoji),
         };
     };
