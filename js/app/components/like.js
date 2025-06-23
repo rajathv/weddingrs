@@ -47,6 +47,10 @@ export const like = (() => {
 
                         info.setAttribute('data-count-like', String(count - 1));
                     }
+                })
+                .finally(() => {
+                    info.innerText = info.getAttribute('data-count-like');
+                    button.disabled = false;
                 });
         } else {
             await request(HTTP_POST, '/api/comment/' + id)
@@ -61,11 +65,12 @@ export const like = (() => {
 
                         info.setAttribute('data-count-like', String(count + 1));
                     }
+                })
+                .finally(() => {
+                    info.innerText = info.getAttribute('data-count-like');
+                    button.disabled = false;
                 });
         }
-
-        info.innerText = info.getAttribute('data-count-like');
-        button.disabled = false;
     };
 
     /**
