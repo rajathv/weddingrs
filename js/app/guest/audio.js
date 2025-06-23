@@ -1,4 +1,5 @@
 import { progress } from './progress.js';
+import { util } from '../../common/util.js';
 import { cache } from '../../connection/cache.js';
 
 export const audio = (() => {
@@ -55,7 +56,7 @@ export const audio = (() => {
                 music.innerHTML = statePlay;
             } catch (err) {
                 isPlay = false;
-                alert(err);
+                util.notify(err).error();
             }
         };
 

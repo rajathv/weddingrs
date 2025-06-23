@@ -49,6 +49,23 @@ export const util = (() => {
     };
 
     /**
+     * @param {string} message
+     * @returns {{ success: function, error: function, warning: function, custom: function }}
+     */
+    const notify = (message) => {
+        const exec = (emoji) => {
+            window.alert(`${emoji} ${message}`);
+        };
+
+        return {
+            success: () => exec('🟩'),
+            error: () => exec('🟥'),
+            warning: () => exec('🟨'),
+            custom: (emoji) => exec(emoji),
+        };
+    };
+
+    /**
      * @param {HTMLElement} el
      * @param {string} html
      * @returns {HTMLElement}
@@ -162,7 +179,7 @@ export const util = (() => {
         const data = button.getAttribute('data-copy');
 
         if (!data || data.length === 0) {
-            alert('Nothing to copy');
+            notify('Nothing to copy').warning();
             return;
         }
 
@@ -172,7 +189,7 @@ export const util = (() => {
             await navigator.clipboard.writeText(data);
         } catch {
             button.disabled = false;
-            alert('Failed to copy');
+            notify('Failed to copy').error();
             return;
         }
 
@@ -259,6 +276,7 @@ export const util = (() => {
     return {
         loader,
         copy,
+        notify,
         timeOut,
         debounce,
         escapeHtml,

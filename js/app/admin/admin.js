@@ -70,7 +70,7 @@ export const admin = (() => {
             .token(session.getToken())
             .body({ tenor_key: form.value.length ? form.value : null })
             .send()
-            .then(() => alert(`success ${form.value.length ? 'add' : 'remove'} tenor key`))
+            .then(() => util.notify(`success ${form.value.length ? 'add' : 'remove'} tenor key`).success())
             .finally(() => {
                 form.disabled = false;
                 btn.restore();
@@ -110,7 +110,7 @@ export const admin = (() => {
         const newest = document.getElementById('new_password');
 
         if (old.value.length === 0 || newest.value.length === 0) {
-            alert('Password cannot be empty');
+            util.notify('Password cannot be empty').warning();
             return;
         }
 
@@ -133,7 +133,7 @@ export const admin = (() => {
 
                 old.value = null;
                 newest.value = null;
-                alert('Success change password');
+                util.notify('Success change password').success();
             })
             .finally(() => {
                 btn.restore(true);
@@ -151,7 +151,7 @@ export const admin = (() => {
         const name = document.getElementById('form-name');
 
         if (name.value.length === 0) {
-            alert('Name cannot be empty');
+            util.notify('Name cannot be empty').warning();
             return;
         }
 
@@ -168,7 +168,7 @@ export const admin = (() => {
                 }
 
                 util.safeInnerHTML(document.getElementById('dashboard-name'), `${util.escapeHtml(name.value)}<i class="fa-solid fa-hands text-warning ms-2"></i>`);
-                alert('Success change name');
+                util.notify('Success change name').success();
             })
             .finally(() => {
                 name.disabled = false;
@@ -264,12 +264,12 @@ export const admin = (() => {
         const tz = document.getElementById('form-timezone');
 
         if (tz.value.length === 0) {
-            alert('Time zone cannot be empty');
+            util.notify('Time zone cannot be empty').warning();
             return;
         }
 
         if (!Intl.supportedValuesOf('timeZone').includes(tz.value)) {
-            alert('Timezone not supported');
+            util.notify('Timezone not supported').warning();
             return;
         }
 
@@ -285,7 +285,7 @@ export const admin = (() => {
                     return;
                 }
 
-                alert('Success change tz');
+                util.notify('Success change tz').success();
             })
             .finally(() => {
                 tz.disabled = false;

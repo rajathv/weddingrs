@@ -212,7 +212,7 @@ export const gif = (() => {
                 if (err.name === ERROR_ABORT) {
                     console.warn('Fetch abort:', err);
                 } else {
-                    alert(err);
+                    util.notify(err).error();
                 }
             })
             .finally(() => load.release());

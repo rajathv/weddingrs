@@ -325,7 +325,7 @@ export const comment = (() => {
         }
 
         if (!gifIsOpen && form.value?.trim().length === 0) {
-            alert('Comments cannot be empty.');
+            util.notify('Comments cannot be empty.').warning();
             return;
         }
 
@@ -418,7 +418,7 @@ export const comment = (() => {
         const nameValue = name.value;
 
         if (nameValue.length === 0) {
-            alert('Name cannot be empty.');
+            util.notify('Name cannot be empty.').warning();
 
             if (id) {
                 // scroll to form.
@@ -429,7 +429,7 @@ export const comment = (() => {
 
         const presence = document.getElementById('form-presence');
         if (!id && presence && presence.value === '0') {
-            alert('Please select your attendance status.');
+            util.notify('Please select your attendance status.').warning();
             return;
         }
 
@@ -438,7 +438,7 @@ export const comment = (() => {
         const gifCancel = gif.buttonCancel(id);
 
         if (gifIsOpen && !gifId) {
-            alert('Gif cannot be empty.');
+            util.notify('Gif cannot be empty.').warning();
             return;
         }
 
@@ -448,7 +448,7 @@ export const comment = (() => {
 
         const form = document.getElementById(`form-${id ? `inner-${id}` : 'comment'}`);
         if (!gifIsOpen && form.value?.trim().length === 0) {
-            alert('Comments cannot be empty.');
+            util.notify('Comments cannot be empty.').warning();
             return;
         }
 
