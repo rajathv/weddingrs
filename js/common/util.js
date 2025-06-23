@@ -67,6 +67,12 @@ export const util = (() => {
     };
 
     /**
+     * @param {string} message
+     * @returns {boolean}
+     */
+    const ask = (message) => window.confirm(`🟦 ${message}`);
+
+    /**
      * @param {HTMLElement} el
      * @param {string} html
      * @returns {HTMLElement}
@@ -276,6 +282,7 @@ export const util = (() => {
 
     return {
         loader,
+        ask,
         copy,
         notify,
         timeOut,

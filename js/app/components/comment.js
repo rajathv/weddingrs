@@ -248,7 +248,7 @@ export const comment = (() => {
      * @returns {Promise<void>}
      */
     const remove = async (button) => {
-        if (!confirm('Are you sure?')) {
+        if (!util.ask('Are you sure?')) {
             return;
         }
 
@@ -585,14 +585,14 @@ export const comment = (() => {
 
         const btn = util.disableButton(button);
 
-        if (gif.isOpen(id) && ((!gif.getResultId(id) && isChecklist === isPresent) || confirm('Are you sure?'))) {
+        if (gif.isOpen(id) && ((!gif.getResultId(id) && isChecklist === isPresent) || util.ask('Are you sure?'))) {
             await gif.remove(id);
             removeInnerForm(id);
             return;
         }
 
         const form = document.getElementById(`form-inner-${id}`);
-        if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || confirm('Are you sure?')) {
+        if (form.value.length === 0 || (util.base64Encode(form.value) === form.getAttribute('data-original') && isChecklist === isPresent) || util.ask('Are you sure?')) {
             removeInnerForm(id);
             return;
         }

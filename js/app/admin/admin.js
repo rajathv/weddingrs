@@ -82,7 +82,7 @@ export const admin = (() => {
      * @returns {void}
      */
     const regenerate = (button) => {
-        if (!confirm('Are you sure?')) {
+        if (!util.ask('Are you sure?')) {
             return;
         }
 
@@ -297,7 +297,7 @@ export const admin = (() => {
      * @returns {void}
      */
     const logout = () => {
-        if (!confirm('Are you sure?')) {
+        if (!util.ask('Are you sure?')) {
             return;
         }
 
