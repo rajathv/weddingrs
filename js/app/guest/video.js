@@ -19,6 +19,11 @@ export const video = (() => {
             return;
         }
 
+        const src = wrap.getAttribute('data-src');
+        if (!src) {
+            return;
+        }
+
         const vid = document.createElement('video');
         vid.className = wrap.getAttribute('data-vid-class');
         vid.loop = true;
@@ -31,7 +36,6 @@ export const video = (() => {
         vid.disablePictureInPicture = true;
         vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
 
-        const src = wrap.getAttribute('data-src');
         const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
 
         /**

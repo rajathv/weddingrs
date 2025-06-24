@@ -8,40 +8,41 @@ const urlConfetti = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/con
  * @param {ReturnType<typeof cache>} c
  * @returns {Promise<void>}
  */
-const loadCss = (c) => c.get(urlAosCss).then((uri) => new Promise((res, rej) => {
-    const link = document.createElement('link');
-    link.onload = res;
-    link.onerror = rej;
+const loadAOS = (c) => {
 
-    link.rel = 'stylesheet';
-    link.href = uri;
-    document.head.appendChild(link);
-}));
+    /**
+     * @returns {Promise<void>}
+     */
+    const loadCss = () => c.get(urlAosCss).then((uri) => new Promise((res, rej) => {
+        const link = document.createElement('link');
+        link.onload = res;
+        link.onerror = rej;
 
-/**
- * @param {ReturnType<typeof cache>} c
- * @returns {Promise<void>}
- */
-const loadJs = (c) => c.get(urlAosJs).then((uri) => new Promise((res, rej) => {
-    const sc = document.createElement('script');
-    sc.onload = res;
-    sc.onerror = rej;
+        link.rel = 'stylesheet';
+        link.href = uri;
+        document.head.appendChild(link);
+    }));
 
-    sc.src = uri;
-    document.head.appendChild(sc);
-}));
+    /**
+     * @returns {Promise<void>}
+     */
+    const loadJs = () => c.get(urlAosJs).then((uri) => new Promise((res, rej) => {
+        const sc = document.createElement('script');
+        sc.onload = res;
+        sc.onerror = rej;
 
-/**
- * @param {ReturnType<typeof cache>} c
- * @returns {Promise<void>}
- */
-const loadAOS = (c) => Promise.all([loadCss(c), loadJs(c)]).then(() => {
-    if (typeof window.AOS === 'undefined') {
-        throw new Error('AOS library failed to load');
-    }
+        sc.src = uri;
+        document.head.appendChild(sc);
+    }));
 
-    window.AOS.init();
-});
+    return Promise.all([loadCss(), loadJs()]).then(() => {
+        if (typeof window.AOS === 'undefined') {
+            throw new Error('AOS library failed to load');
+        }
+
+        window.AOS.init();
+    });
+};
 
 /**
  * @param {ReturnType<typeof cache>} c
@@ -50,7 +51,9 @@ const loadAOS = (c) => Promise.all([loadCss(c), loadJs(c)]).then(() => {
 const loadConfetti = (c) => c.get(urlConfetti).then((uri) => new Promise((res, rej) => {
     const sc = document.createElement('script');
     sc.onerror = rej;
-    sc.onload = () => typeof window.confetti === 'undefined' ? rej(new Error('Confetti library failed to load')) : res();
+    sc.onload = () => {
+        return typeof window.confetti === 'undefined' ? rej(new Error('Confetti library failed to load')) : res();
+    };
 
     sc.src = uri;
     document.head.appendChild(sc);
