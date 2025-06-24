@@ -82,6 +82,10 @@ html[data-bs-theme="dark"] .bg-white-black {
     width: 25%;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
+
 @media screen and (max-width: 992px) {
     .width-loading {
         width: 50%;

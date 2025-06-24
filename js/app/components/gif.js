@@ -390,7 +390,7 @@ export const gif = (() => {
         const res = document.getElementById(`gif-result-${uuid}`);
         res.setAttribute('data-id', id);
         res.querySelector(`#gif-cancel-${uuid}`).classList.replace('d-none', 'd-flex');
-        res.insertAdjacentHTML('beforeend', `<img src="${await c.get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
+        res.insertAdjacentHTML('beforeend', `<img src="${await get(util.base64Decode(urlBase64))}" class="img-fluid mx-auto gif-image rounded-4" alt="selected-gif">`);
 
         btn.restore();
 

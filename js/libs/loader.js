@@ -65,10 +65,6 @@ const loadConfetti = (c) => c.get(urlConfetti).then((uri) => new Promise((res, r
 export const loader = (opt = {}) => {
     const c = cache('libs');
 
-    if (Object.entries(opt).length === 0) {
-        opt = { aos: true, confetti: true };
-    }
-
     return c.open().then(() => {
         const promises = [];
 
