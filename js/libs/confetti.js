@@ -1,21 +1,3 @@
-import { cache } from '../connection/cache.js';
-
-const url = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js';
-
-/**
- * @returns {Promise<void>}
- */
-export const loadConfetti = () => cache('libs').get(url).then((uri) => new Promise((res, rej) => {
-    const sc = document.createElement('script');
-    sc.onerror = rej;
-    sc.onload = () => typeof window.confetti === 'undefined' ? rej(new Error('Confetti library failed to load')) : res();
-
-    sc.src = uri;
-    sc.crossOrigin = 'anonymous';
-
-    document.head.appendChild(sc);
-}));
-
 const zIndex = 1057;
 
 /**

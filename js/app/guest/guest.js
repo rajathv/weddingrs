@@ -2,9 +2,9 @@ import { video } from './video.js';
 import { image } from './image.js';
 import { audio } from './audio.js';
 import { progress } from './progress.js';
-import { loadAOS } from '../../libs/aos.js';
 import { util } from '../../common/util.js';
 import { bs } from '../../libs/bootstrap.js';
+import { loader } from '../../libs/loader.js';
 import { theme } from '../../common/theme.js';
 import { lang } from '../../common/language.js';
 import { storage } from '../../common/storage.js';
@@ -267,39 +267,21 @@ export const guest = (() => {
     /**
      * @returns {object}
      */
-    const loaderConfetti = () => {
+    const loaderLibs = () => {
         progress.add();
 
         /**
-         * @param {boolean} isLoad 
+         * @param {{aos: boolean, confetti: boolean}} opt
          * @returns {void}
          */
-        const load = (isLoad) => {
-            if (!isLoad) {
-                progress.complete('confetti', true);
-                return;
-            }
-
-            confetti.loadConfetti()
-                .then(() => progress.complete('confetti'))
-                .catch(() => progress.invalid('confetti'));
+        const load = (opt) => {
+            loader(opt)
+                .then(() => progress.complete('libs'))
+                .catch(() => progress.invalid('libs'));
         };
 
         return {
             load,
-        };
-    };
-
-    /**
-     * @returns {object}
-     */
-    const loaderAos = () => {
-        progress.add();
-
-        return {
-            load: () => loadAOS()
-                .then(() => progress.complete('aos'))
-                .catch(() => progress.invalid('aos')),
         };
     };
 
@@ -347,8 +329,7 @@ export const guest = (() => {
         const vid = video.init();
         const img = image.init();
         const aud = audio.init();
-        const aos = loaderAos();
-        const cfi = loaderConfetti();
+        const lib = loaderLibs();
         const token = document.body.getAttribute('data-key');
         const params = new URLSearchParams(window.location.search);
 
@@ -363,8 +344,7 @@ export const guest = (() => {
             vid.load();
             img.load();
             aud.load();
-            aos.load();
-            cfi.load(document.body.getAttribute('data-confetti') === 'true');
+            lib.load({ confetti: document.body.getAttribute('data-confetti') === 'true' });
 
             document.getElementById('comment')?.remove();
             document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
@@ -382,7 +362,7 @@ export const guest = (() => {
             }
 
             // fetch after document is loaded.
-            const loader = () => session.guest(params.get('k') ?? token).then(({ data }) => {
+            const load = () => session.guest(params.get('k') ?? token).then(({ data }) => {
                 progress.complete('config');
 
                 if (img.hasDataSrc()) {
@@ -391,9 +371,8 @@ export const guest = (() => {
 
                 vid.load();
                 aud.load();
-                aos.load();
                 comment.init();
-                cfi.load(data.is_confetti_animation);
+                lib.load({ confetti: data.is_confetti_animation });
 
                 comment.show()
                     .then(() => progress.complete('comment'))
@@ -401,7 +380,7 @@ export const guest = (() => {
 
             }).catch(() => progress.invalid('config'));
 
-            window.addEventListener('load', loader);
+            window.addEventListener('load', load);
         }
     };
 
