@@ -152,10 +152,16 @@ export const gif = (() => {
             prog.style.width = Math.min((loaded / total) * 100, 100).toString() + '%';
         };
 
+        const err = () => {
+            prog.style.backgroundColor = 'red';
+            info.innerText = `Error loading GIFs`;
+        };
+
         return {
             release,
             until,
             step,
+            err,
         };
     };
 
@@ -212,6 +218,7 @@ export const gif = (() => {
                 if (err.name === ERROR_ABORT) {
                     console.warn('Fetch abort:', err);
                 } else {
+                    load.err();
                     util.notify(err).error();
                 }
             })
