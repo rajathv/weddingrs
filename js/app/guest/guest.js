@@ -296,6 +296,7 @@ export const guest = (() => {
         normalizeArabicFont();
         buildGoogleCalendar();
 
+        document.body.scrollIntoView({ behavior: 'instant' });
         document.getElementById('root').classList.remove('opacity-0');
 
         if (information.has('presence')) {
@@ -305,8 +306,6 @@ export const guest = (() => {
         if (information.get('info')) {
             document.getElementById('information')?.remove();
         }
-
-        document.body.scrollIntoView({ behavior: 'instant' });
 
         // wait until welcome screen is show.
         await util.changeOpacity(document.getElementById('welcome'), true);
@@ -341,13 +340,13 @@ export const guest = (() => {
         });
 
         if (!token || token.length <= 0) {
+            document.getElementById('comment')?.remove();
+            document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
+
             vid.load();
             img.load();
             aud.load();
             lib.load({ confetti: document.body.getAttribute('data-confetti') === 'true' });
-
-            document.getElementById('comment')?.remove();
-            document.querySelector('a.nav-link[href="#comment"]')?.closest('li.nav-item')?.remove();
         }
 
         if (token && token.length > 0) {
