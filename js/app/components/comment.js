@@ -138,13 +138,13 @@ export const comment = (() => {
             .default()
             .then((res) => res.json())
             .then((res) => {
-                let result = res.City + ' - ' + res.RegionName;
+                let result = 'localhost';
 
-                if (res.City.length === 0 && res.RegionName.length === 0) {
-                    result = res.Capital + ' - ' + res.CountryName;
-
-                    if (res.Capital.length === 0 && res.CountryName.length === 0) {
-                        result = 'localhost';
+                if (res.status === 'success') {
+                    if (res.City.length !== 0 && res.RegionName.length !== 0) {
+                        result = res.City + ' - ' + res.RegionName;
+                    } else if (res.Capital.length !== 0 && res.CountryName.length !== 0) {
+                        result = res.Capital + ' - ' + res.CountryName;
                     }
                 }
 
