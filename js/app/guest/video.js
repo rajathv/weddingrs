@@ -10,18 +10,18 @@ export const video = (() => {
     let c = null;
 
     /**
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     const load = () => {
         const wrap = document.getElementById('video-love-stroy');
         if (!wrap || !wrap.hasAttribute('data-src')) {
             wrap?.remove();
-            return;
+            return Promise.resolve();
         }
 
         const src = wrap.getAttribute('data-src');
         if (!src) {
-            return;
+            return Promise.resolve();
         }
 
         const vid = document.createElement('video');
@@ -87,23 +87,18 @@ export const video = (() => {
             });
         };
 
-        // run in async
-        c.open().then(() => {
-            if (!window.isSecureContext) {
-                return fetchBasic();
+        if (!window.isSecureContext) {
+            return fetchBasic();
+        }
+
+        return c.has(src).then((res) => {
+            if (!res) {
+                return c.del(src).then(fetchBasic).then((r) => c.set(src, r));
             }
 
-            return c.has(src).then((res) => {
-                if (res) {
-                    return resToVideo(res).finally(() => {
-                        wrap.appendChild(vid);
-                        observer.observe(vid);
-                    });
-                }
-
-                return c.del(src)
-                    .then(fetchBasic)
-                    .then((r) => c.set(src, r));
+            return resToVideo(res).finally(() => {
+                wrap.appendChild(vid);
+                observer.observe(vid);
             });
         });
     };
