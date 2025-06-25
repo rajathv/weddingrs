@@ -1,7 +1,7 @@
 export const storage = (table) => {
 
     /**
-     * @param {string=} key
+     * @param {string|null} [key=null]
      * @returns {any}
      */
     const get = (key = null) => {

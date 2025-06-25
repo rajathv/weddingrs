@@ -79,9 +79,10 @@ export const video = (() => {
                     .withRetry()
                     .default()
                     .then(resToVideo)
-                    .catch(() => {
+                    .catch((err) => {
                         bar.style.backgroundColor = 'red';
                         inf.innerText = `Error loading video`;
+                        console.error(err);
                     })
                     .finally(() => observer.observe(vid));
             });
