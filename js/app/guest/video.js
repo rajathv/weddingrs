@@ -43,7 +43,7 @@ export const video = (() => {
          * @returns {Promise<Response>}
          */
         const resToVideo = (res) => {
-            vid.addEventListener('canplay', () => {
+            vid.addEventListener('loadedmetadata', () => {
                 vid.style.removeProperty('height');
                 document.getElementById('video-love-stroy-loading')?.remove();
             }, { once: true });
@@ -60,7 +60,7 @@ export const video = (() => {
         const fetchBasic = () => {
             const bar = document.getElementById('progress-bar-video-love-stroy');
             const inf = document.getElementById('progress-info-video-love-stroy');
-            const loaded = new Promise((res) => vid.addEventListener('canplay', res, { once: true }));
+            const loaded = new Promise((res) => vid.addEventListener('loadedmetadata', res, { once: true }));
 
             vid.src = util.escapeHtml(src);
             wrap.appendChild(vid);
