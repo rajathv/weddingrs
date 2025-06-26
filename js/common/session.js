@@ -29,16 +29,13 @@ export const session = (() => {
         return request(HTTP_POST, '/api/session')
             .body(body)
             .send(dto.tokenResponse)
-            .then(
-                (res) => {
-                    if (res.code === HTTP_STATUS_OK) {
-                        setToken(res.data.token);
-                    }
+            .then((res) => {
+                if (res.code === HTTP_STATUS_OK) {
+                    setToken(res.data.token);
+                }
 
-                    return res.code === HTTP_STATUS_OK;
-                },
-                () => false
-            );
+                return res.code === HTTP_STATUS_OK;
+            });
     };
 
     /**

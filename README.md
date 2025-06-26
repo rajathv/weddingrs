@@ -42,7 +42,7 @@ Untuk kamu yang ingin mencoba secara gratis:
 
 ## ⚙️ Tech stack
 
-- Bootstrap 5.3.6
+- Bootstrap 5.3.7
 - AOS 2.3.4
 - Fontawesome 6.7.2
 - Canvas Confetti 1.9.3

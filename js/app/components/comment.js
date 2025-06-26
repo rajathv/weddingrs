@@ -278,7 +278,7 @@ export const comment = (() => {
         const status = await request(HTTP_DELETE, '/api/comment/' + owns.get(id))
             .token(session.getToken())
             .send(dto.statusResponse)
-            .then((res) => res.data.status, () => false);
+            .then((res) => res.data.status);
 
         if (!status) {
             btn.restore();
@@ -356,7 +356,7 @@ export const comment = (() => {
             .token(session.getToken())
             .body(dto.updateCommentRequest(presence ? isPresent : null, gifIsOpen ? null : form.value, gifId))
             .send(dto.statusResponse)
-            .then((res) => res.data.status, () => false);
+            .then((res) => res.data.status);
 
         if (form) {
             form.disabled = false;
