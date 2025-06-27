@@ -180,7 +180,7 @@ export const request = (method, path) => {
                     chunks.push(value);
                     receivedLength += value.length;
 
-                    await callbackFunc(receivedLength, contentLength, window.structuredClone(chunks));
+                    await callbackFunc(receivedLength, contentLength, window.structuredClone ? window.structuredClone(chunks) : chunks);
                 }
 
                 const contentType = res.headers.get('Content-Type') ?? 'application/octet-stream';
