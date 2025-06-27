@@ -110,10 +110,6 @@ export const comment = (() => {
      * @returns {Promise<void>}
      */
     const fetchTracker = async (c) => {
-        if (!session.isAdmin()) {
-            return;
-        }
-
         if (c.comments) {
             await Promise.all(c.comments.map((v) => fetchTracker(v)));
         }
@@ -245,7 +241,7 @@ export const comment = (() => {
             .then(async (res) => {
                 comments.dispatchEvent(new Event('undangan.comment.result'));
 
-                if (res.data.lists) {
+                if (res.data.lists && session.isAdmin()) {
                     await Promise.all(res.data.lists.map((v) => fetchTracker(v)));
                 }
 
