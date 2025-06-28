@@ -540,16 +540,22 @@ export const gif = (() => {
     /**
      * @returns {void}
      */
+    const isHasKey = () => {
+        if (!config.get('tenor_key')) {
+            isEnabled = false;
+            document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.remove();
+        }
+    };
+
+    /**
+     * @returns {void}
+     */
     const init = () => {
         c = cache('gif');
         objectPool = new Map();
         eventListeners = new Map();
         config = storage('config');
-
-        if (!config.get('tenor_key')) {
-            isEnabled = false;
-            document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.remove();
-        }
+        document.addEventListener('undangan.session', isHasKey);
     };
 
     return {

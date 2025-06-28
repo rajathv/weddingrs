@@ -68,6 +68,7 @@ export const session = (() => {
                     config.set(k, v);
                 }
 
+                document.dispatchEvent(new Event('undangan.session'));
                 setToken(token);
                 return res;
             });

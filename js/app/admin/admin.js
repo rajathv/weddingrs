@@ -32,6 +32,7 @@ export const admin = (() => {
         document.getElementById('dashboard-tenorkey').value = res.data.tenor_key;
 
         storage('config').set('tenor_key', res.data.tenor_key);
+        document.dispatchEvent(new Event('undangan.session'));
 
         request(HTTP_GET, '/api/stats').token(session.getToken()).withCache(1000 * 30).withForceCache().send().then((resp) => {
             document.getElementById('count-comment').textContent = String(resp.data.comments).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -39,6 +40,8 @@ export const admin = (() => {
             document.getElementById('count-present').textContent = String(resp.data.present).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             document.getElementById('count-absent').textContent = String(resp.data.absent).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         });
+
+        comment.show();
     });
 
     /**
@@ -311,15 +314,11 @@ export const admin = (() => {
         lang.init();
         lang.setDefault('en');
 
+        comment.init();
         offline.init();
         theme.spyTop();
 
-        const booted = () => getUserStats().then(() => {
-            comment.init();
-            comment.show();
-        });
-
-        document.addEventListener('hidden.bs.modal', booted);
+        document.addEventListener('hidden.bs.modal', getUserStats);
 
         try {
             const raw = window.location.hash.slice(1);
@@ -333,7 +332,7 @@ export const admin = (() => {
                 throw new Error('Invalid token');
             }
 
-            booted();
+            getUserStats();
         } catch {
             auth.clearSession();
         }

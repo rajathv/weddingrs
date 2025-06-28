@@ -320,6 +320,7 @@ export const guest = (() => {
     const domLoaded = () => {
         lang.init();
         offline.init();
+        comment.init();
         progress.init();
 
         config = storage('config');
@@ -370,7 +371,6 @@ export const guest = (() => {
 
                 vid.load();
                 aud.load();
-                comment.init();
                 lib.load({ confetti: data.is_confetti_animation });
 
                 comment.show()
