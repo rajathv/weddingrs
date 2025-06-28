@@ -14,9 +14,9 @@ export const auth = (() => {
 
     /**
      * @param {HTMLButtonElement} button
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    const login = async (button) => {
+    const login = (button) => {
         const btn = util.disableButton(button);
 
         const formEmail = document.getElementById('loginEmail');
@@ -25,16 +25,17 @@ export const auth = (() => {
         formEmail.disabled = true;
         formPassword.disabled = true;
 
-        const res = await session.login(dto.postSessionRequest(formEmail.value, formPassword.value));
-        if (res) {
-            formEmail.value = null;
-            formPassword.value = null;
-            bs.modal('mainModal').hide();
-        }
-
-        btn.restore();
-        formEmail.disabled = false;
-        formPassword.disabled = false;
+        session.login(dto.postSessionRequest(formEmail.value, formPassword.value)).then((res) => {
+            if (res) {
+                formEmail.value = null;
+                formPassword.value = null;
+                bs.modal('mainModal').hide();
+            }
+        }).finally(() => {
+            btn.restore();
+            formEmail.disabled = false;
+            formPassword.disabled = false;
+        });
     };
 
     /**

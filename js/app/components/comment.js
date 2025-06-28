@@ -492,8 +492,7 @@ export const comment = (() => {
         const response = await request(HTTP_POST, `/api/comment?lang=${lang.getLanguage()}`)
             .token(session.getToken())
             .body(dto.postCommentRequest(id, nameValue, isPresence, gifIsOpen ? null : form.value, gifId))
-            .send(dto.getCommentResponse)
-            .then((res) => res, () => null);
+            .send(dto.getCommentResponse);
 
         if (name) {
             name.disabled = false;
