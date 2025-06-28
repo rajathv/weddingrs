@@ -32,6 +32,7 @@ export const session = (() => {
             .then((res) => {
                 if (res.code === HTTP_STATUS_OK) {
                     setToken(res.data.token);
+                    document.dispatchEvent(new Event('undangan.admin.login'));
                 }
 
                 return res.code === HTTP_STATUS_OK;
