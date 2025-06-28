@@ -274,7 +274,7 @@ export const util = (() => {
      */
     const convertMarkdownToHTML = (str) => {
         listsMarkDown.forEach(([k, v]) => {
-            str = str.replace(new RegExp(`\\${k}(?=\\S)(.*?)(?<!\\s)\\${k}`, 'gs'), v);
+            str = str.replace(new RegExp(`\\${k}(\\S(?:[\\s\\S]*?\\S)?)\\${k}`, 'g'), v);
         });
 
         return str;

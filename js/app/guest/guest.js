@@ -248,7 +248,7 @@ export const guest = (() => {
          * @param {string} d 
          * @returns {string}
          */
-        const formatDate = (d) => (new Date(d + ':00Z')).toISOString().replace(/[-:]/g, '').split('.').shift();
+        const formatDate = (d) => (new Date(d.replace(' ', 'T') + ':00Z')).toISOString().replace(/[-:]/g, '').split('.').shift();
 
         const url = new URL('https://calendar.google.com/calendar/render');
         const data = new URLSearchParams({
