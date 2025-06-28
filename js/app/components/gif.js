@@ -35,8 +35,6 @@ export const gif = (() => {
      */
     let config = null;
 
-    let isEnabled = true;
-
     /**
      * @param {string} uuid
      * @param {object[]} lists
@@ -535,16 +533,13 @@ export const gif = (() => {
     /**
      * @returns {boolean}
      */
-    const isActive = () => isEnabled;
+    const isActive = () => !!config.get('tenor_key');
 
     /**
      * @returns {void}
      */
-    const isHasKey = () => {
-        if (!config.get('tenor_key')) {
-            isEnabled = false;
-            document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.remove();
-        }
+    const showButton = () => {
+        document.querySelector('[onclick="undangan.comment.gif.open(undangan.comment.gif.default)"]')?.classList.toggle('d-none', !config.get('tenor_key'));
     };
 
     /**
@@ -555,7 +550,7 @@ export const gif = (() => {
         objectPool = new Map();
         eventListeners = new Map();
         config = storage('config');
-        document.addEventListener('undangan.session', isHasKey);
+        document.addEventListener('undangan.session', showButton);
     };
 
     return {
