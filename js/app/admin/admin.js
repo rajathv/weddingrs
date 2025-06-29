@@ -318,7 +318,7 @@ export const admin = (() => {
         offline.init();
         theme.spyTop();
 
-        document.addEventListener('undangan.admin.login', getUserStats);
+        document.addEventListener('hidden.bs.modal', getUserStats);
 
         try {
             const raw = window.location.hash.slice(1);

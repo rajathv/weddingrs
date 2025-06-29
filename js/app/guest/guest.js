@@ -363,6 +363,7 @@ export const guest = (() => {
 
             // fetch after document is loaded.
             const load = () => session.guest(params.get('k') ?? token).then(({ data }) => {
+                document.dispatchEvent(new Event('undangan.session'));
                 progress.complete('config');
 
                 if (img.hasDataSrc()) {
