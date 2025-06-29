@@ -110,8 +110,9 @@ svg {
     line-height: 0;
     width: 100%;
     height: auto;
-    shape-rendering: crispEdges !important;
+    shape-rendering: geometricPrecision !important;
     transform: translateZ(0) !important;
+    backface-visibility: hidden;
 }
 
 .no-gap-bottom {
