@@ -99,8 +99,10 @@ html[data-bs-theme="dark"] .bg-white-black {
 }
 
 .svg-wrapper {
-    overflow: hidden;
+    display: block;
     line-height: 0;
+    overflow: hidden;
+    margin-top: -0.1rem !important;
 }
 
 svg {
@@ -108,6 +110,8 @@ svg {
     line-height: 0;
     width: 100%;
     height: auto;
+    shape-rendering: crispEdges !important;
+    transform: translateZ(0) !important;
 }
 
 .no-gap-bottom {
