@@ -3,7 +3,7 @@ import { bs } from '../../libs/bootstrap.js';
 import { dto } from '../../connection/dto.js';
 import { storage } from '../../common/storage.js';
 import { session } from '../../common/session.js';
-import { request, HTTP_GET, HTTP_STATUS_OK, cacheName } from '../../connection/request.js';
+import { request, HTTP_GET, HTTP_STATUS_OK, removeCache } from '../../connection/request.js';
 
 export const auth = (() => {
 
@@ -42,9 +42,7 @@ export const auth = (() => {
      * @returns {Promise<void>}
      */
     const clearSession = async () => {
-        if (window.isSecureContext) {
-            await window.caches.delete(cacheName);
-        }
+        await removeCache();
 
         user.clear();
         session.logout();

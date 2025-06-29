@@ -35,8 +35,20 @@ const singleton = (() => {
 
             return instance;
         },
+        purge: () => {
+            instance = null;
+        },
     };
 })();
+
+export const removeCache = async () => {
+    if (!window.isSecureContext) {
+        return;
+    }
+
+    singleton.purge();
+    await window.caches.delete(cacheName);
+};
 
 /**
  * @param {Cache} cacheObject 
