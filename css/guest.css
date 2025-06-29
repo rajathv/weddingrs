@@ -98,6 +98,18 @@ html[data-bs-theme="dark"] .bg-white-black {
     }
 }
 
+.svg-wrapper {
+    overflow: hidden;
+    line-height: 0;
+}
+
+svg {
+    display: block;
+    line-height: 0;
+    width: 100%;
+    height: auto;
+}
+
 .no-gap-bottom {
     margin-bottom: -0.75rem !important;
 }
