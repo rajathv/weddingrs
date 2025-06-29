@@ -102,17 +102,8 @@ html[data-bs-theme="dark"] .bg-white-black {
     display: block;
     line-height: 0;
     overflow: hidden;
-    margin-top: -0.1rem !important;
-}
-
-svg {
-    display: block;
-    line-height: 0;
-    width: 100%;
-    height: auto;
-    shape-rendering: geometricPrecision !important;
-    transform: translateZ(0) !important;
     backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 .no-gap-bottom {
