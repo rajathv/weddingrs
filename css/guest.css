@@ -98,12 +98,16 @@ html[data-bs-theme="dark"] .bg-white-black {
     }
 }
 
-.svg-wrapper {
+svg {
     display: block;
     line-height: 0;
-    overflow: hidden;
+    shape-rendering: geometricPrecision;
     backface-visibility: hidden;
-    transform: translateZ(0);
+}
+
+.svg-wrapper {
+    overflow: hidden !important;
+    transform: translateZ(0) !important;
 }
 
 .no-gap-bottom {
