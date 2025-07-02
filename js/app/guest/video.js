@@ -1,3 +1,4 @@
+import { progress } from './progress.js';
 import { util } from '../../common/util.js';
 import { cache } from '../../connection/cache.js';
 import { HTTP_GET, request } from '../../connection/request.js';
@@ -16,11 +17,13 @@ export const video = (() => {
         const wrap = document.getElementById('video-love-stroy');
         if (!wrap || !wrap.hasAttribute('data-src')) {
             wrap?.remove();
+            progress.complete('video', true);
             return Promise.resolve();
         }
 
         const src = wrap.getAttribute('data-src');
         if (!src) {
+            progress.complete('video', true);
             return Promise.resolve();
         }
 
@@ -62,10 +65,16 @@ export const video = (() => {
             const inf = document.getElementById('progress-info-video-love-stroy');
             const loaded = new Promise((res) => vid.addEventListener('loadedmetadata', res, { once: true }));
 
+            const ab = new AbortController();
+            vid.addEventListener('error', () => progress.invalid('video'), { signal: ab.signal, once: true });
+
             vid.src = util.escapeHtml(src);
             wrap.appendChild(vid);
 
             return loaded.then(() => {
+                ab.abort();
+                progress.complete('video');
+
                 const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
                 vid.style.height = `${height}px`;
 
@@ -97,6 +106,7 @@ export const video = (() => {
                 return c.del(src).then(fetchBasic).then((r) => c.set(src, r));
             }
 
+            progress.complete('video');
             return resToVideo(res).finally(() => {
                 wrap.appendChild(vid);
                 observer.observe(vid);
@@ -108,6 +118,7 @@ export const video = (() => {
      * @returns {object}
      */
     const init = () => {
+        progress.add();
         c = cache('video').withForceCache();
 
         return {
