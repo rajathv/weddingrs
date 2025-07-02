@@ -25,13 +25,13 @@ svg>path {
 }
 
 html[data-bs-theme="dark"] .navbar {
-    background-color: rgba(var(--bs-dark-rgb), 0.8) !important;
-    backdrop-filter: blur(0.625rem);
+    background-color: rgba(var(--bs-dark-rgb), 0.75) !important;
+    backdrop-filter: blur(0.5rem);
 }
 
 html[data-bs-theme="light"] .navbar {
-    background-color: rgba(var(--bs-light-rgb), 0.8) !important;
-    backdrop-filter: blur(0.625rem);
+    background-color: rgba(var(--bs-light-rgb), 0.75) !important;
+    backdrop-filter: blur(0.5rem);
 }
 
 html[data-bs-theme="dark"] .text-theme-auto {
@@ -43,11 +43,11 @@ html[data-bs-theme="light"] .text-theme-auto {
 }
 
 html[data-bs-theme="dark"] .nav-link {
-    color: rgba(var(--bs-white-rgb), 0.55);
+    color: rgba(var(--bs-white-rgb), 0.6);
 }
 
 html[data-bs-theme="light"] .nav-link {
-    color: rgba(var(--bs-black-rgb), 0.55);
+    color: rgba(var(--bs-black-rgb), 0.6);
 }
 
 html[data-bs-theme="dark"] .bg-theme-auto {

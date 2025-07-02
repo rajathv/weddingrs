@@ -29,12 +29,12 @@ html {
 
 html[data-bs-theme="dark"] .btn-transparent {
     background-color: rgba(var(--bs-dark-rgb), 0.5) !important;
-    backdrop-filter: blur(0.625rem);
+    backdrop-filter: blur(0.5rem);
 }
 
 html[data-bs-theme="light"] .btn-transparent {
     background-color: rgba(var(--bs-light-rgb), 0.5) !important;
-    backdrop-filter: blur(0.625rem);
+    backdrop-filter: blur(0.5rem);
 }
 
 .loading-page {
@@ -56,19 +56,19 @@ html[data-bs-theme="dark"] .color-theme-svg {
 }
 
 html[data-bs-theme="light"] .bg-light-dark {
-    background-color: rgba(var(--bs-light-rgb), 1);
+    background-color: rgb(var(--bs-light-rgb));
 }
 
 html[data-bs-theme="dark"] .bg-light-dark {
-    background-color: rgba(var(--bs-dark-rgb), 1);
+    background-color: rgb(var(--bs-dark-rgb));
 }
 
 html[data-bs-theme="light"] .bg-white-black {
-    background-color: rgba(var(--bs-white-rgb), 1);
+    background-color: rgb(var(--bs-white-rgb));
 }
 
 html[data-bs-theme="dark"] .bg-white-black {
-    background-color: rgba(var(--bs-black-rgb), 1);
+    background-color: rgb(var(--bs-black-rgb));
 }
 
 .bg-cover-home {
