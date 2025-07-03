@@ -65,14 +65,12 @@ export const video = (() => {
             const inf = document.getElementById('progress-info-video-love-stroy');
             const loaded = new Promise((res) => vid.addEventListener('loadedmetadata', res, { once: true }));
 
-            const ab = new AbortController();
-            vid.addEventListener('error', () => progress.invalid('video'), { signal: ab.signal, once: true });
+            vid.addEventListener('error', () => progress.invalid('video'), { once: true });
 
             vid.src = util.escapeHtml(src);
             wrap.appendChild(vid);
 
             return loaded.then(() => {
-                ab.abort();
                 progress.complete('video');
 
                 const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
