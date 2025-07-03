@@ -1,7 +1,7 @@
 import { progress } from './progress.js';
 import { util } from '../../common/util.js';
 import { cache } from '../../connection/cache.js';
-import { HTTP_GET, request } from '../../connection/request.js';
+import { HTTP_GET, request, HTTP_STATUS_OK } from '../../connection/request.js';
 
 export const video = (() => {
 
@@ -63,36 +63,45 @@ export const video = (() => {
         const fetchBasic = () => {
             const bar = document.getElementById('progress-bar-video-love-stroy');
             const inf = document.getElementById('progress-info-video-love-stroy');
-            const loaded = new Promise((res) => vid.addEventListener('loadedmetadata', res, { once: true }));
 
-            vid.addEventListener('error', () => progress.invalid('video'), { once: true });
+            return request(HTTP_GET, src)
+                .default({ 'Range': 'bytes=0-10' })
+                .then((res) => {
+                    if (res.status === HTTP_STATUS_OK) {
+                        return Promise.resolve();
+                    }
 
-            vid.src = util.escapeHtml(src);
-            wrap.appendChild(vid);
+                    vid.addEventListener('error', () => progress.invalid('video'), { once: true });
+                    const loaded = new Promise((r) => vid.addEventListener('loadedmetadata', r, { once: true }));
 
-            return loaded.then(() => {
-                progress.complete('video');
+                    vid.src = util.escapeHtml(src);
+                    wrap.appendChild(vid);
 
-                const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
-                vid.style.height = `${height}px`;
+                    return loaded;
+                })
+                .then(() => {
+                    progress.complete('video');
 
-                return request(HTTP_GET, vid.src)
-                    .withProgressFunc((a, b) => {
-                        const result = Number((a / b) * 100).toFixed(0) + '%';
+                    const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
+                    vid.style.height = `${height}px`;
 
-                        bar.style.width = result;
-                        inf.innerText = result;
-                    })
-                    .withRetry()
-                    .default()
-                    .then(resToVideo)
-                    .catch((err) => {
-                        bar.style.backgroundColor = 'red';
-                        inf.innerText = `Error loading video`;
-                        console.error(err);
-                    })
-                    .finally(() => observer.observe(vid));
-            });
+                    return request(HTTP_GET, vid.src)
+                        .withProgressFunc((a, b) => {
+                            const result = Number((a / b) * 100).toFixed(0) + '%';
+
+                            bar.style.width = result;
+                            inf.innerText = result;
+                        })
+                        .withRetry()
+                        .default()
+                        .then(resToVideo)
+                        .catch((err) => {
+                            bar.style.backgroundColor = 'red';
+                            inf.innerText = `Error loading video`;
+                            console.error(err);
+                        })
+                        .finally(() => observer.observe(vid));
+                });
         };
 
         if (!window.isSecureContext) {
