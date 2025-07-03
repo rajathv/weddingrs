@@ -52,7 +52,7 @@ const loadConfetti = (c) => c.get(urlConfetti).then((uri) => new Promise((res, r
     const sc = document.createElement('script');
     sc.onerror = rej;
     sc.onload = () => {
-        return typeof window.confetti === 'undefined' ? rej(new Error('Confetti library failed to load')) : res();
+        typeof window.confetti === 'undefined' ? rej(new Error('Confetti library failed to load')) : res();
     };
 
     sc.src = uri;
