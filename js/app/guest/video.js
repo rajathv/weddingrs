@@ -68,7 +68,7 @@ export const video = (() => {
                 .default({ 'Range': 'bytes=0-10' })
                 .then((res) => {
                     if (res.status === HTTP_STATUS_OK) {
-                        return Promise.resolve();
+                        vid.preload = 'none';
                     }
 
                     vid.addEventListener('error', () => progress.invalid('video'), { once: true });
