@@ -1,7 +1,7 @@
 import { progress } from './progress.js';
 import { util } from '../../common/util.js';
 import { cache } from '../../connection/cache.js';
-import { HTTP_GET, request, HTTP_STATUS_OK } from '../../connection/request.js';
+import { HTTP_GET, request, HTTP_STATUS_OK, HTTP_STATUS_PARTIAL_CONTENT } from '../../connection/request.js';
 
 export const video = (() => {
 
@@ -65,10 +65,22 @@ export const video = (() => {
             const inf = document.getElementById('progress-info-video-love-stroy');
 
             return request(HTTP_GET, src)
-                .default({ 'Range': 'bytes=0-10' })
+                .withCancel(new Promise((re) => vid.addEventListener('undangan.video.prefetch', re, { once: true })))
+                .default({ 'Range': 'bytes=0-1' })
                 .then((res) => {
+                    vid.dispatchEvent(new Event('undangan.video.prefetch'));
+
                     if (res.status === HTTP_STATUS_OK) {
                         vid.preload = 'none';
+
+                        vid.src = util.escapeHtml(src);
+                        wrap.appendChild(vid);
+
+                        return Promise.resolve();
+                    }
+
+                    if (res.status !== HTTP_STATUS_PARTIAL_CONTENT) {
+                        throw new Error('failed to fetch video');
                     }
 
                     vid.addEventListener('error', () => progress.invalid('video'), { once: true });
