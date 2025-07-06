@@ -53,7 +53,7 @@ export const card = (() => {
     const renderLike = (c) => {
         return `
         <button style="font-size: 0.8rem;" onclick="undangan.comment.like.love(this)" data-uuid="${c.uuid}" class="btn btn-sm btn-outline-auto ms-auto rounded-3 p-0 shadow-sm d-flex justify-content-start align-items-center" data-offline-disabled="false">
-            <span class="my-0 mx-1" data-count-like="${c.comment_like}">${c.comment_like}</span>
+            <span class="my-0 mx-1" data-count-like="${c.like_count}">${c.like_count}</span>
             <i class="me-1 ${likes.has(c.uuid) ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart'}"></i>
         </button>`;
     };
