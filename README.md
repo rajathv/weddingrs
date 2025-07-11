@@ -14,18 +14,20 @@ Untuk kamu yang ingin melihat demo terlebih dahulu:
 
 ## 📦 Documentation
 
-- Jalankan: `npm install` serta `npm run dev`.
-- Ubah isi dari index.html sesuai yang kamu mau.
-- Jika tidak ingin menggunakan `komentar` bisa hapus `data-url` dan `data-key` pada body index.
-- Sesuaikan `data-url` pada body index dan dashboard sesuai url backend (jika deploy sendiri).
-- Sesuaikan juga `data-key` dengan access key pada dashboard.
-- Jika mau menggunakan gif, dapatkan tenor key di [developers.google.com/tenor](https://developers.google.com/tenor/guides/quickstart)
-- Waktu deploy: `npm run build:public` dan folder public yang akan di deploy.
-- Self deployment backend bisa lihat dibawah atau ingin coba gratis pada trial api.
+* Jalankan perintah `npm install`, lalu `npm run dev`, dan buka `http://localhost:8080`.
+* Ubah isi file `index.html` sesuai keinginanmu.
+* Jika tidak ingin menggunakan **fitur komentar**, hapus atribut `data-url` dan `data-key` di elemen `<body>` pada index.html.
+* Sesuaikan `data-url` pada `<body>` di index dan dashboard sesuai dengan URL backend (jika kamu meng-hosting sendiri).
+* Sesuaikan juga `data-key` di index dengan access key yang bisa kamu ambil dari dashboard.
+* Jika ingin menggunakan GIF, dapatkan Tenor API key di [developers.google.com/tenor](https://developers.google.com/tenor/guides/quickstart).
+* Untuk deployment, jalankan `npm run build:public`. Folder `public` adalah yang akan kamu upload.
+* Untuk backend self-hosting, lihat penjelasan di bawah, atau gunakan **trial API** secara gratis.
 
-> Undangan ini hanya HTML, CSS, dan JavaScript seperti biasa. NPM digunakan untuk build file js agar dieksekusi secara langsung (bukan tipe module lagi).
+> Undangan ini hanya menggunakan HTML, CSS, dan JavaScript biasa. NPM digunakan agar file JavaScript bisa langsung dieksekusi (bukan bertipe module lagi).
 
-> Jika kamu punya pertanyaan, silakan gunakan fitur `discussions` agar teman-teman yang lain juga mengetahuinya.
+> Jika tetap ingin tanpa NPM, ubah `src="./dist/guest.js"` menjadi `src="./js/guest.js" type="module"` pada tag `<head>` di index dan dashboard.html, dengan risiko glitch tema di awal loading.
+
+> Jika kamu punya pertanyaan, gunakan fitur `discussions` agar bisa dibaca juga oleh teman-teman lainnya.
 
 ## 🔥 Deployment API
 

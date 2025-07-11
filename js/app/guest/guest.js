@@ -296,9 +296,6 @@ export const guest = (() => {
         normalizeArabicFont();
         buildGoogleCalendar();
 
-        document.body.scrollIntoView({ behavior: 'instant' });
-        document.getElementById('root').classList.remove('opacity-0');
-
         if (information.has('presence')) {
             document.getElementById('form-presence').value = information.get('presence') ? '1' : '2';
         }
@@ -312,6 +309,9 @@ export const guest = (() => {
 
         // remove loading screen and show welcome screen.
         await util.changeOpacity(document.getElementById('loading'), false).then((el) => el.remove());
+
+        document.body.scrollIntoView({ behavior: 'instant' });
+        document.getElementById('root').classList.remove('opacity-0');
     };
 
     /**

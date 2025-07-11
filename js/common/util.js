@@ -50,7 +50,7 @@ export const util = (() => {
 
     /**
      * @param {string} message
-     * @returns {{ success: function, error: function, warning: function, custom: function }}
+     * @returns {{ success: function, error: function, warning: function, info: function, custom: function }}
      */
     const notify = (message) => {
         const exec = (emoji) => {

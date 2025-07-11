@@ -71,13 +71,25 @@
     <script src="./dist/guest.js"></script>
 </head>
 
-<!-- If you're not using comments, you can remove the data-key and data-url attributes, and ignore dashboard.html. -->
-<!-- If you're not using a song, you can remove the data-audio attribute. -->
-<!-- Change the time to time-data (according to that format) -->
-<!-- Set data-confetti to 'false' if you're not using confetti. Only works when comments are disabled. -->
-<!-- You can use GitHub release files (guest.css, guest.js, admin.css, admin.js) directly without compilation. -->
+<!-- Jika tidak menggunakan komentar, hapus atribut data-key dan data-url, serta abaikan file dashboard.html. -->
+<!-- If you're not using comments, remove the data-key and data-url attributes, and ignore dashboard.html. -->
+
+<!-- Jika tidak menggunakan lagu, hapus atribut data-audio. -->
+<!-- If you're not using a song, remove the data-audio attribute. -->
+
+<!-- Ubah atribut time menjadi time-data (mengikuti format yang ditentukan). -->
+<!-- Change the time attribute to time-data (follow the required format). -->
+
+<!-- Atur data-confetti ke 'false' jika tidak ingin menggunakan konfeti. Hanya berfungsi saat komentar dimatikan. -->
+<!-- Set data-confetti to 'false' if you don't want confetti. Only works when comments are disabled. -->
+
+<!-- Kamu bisa langsung gunakan file rilis GitHub (guest.css, guest.js, admin.css, admin.js) tanpa perlu build. -->
+<!-- You can use GitHub release files (guest.css, guest.js, admin.css, admin.js) directly without compiling. -->
+
+<!-- Disarankan menggunakan 'data-src' pada tag <img> -->
+<!-- It's recommended to use 'data-src' in the <img> tag -->
+
 <!-- <html lang="id" data-bs-theme="auto"> ['auto', 'dark', 'light'] -->
-<!-- Recommend use 'data-src' in img tag -->
 
 <body data-key="d9faced3377732b0edf19e90d1bde0cd5de04801c75eb41743" data-url="https://api.ulems.my.id/" data-audio="./assets/music/pure-love-304010.mp3" data-confetti="true" data-time="2024-01-01 09:30:00">
 
@@ -238,7 +250,9 @@
                         <div class="bg-theme-auto rounded-5 shadow p-3">
                             <h2 class="font-esthetic text-center py-2 mb-2" style="font-size: 2.125rem;">Kisah Cinta</h2>
 
-                            <!-- You can remove this -->
+                            <!-- Jika tidak ingin menggunakan video, hapus seluruh tag dengan id="video-love-story" di bawah ini. -->
+                            <!-- If you don't want to use the video, remove the entire tag with id="video-love-story" below. -->
+
                             <div id="video-love-stroy" class="position-relative rounded-4 mb-1 pb-0" data-src="./assets/video/265501_tiny.mp4" data-vid-class="w-100 rounded-4 shadow-sm m-0 p-0">
                                 <div class="position-absolute d-flex flex-column justify-content-center align-items-center top-50 start-50 translate-middle w-100 h-100 bg-overlay-auto rounded-4 z-3" id="video-love-stroy-loading">
                                     <div class="progress w-25" role="progressbar" style="height: 0.5rem;" aria-label="progress bar">
