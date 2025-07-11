@@ -29,6 +29,9 @@ Untuk kamu yang ingin melihat demo terlebih dahulu:
 
 > Jika kamu punya pertanyaan, gunakan fitur `discussions` agar bisa dibaca juga oleh teman-teman lainnya.
 
+> [!WARNING]  
+> Gunakan versi 3.14.0, untuk versi 4 masih tahap pengembangan dan berpotensi teredapat bug 🐛
+
 ## 🔥 Deployment API
 
 - Video\
