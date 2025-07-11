@@ -56,12 +56,12 @@ export const removeCache = async () => {
  */
 export const cacheWrapper = (cacheObject) => {
     /**
-    * @param {string|URL} input 
-    * @param {Response} res 
-    * @param {boolean} forceCache
-    * @param {number} ttl
-    * @returns {Response}
-    */
+     * @param {string|URL} input 
+     * @param {Response} res 
+     * @param {boolean} forceCache
+     * @param {number} ttl
+     * @returns {Response}
+     */
     const set = (input, res, forceCache, ttl) => res.clone().arrayBuffer().then((ab) => {
         if (!res.ok || !window.isSecureContext) {
             return res;
@@ -332,7 +332,7 @@ export const request = (method, path) => {
                     err = new Error('🟥 Network error or rate limit exceeded');
                 }
 
-                alert(err.message || String(err));
+                alert(err.message ?? String(err));
                 throw err;
             });
         },

@@ -111,7 +111,7 @@ export const guest = (() => {
         }
 
         if (slides.length === 1) {
-            util.changeOpacity(slides[0], true);
+            await util.changeOpacity(slides[0], true);
             return;
         }
 
@@ -159,6 +159,7 @@ export const guest = (() => {
     const open = (button) => {
         button.disabled = true;
         document.body.scrollIntoView({ behavior: 'instant' });
+        document.getElementById('root').classList.remove('opacity-0');
 
         if (theme.isAutoMode()) {
             document.getElementById('button-theme').classList.remove('d-none');
@@ -309,9 +310,6 @@ export const guest = (() => {
 
         // remove loading screen and show welcome screen.
         await util.changeOpacity(document.getElementById('loading'), false).then((el) => el.remove());
-
-        document.body.scrollIntoView({ behavior: 'instant' });
-        document.getElementById('root').classList.remove('opacity-0');
     };
 
     /**
