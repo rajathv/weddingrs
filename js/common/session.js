@@ -89,6 +89,17 @@ export const session = (() => {
     };
 
     /**
+     * @returns {boolean}
+     */
+    const isValid = () => {
+        if (!isAdmin()) {
+            return false;
+        }
+
+        return (decode()?.exp ?? 0) > (Date.now() / 1000);
+    };
+
+    /**
      * @returns {void}
      */
     const init = () => {
@@ -98,6 +109,7 @@ export const session = (() => {
     return {
         init,
         guest,
+        isValid,
         login,
         logout,
         decode,
