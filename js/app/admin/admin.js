@@ -320,22 +320,13 @@ export const admin = (() => {
 
         document.addEventListener('hidden.bs.modal', getUserStats);
 
-        try {
-            const raw = window.location.hash.slice(1);
-            if (raw.length > 0) {
-                session.setToken(raw);
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            const exp = session.decode()?.exp;
-            if (!exp || exp < (Date.now() / 1000)) {
-                throw new Error('Invalid token');
-            }
-
-            getUserStats();
-        } catch {
-            auth.clearSession();
+        const raw = window.location.hash.slice(1);
+        if (raw.length > 0) {
+            session.setToken(raw);
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
+
+        session.isValid() ? getUserStats() : auth.clearSession();
     };
 
     /**
