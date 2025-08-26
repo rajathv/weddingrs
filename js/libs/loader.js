@@ -66,44 +66,6 @@ const loadConfetti = (c) => {
  * @param {ReturnType<typeof cache>} c
  * @returns {Promise<void>}
  */
-const loadBootstrap = (c) => {
-    const url = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js';
-
-    return c.get(url).then((uri) => new Promise((res, rej) => {
-        const sc = document.createElement('script');
-        sc.onerror = rej;
-        sc.onload = () => {
-            typeof window.bootstrap === 'undefined' ? rej(new Error('Bootstrap library failed to load')) : res();
-        };
-
-        sc.src = uri;
-        document.head.appendChild(sc);
-    }));
-};
-
-/**
- * @param {ReturnType<typeof cache>} c
- * @returns {Promise<void>}
- */
-const loadFont = (c) => {
-
-    const font = 'https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap';
-
-    return c.get(font).then((uri) => new Promise((res, rej) => {
-        const link = document.createElement('link');
-        link.onload = res;
-        link.onerror = rej;
-
-        link.rel = 'stylesheet';
-        link.href = uri;
-        document.head.appendChild(link);
-    }));
-};
-
-/**
- * @param {ReturnType<typeof cache>} c
- * @returns {Promise<void>}
- */
 const loadAdditionalFont = (c) => {
 
     const fonts = [
@@ -115,41 +77,16 @@ const loadAdditionalFont = (c) => {
      * @param {string} font
      * @returns {Promise<void>}
      */
-    const loadCss = (font) => c.get(font).then((uri) => new Promise((res, rej) => {
-        const link = document.createElement('link');
-        link.onload = res;
-        link.onerror = rej;
-
-        link.rel = 'stylesheet';
-        link.href = uri;
-        document.head.appendChild(link);
-    }));
-
-    return Promise.all(fonts.map(loadCss));
-};
-
-/**
- * @param {ReturnType<typeof cache>} c
- * @returns {Promise<void>}
- */
-const loadIcon = (c) => {
-
-    const url = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.0.0';
-
-    return c.get(`${url}/css/all.min.css`)
+    const loadCss = (font) => c.get(font)
         .then(window.fetch)
         .then((r) => r.text())
         .then((txt) => {
-            const urls = [...new Set([...txt.matchAll(/url\(["']?([^"')]+)["']?\)/g)])];
+            const urls = [...new Set([...txt.matchAll(/url\(["']?([^"')]+)["']?\)/g)])].map((v) => v[1]);
 
-            return Promise.all(urls.map((m) => {
-                const orig = m[0];
-                const rel = m[1].replace('..', '');
+            return Promise.all(urls.map((v) => c.get(v))).then((res) => {
 
-                return c.get(url + rel).then((abs) => ({ orig, abs }));
-            })).then((res) => {
-                for (const { orig, abs } of res) {
-                    txt = txt.replaceAll(orig, `url(${abs})`);
+                for (const [i, abs] of res.entries()) {
+                    txt = txt.replaceAll(urls[i], abs);
                 }
 
                 return txt;
@@ -164,6 +101,8 @@ const loadIcon = (c) => {
             link.href = URL.createObjectURL(new Blob([txt]));
             document.head.appendChild(link);
         }));
+
+    return Promise.all(fonts.map(loadCss));
 };
 
 /**
@@ -177,7 +116,7 @@ export const loader = (opt = {}) => {
     const c = cache('libs');
 
     return c.open().then(() => {
-        const promises = [loadFont(c), loadIcon(c), loadBootstrap(c)];
+        const promises = [];
 
         if (opt?.aos ?? true) {
             promises.push(loadAOS(c));
