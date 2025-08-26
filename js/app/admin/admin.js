@@ -1,6 +1,7 @@
 import { auth } from './auth.js';
 import { navbar } from './navbar.js';
 import { util } from '../../common/util.js';
+import { loader } from '../../libs/loader.js';
 import { dto } from '../../connection/dto.js';
 import { theme } from '../../common/theme.js';
 import { lang } from '../../common/language.js';
@@ -326,7 +327,9 @@ export const admin = (() => {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        session.isValid() ? getUserStats() : auth.clearSession();
+        loader({ aos: false, confetti: false, additionalFont: false }).then(() => {
+            session.isValid() ? getUserStats() : auth.clearSession();
+        });
     };
 
     /**
