@@ -81,7 +81,7 @@ const loadAdditionalFont = (c) => {
         .then(window.fetch)
         .then((r) => r.text())
         .then((txt) => {
-            const urls = [...new Set([...txt.matchAll(/url\(["']?([^"')]+)["']?\)/g)])].map((v) => v[1]);
+            const urls = Array.from(new Set(txt.matchAll(/url\(["']?([^"')]+)["']?\)/g)), (v) => v[1]);
 
             return Promise.all(urls.map((v) => c.get(v))).then((res) => {
 
