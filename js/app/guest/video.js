@@ -71,11 +71,7 @@ export const video = (() => {
                     vid.dispatchEvent(new Event('undangan.video.prefetch'));
 
                     if (res.status === HTTP_STATUS_OK) {
-                        vid.preload = 'none';
-
-                        vid.src = util.escapeHtml(src);
                         wrap.appendChild(vid);
-
                         return Promise.resolve();
                     }
 
@@ -97,7 +93,7 @@ export const video = (() => {
                     const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
                     vid.style.height = `${height}px`;
 
-                    return request(HTTP_GET, vid.src)
+                    return request(HTTP_GET, src)
                         .withProgressFunc((a, b) => {
                             const result = Number((a / b) * 100).toFixed(0) + '%';
 
@@ -107,6 +103,10 @@ export const video = (() => {
                         .withRetry()
                         .default()
                         .then(resToVideo)
+                        .then((v) => {
+                            vid.load();
+                            return v;
+                        })
                         .catch((err) => {
                             bar.style.backgroundColor = 'red';
                             inf.innerText = `Error loading video`;
