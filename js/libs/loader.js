@@ -77,7 +77,7 @@ const loadAdditionalFont = (c) => {
      * @param {string} font
      * @returns {Promise<void>}
      */
-    const loadCss = (font) => c.get(font)
+    const loadFont = (font) => c.get(font)
         .then(window.fetch)
         .then((r) => r.text())
         .then((txt) => {
@@ -102,7 +102,7 @@ const loadAdditionalFont = (c) => {
             document.head.appendChild(link);
         }));
 
-    return Promise.all(fonts.map(loadCss));
+    return Promise.all(fonts.map(loadFont));
 };
 
 /**
