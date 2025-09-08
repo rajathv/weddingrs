@@ -132,9 +132,6 @@ export const request = (method, path) => {
         method: String(method).toUpperCase(),
     };
 
-    window.addEventListener('offline', () => ac.abort(), { once: true });
-    window.addEventListener('popstate', () => ac.abort(), { once: true });
-
     let reqTtl = 0;
     let reqRetry = 0;
     let reqDelay = 0;

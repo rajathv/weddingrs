@@ -105,14 +105,14 @@ export const video = (() => {
                         .then(resToVideo)
                         .then((v) => {
                             vid.load();
+                            observer.observe(vid);
                             return v;
                         })
                         .catch((err) => {
                             bar.style.backgroundColor = 'red';
                             inf.innerText = `Error loading video`;
                             console.error(err);
-                        })
-                        .finally(() => observer.observe(vid));
+                        });
                 });
         };
 
@@ -126,7 +126,7 @@ export const video = (() => {
             }
 
             progress.complete('video');
-            return resToVideo(res).finally(() => {
+            return resToVideo(res).then(() => {
                 wrap.appendChild(vid);
                 observer.observe(vid);
             });
