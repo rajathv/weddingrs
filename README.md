@@ -49,7 +49,7 @@ Untuk kamu yang ingin mencoba secara gratis:
 
 - Bootstrap 5.3.8
 - AOS 2.3.4
-- Fontawesome 7.0.0
+- Fontawesome 7.0.1
 - Canvas Confetti 1.9.3
 - Google Fonts
 - Vanilla JS
