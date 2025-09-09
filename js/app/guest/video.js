@@ -31,15 +31,19 @@ export const video = (() => {
         vid.className = wrap.getAttribute('data-vid-class');
         vid.loop = true;
         vid.muted = true;
-        vid.controls = true;
+        vid.controls = false;
         vid.autoplay = false;
         vid.playsInline = true;
         vid.preload = 'metadata';
-        vid.disableRemotePlayback = true;
-        vid.disablePictureInPicture = true;
-        vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
 
         const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
+
+        vid.addEventListener('error', () => progress.invalid('video'));
+        vid.addEventListener('loadedmetadata', () => {
+            const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
+            vid.style.height = `${height}px`;
+            wrap.style.height = `${height}px`;
+        });
 
         /**
          * @param {Response} res 
@@ -47,7 +51,6 @@ export const video = (() => {
          */
         const resToVideo = (res) => {
             vid.addEventListener('loadedmetadata', () => {
-                vid.style.removeProperty('height');
                 document.getElementById('video-love-stroy-loading')?.remove();
             }, { once: true });
 
@@ -71,7 +74,10 @@ export const video = (() => {
                     vid.dispatchEvent(new Event('undangan.video.prefetch'));
 
                     if (res.status === HTTP_STATUS_OK) {
+                        vid.preload = 'none';
+                        vid.src = util.escapeHtml(src);
                         wrap.appendChild(vid);
+
                         return Promise.resolve();
                     }
 
@@ -79,7 +85,6 @@ export const video = (() => {
                         throw new Error('failed to fetch video');
                     }
 
-                    vid.addEventListener('error', () => progress.invalid('video'), { once: true });
                     const loaded = new Promise((r) => vid.addEventListener('loadedmetadata', r, { once: true }));
 
                     vid.src = util.escapeHtml(src);
@@ -88,10 +93,8 @@ export const video = (() => {
                     return loaded;
                 })
                 .then(() => {
+                    vid.pause();
                     progress.complete('video');
-
-                    const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
-                    vid.style.height = `${height}px`;
 
                     return request(HTTP_GET, src)
                         .withProgressFunc((a, b) => {
@@ -104,6 +107,11 @@ export const video = (() => {
                         .default()
                         .then(resToVideo)
                         .then((v) => {
+                            vid.controls = true;
+                            vid.disableRemotePlayback = true;
+                            vid.disablePictureInPicture = true;
+                            vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
+
                             vid.load();
                             observer.observe(vid);
                             return v;
@@ -125,10 +133,10 @@ export const video = (() => {
                 return c.del(src).then(fetchBasic).then((r) => c.set(src, r));
             }
 
-            progress.complete('video');
             return resToVideo(res).then(() => {
                 wrap.appendChild(vid);
                 observer.observe(vid);
+                progress.complete('video');
             });
         });
     };
