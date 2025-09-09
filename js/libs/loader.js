@@ -69,38 +69,23 @@ const loadConfetti = (c) => {
 const loadAdditionalFont = (c) => {
 
     const fonts = [
-        'https://fonts.googleapis.com/css2?family=Sacramento&display=swap',
-        'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic&display=swap',
+        { css: 'https://fonts.googleapis.com/css2?family=Sacramento&display=swap', family: 'Sacramento' },
+        { css: 'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic&display=swap', family: 'Noto Naskh Arabic' },
     ];
 
     /**
-     * @param {string} font
+     * @param {object}
      * @returns {Promise<void>}
      */
-    const loadFont = (font) => c.get(font)
-        .then(window.fetch)
-        .then((r) => r.text())
-        .then((txt) => {
-            const urls = Array.from(new Set(txt.matchAll(/url\(["']?([^"')]+)["']?\)/g)), (v) => v[1]);
+    const loadFont = ({ css, family }) => c.get(css).then((uri) => new Promise((res, rej) => {
+        const link = document.createElement('link');
+        link.onload = res;
+        link.onerror = rej;
 
-            return Promise.all(urls.map((v) => c.get(v))).then((res) => {
-
-                for (const [i, abs] of res.entries()) {
-                    txt = txt.replaceAll(urls[i], abs);
-                }
-
-                return txt;
-            });
-        })
-        .then((txt) => new Promise((res, rej) => {
-            const link = document.createElement('link');
-            link.onload = res;
-            link.onerror = rej;
-
-            link.rel = 'stylesheet';
-            link.href = URL.createObjectURL(new Blob([txt]));
-            document.head.appendChild(link);
-        }));
+        link.rel = 'stylesheet';
+        link.href = uri;
+        document.head.appendChild(link);
+    })).then(() => document.fonts.load(`1em "${family}"`));
 
     return Promise.all(fonts.map(loadFont));
 };
@@ -113,7 +98,7 @@ const loadAdditionalFont = (c) => {
  * @returns {Promise<void>}
  */
 export const loader = (opt = {}) => {
-    const c = cache('libs');
+    const c = cache('libs').withForceCache();
 
     return c.open().then(() => {
         const promises = [];
