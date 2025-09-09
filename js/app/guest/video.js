@@ -31,15 +31,19 @@ export const video = (() => {
         vid.className = wrap.getAttribute('data-vid-class');
         vid.loop = true;
         vid.muted = true;
-        vid.controls = true;
+        vid.controls = false;
         vid.autoplay = false;
         vid.playsInline = true;
         vid.preload = 'metadata';
-        vid.disableRemotePlayback = true;
-        vid.disablePictureInPicture = true;
-        vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
 
         const observer = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? vid.play() : vid.pause()));
+
+        vid.addEventListener('error', () => progress.invalid('video'));
+        vid.addEventListener('loadedmetadata', () => {
+            const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
+            vid.style.height = `${height}px`;
+            wrap.style.height = `${height}px`;
+        });
 
         /**
          * @param {Response} res 
@@ -47,7 +51,6 @@ export const video = (() => {
          */
         const resToVideo = (res) => {
             vid.addEventListener('loadedmetadata', () => {
-                vid.style.removeProperty('height');
                 document.getElementById('video-love-stroy-loading')?.remove();
             }, { once: true });
 
@@ -64,56 +67,50 @@ export const video = (() => {
             const bar = document.getElementById('progress-bar-video-love-stroy');
             const inf = document.getElementById('progress-info-video-love-stroy');
 
-            return request(HTTP_GET, src)
-                .withCancel(new Promise((re) => vid.addEventListener('undangan.video.prefetch', re, { once: true })))
-                .default({ 'Range': 'bytes=0-1' })
-                .then((res) => {
-                    vid.dispatchEvent(new Event('undangan.video.prefetch'));
+            return request(HTTP_GET, src).withNoBody().default({ 'Range': 'bytes=0-1' }).then((res) => {
 
-                    if (res.status === HTTP_STATUS_OK) {
-                        wrap.appendChild(vid);
-                        return Promise.resolve();
-                    }
-
-                    if (res.status !== HTTP_STATUS_PARTIAL_CONTENT) {
-                        throw new Error('failed to fetch video');
-                    }
-
-                    vid.addEventListener('error', () => progress.invalid('video'), { once: true });
-                    const loaded = new Promise((r) => vid.addEventListener('loadedmetadata', r, { once: true }));
-
+                if (res.status === HTTP_STATUS_OK) {
+                    vid.preload = 'none';
                     vid.src = util.escapeHtml(src);
                     wrap.appendChild(vid);
 
-                    return loaded;
-                })
-                .then(() => {
-                    progress.complete('video');
+                    return Promise.resolve();
+                }
 
-                    const height = vid.getBoundingClientRect().width * (vid.videoHeight / vid.videoWidth);
-                    vid.style.height = `${height}px`;
+                if (res.status !== HTTP_STATUS_PARTIAL_CONTENT) {
+                    throw new Error('failed to fetch video');
+                }
 
-                    return request(HTTP_GET, src)
-                        .withProgressFunc((a, b) => {
-                            const result = Number((a / b) * 100).toFixed(0) + '%';
+                const loaded = new Promise((r) => vid.addEventListener('loadedmetadata', r, { once: true }));
 
-                            bar.style.width = result;
-                            inf.innerText = result;
-                        })
-                        .withRetry()
-                        .default()
-                        .then(resToVideo)
-                        .then((v) => {
-                            vid.load();
-                            observer.observe(vid);
-                            return v;
-                        })
-                        .catch((err) => {
-                            bar.style.backgroundColor = 'red';
-                            inf.innerText = `Error loading video`;
-                            console.error(err);
-                        });
-                });
+                vid.src = util.escapeHtml(src);
+                wrap.appendChild(vid);
+
+                return loaded;
+            }).then(() => {
+                vid.pause();
+                progress.complete('video');
+
+                return request(HTTP_GET, src).withRetry().withProgressFunc((a, b) => {
+                    const result = Number((a / b) * 100).toFixed(0) + '%';
+
+                    bar.style.width = result;
+                    inf.innerText = result;
+                }).default().then(resToVideo);
+            }).then((res) => {
+                vid.controls = true;
+                vid.disableRemotePlayback = true;
+                vid.disablePictureInPicture = true;
+                vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
+
+                vid.load();
+                observer.observe(vid);
+                return res;
+            }).catch((err) => {
+                bar.style.backgroundColor = 'red';
+                inf.innerText = `Error loading video`;
+                console.error(err);
+            });
         };
 
         if (!window.isSecureContext) {
@@ -125,10 +122,10 @@ export const video = (() => {
                 return c.del(src).then(fetchBasic).then((r) => c.set(src, r));
             }
 
-            progress.complete('video');
             return resToVideo(res).then(() => {
                 wrap.appendChild(vid);
                 observer.observe(vid);
+                progress.complete('video');
             });
         });
     };

@@ -13,7 +13,6 @@ export const progress = (() => {
     let total = 0;
     let loaded = 0;
     let valid = true;
-    let isDone = false;
 
     /**
      * @type {Promise<void>|null}
@@ -49,7 +48,7 @@ export const progress = (() => {
         bar.style.width = Math.min((loaded / total) * 100, 100).toString() + '%';
 
         if (loaded === total) {
-            isDone = true;
+            valid = false;
             document.dispatchEvent(new Event('undangan.progress.done'));
         }
     };
@@ -59,7 +58,7 @@ export const progress = (() => {
      * @returns {void}
      */
     const invalid = (type) => {
-        if (valid && !isDone) {
+        if (valid) {
             valid = false;
             bar.style.backgroundColor = 'red';
             info.innerText = `Error loading ${type} ${showInformation()}`;
