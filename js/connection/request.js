@@ -136,6 +136,7 @@ export const request = (method, path) => {
     let reqRetry = 0;
     let reqDelay = 0;
     let reqAttempts = 0;
+    let reqNoBody = false;
     let reqForceCache = false;
 
     /**
@@ -168,6 +169,15 @@ export const request = (method, path) => {
              * @returns {Promise<Response>}
              */
             const wrapperFetch = () => window.fetch(input, req).then(async (res) => {
+                if (reqNoBody) {
+                    ac.abort();
+                    return new Response(null, {
+                        status: res.status,
+                        statusText: res.statusText,
+                        headers: new Headers(res.headers),
+                    });
+                }
+
                 if (!res.ok || !callbackFunc) {
                     return res;
                 }
@@ -201,7 +211,7 @@ export const request = (method, path) => {
                 });
             });
 
-            if (reqTtl === 0 || !window.isSecureContext) {
+            if (reqTtl === 0 || !window.isSecureContext || reqNoBody) {
                 return wrapperFetch();
             }
 
@@ -219,7 +229,7 @@ export const request = (method, path) => {
             }));
         };
 
-        if (reqRetry === 0 && reqDelay === 0) {
+        if (reqRetry === 0 || reqDelay === 0) {
             return abstractFetch();
         }
 
@@ -343,10 +353,22 @@ export const request = (method, path) => {
             return this;
         },
         /**
+         * @param {number} [ttl=21600000]
          * @returns {ReturnType<typeof request>}
          */
-        withForceCache() {
+        withForceCache(ttl = 1000 * 60 * 60 * 6) {
             reqForceCache = true;
+            if (reqTtl === 0) {
+                reqTtl = ttl;
+            }
+
+            return this;
+        },
+        /**
+         * @returns {ReturnType<typeof request>}
+         */
+        withNoBody() {
+            reqNoBody = true;
 
             return this;
         },

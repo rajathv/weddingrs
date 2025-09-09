@@ -67,61 +67,50 @@ export const video = (() => {
             const bar = document.getElementById('progress-bar-video-love-stroy');
             const inf = document.getElementById('progress-info-video-love-stroy');
 
-            return request(HTTP_GET, src)
-                .withCancel(new Promise((re) => vid.addEventListener('undangan.video.prefetch', re, { once: true })))
-                .default({ 'Range': 'bytes=0-1' })
-                .then((res) => {
-                    vid.dispatchEvent(new Event('undangan.video.prefetch'));
+            return request(HTTP_GET, src).withNoBody().default({ 'Range': 'bytes=0-1' }).then((res) => {
 
-                    if (res.status === HTTP_STATUS_OK) {
-                        vid.preload = 'none';
-                        vid.src = util.escapeHtml(src);
-                        wrap.appendChild(vid);
-
-                        return Promise.resolve();
-                    }
-
-                    if (res.status !== HTTP_STATUS_PARTIAL_CONTENT) {
-                        throw new Error('failed to fetch video');
-                    }
-
-                    const loaded = new Promise((r) => vid.addEventListener('loadedmetadata', r, { once: true }));
-
+                if (res.status === HTTP_STATUS_OK) {
+                    vid.preload = 'none';
                     vid.src = util.escapeHtml(src);
                     wrap.appendChild(vid);
 
-                    return loaded;
-                })
-                .then(() => {
-                    vid.pause();
-                    progress.complete('video');
+                    return Promise.resolve();
+                }
 
-                    return request(HTTP_GET, src)
-                        .withProgressFunc((a, b) => {
-                            const result = Number((a / b) * 100).toFixed(0) + '%';
+                if (res.status !== HTTP_STATUS_PARTIAL_CONTENT) {
+                    throw new Error('failed to fetch video');
+                }
 
-                            bar.style.width = result;
-                            inf.innerText = result;
-                        })
-                        .withRetry()
-                        .default()
-                        .then(resToVideo)
-                        .then((v) => {
-                            vid.controls = true;
-                            vid.disableRemotePlayback = true;
-                            vid.disablePictureInPicture = true;
-                            vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
+                const loaded = new Promise((r) => vid.addEventListener('loadedmetadata', r, { once: true }));
 
-                            vid.load();
-                            observer.observe(vid);
-                            return v;
-                        })
-                        .catch((err) => {
-                            bar.style.backgroundColor = 'red';
-                            inf.innerText = `Error loading video`;
-                            console.error(err);
-                        });
-                });
+                vid.src = util.escapeHtml(src);
+                wrap.appendChild(vid);
+
+                return loaded;
+            }).then(() => {
+                vid.pause();
+                progress.complete('video');
+
+                return request(HTTP_GET, src).withRetry().withProgressFunc((a, b) => {
+                    const result = Number((a / b) * 100).toFixed(0) + '%';
+
+                    bar.style.width = result;
+                    inf.innerText = result;
+                }).default().then(resToVideo);
+            }).then((res) => {
+                vid.controls = true;
+                vid.disableRemotePlayback = true;
+                vid.disablePictureInPicture = true;
+                vid.controlsList = 'noremoteplayback nodownload noplaybackrate';
+
+                vid.load();
+                observer.observe(vid);
+                return res;
+            }).catch((err) => {
+                bar.style.backgroundColor = 'red';
+                inf.innerText = `Error loading video`;
+                console.error(err);
+            });
         };
 
         if (!window.isSecureContext) {
