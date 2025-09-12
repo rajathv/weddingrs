@@ -71,10 +71,10 @@ export const openAnimation = (until = 15) => {
 };
 
 /**
-* @param {HTMLElement} div
-* @param {number} [duration=50]
-* @returns {void}
-*/
+ * @param {HTMLElement} div
+ * @param {number} [duration=50]
+ * @returns {void}
+ */
 export const tapTapAnimation = (div, duration = 50) => {
     if (!window.confetti) {
         return;

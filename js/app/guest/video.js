@@ -96,8 +96,8 @@ export const video = (() => {
 
                     bar.style.width = result;
                     inf.innerText = result;
-                }).default().then(resToVideo);
-            }).then((res) => {
+                }).default();
+            }).then(resToVideo).then((res) => {
                 vid.controls = true;
                 vid.disableRemotePlayback = true;
                 vid.disablePictureInPicture = true;

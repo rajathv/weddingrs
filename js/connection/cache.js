@@ -124,6 +124,10 @@ export const cache = (cacheName) => {
             console.warn('Cache is not supported in insecure context');
         }
 
+        if (items.length === 0) {
+            return Promise.resolve();
+        }
+
         items.filter((val) => val !== null).forEach((val) => {
             const exist = uniq.get(val.url) ?? [];
             uniq.set(val.url, [...exist, [val.res, val?.rej]]);
